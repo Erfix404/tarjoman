@@ -1,0 +1,73 @@
+## Task
+Implement Work Package FND-003 (Error taxonomy) for Tarjoman. Implement the typed error hierarchy and failure semantics specified in ARCHITECTURE_ZERO.md §24, ensure stable machine error codes, stable non-zero CLI exit codes, HTTP status mapping, MCP error mapping, secret/raw source exclusion from error representations, and comprehensive tests meeting all acceptance criteria.
+
+## Skill
+Use the `codebase-design` skill for this task. Design a deep, structured error hierarchy where callers and interfaces inspect typed fields rather than parsing strings.
+
+## Background & Specifications
+Read these exact documents:
+- `ARCHITECTURE_ZERO.md` §24 (Error taxonomy and failure semantics) and §19 (Locked decision D19).
+- `WORKPACKAGES.json` entry for package ID "FND-003".
+- `AGENTS.md` (Scope law, mandatory invariants).
+
+## Required Actions
+1. Implement Error Hierarchy in `src/tarjoman/core/errors.py`:
+   - Base exception: `TarjomanError(Exception)` with:
+     - `message: str`
+     - `code: str` (stable uppercase machine-readable code, e.g. `CONFIGURATION_ERROR`)
+     - `retryable: bool` (default False)
+     - `details: Dict[str, Any]` (structured metadata, optional)
+     - `exit_code: int` (stable non-zero integer CLI exit code)
+     - Helper method `to_dict() -> Dict[str, Any]`
+   - Implement all 12 typed public errors from ARCHITECTURE_ZERO.md §24 table:
+     1. `ConfigurationError` (retryable=False, exit_code=2)
+     2. `PolicyViolationError` (retryable=False, exit_code=3)
+     3. `LicensePolicyError` (retryable=False, exit_code=4)
+     4. `CapabilityUnavailableError` (retryable=False, exit_code=5)
+     5. `ProviderRateLimitError` (retryable=True, exit_code=12)
+     6. `ProviderTransientError` (retryable=True, exit_code=10)
+     7. `ProviderPermanentError` (retryable=False, exit_code=11)
+     8. `StructuredOutputError` (retryable=True, exit_code=13)
+     9. `ArtifactValidationError` (retryable=False, exit_code=6)
+     10. `MigrationError` (retryable=False, exit_code=7)
+     11. `JobCancelledError` (retryable=False, exit_code=8)
+     12. `SpeechSynthesisQualityError` (retryable=True, exit_code=14)
+
+2. Protocol and Interface Mappings:
+   - CLI Exit Code: `error.exit_code` or `get_exit_code(err) -> int` (returns stable non-zero code).
+   - HTTP Status Code: `get_http_status(err) -> int` (e.g. 400 for ConfigurationError/ArtifactValidationError, 403 for PolicyViolationError/LicensePolicyError, 404 for NotFound variants, 429 for ProviderRateLimitError, 502/503 for ProviderTransientError, 500 for generic TarjomanError).
+   - MCP Error Code: `get_mcp_error(err) -> Dict[str, Any]` (returns JSON-RPC compliant error code and message).
+
+3. Invariants (§24):
+   - Raw source content and secrets MUST NOT leak into default error messages. Provide a sanitization helper or safeguard that strips API keys / token patterns from error messages.
+   - Structured fields: no caller ever needs to regex match `str(e)` to understand error type, retryability, or code.
+
+4. Expose Errors in `src/tarjoman/core/__init__.py` and `src/tarjoman/core/errors.py`:
+   - Re-export all error classes and mapping helpers from `tarjoman.core.errors` and `tarjoman.core`.
+
+5. Comprehensive Tests in `tests/test_error_taxonomy.py`:
+   - Test all 12 error classes inherit from `TarjomanError`.
+   - Test `retryable` property matches §24 table exactly.
+   - Test stable machine codes and CLI exit codes are deterministic and non-zero.
+   - Test `get_http_status` mapping table for all error classes.
+   - Test `get_mcp_error` mapping table for all error classes.
+   - Test secret redaction / sanitization in error messages.
+   - Test `to_dict()` serialization.
+   - Verify all existing 186 tests and all 10 domain benchmarks pass.
+
+## Acceptance Criteria
+- [ ] All 12 public errors from ARCHITECTURE_ZERO.md §24 implemented with typed fields.
+- [ ] `no generic error string contract`: code, message, retryable, details, and exit_code are first-class typed attributes.
+- [ ] `CLI nonzero codes stable`: deterministic non-zero CLI exit code for every error class.
+- [ ] `API/MCP mapping table`: HTTP status and MCP error mapping functions implemented and thoroughly tested.
+- [ ] Raw source/secret sanitization enforced in error formatting.
+- [ ] All 186 existing tests in `tests/` pass with zero failures.
+- [ ] All 10 domain benchmarks in `benchmarks/run_benchmarks.py` pass.
+
+## Out of Scope
+- Implementing concrete provider clients or REST server endpoints (covered in later phases).
+
+## Output
+Write report to `/opt/data/projects/tarjoman/FND_003_REPORT.md`.
+Print exactly this as the last line:
+FND_003_COMPLETED /opt/data/projects/tarjoman/FND_003_REPORT.md

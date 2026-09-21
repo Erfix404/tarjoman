@@ -146,7 +146,7 @@
       "title": "Error taxonomy",
       "phase": "1",
       "track": "foundation",
-      "status": "READY",
+      "status": "DONE",
       "required_for_core_v1": true,
       "depends_on": [
         "FND-002"
