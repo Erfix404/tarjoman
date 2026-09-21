@@ -1,0 +1,90 @@
+## Task
+Implement Work Package FND-011 (Structured logging/provenance) for Tarjoman on branch `phase/1-foundation`. Build the structured logging and provenance subsystem per ARCHITECTURE_ZERO.md §4, §23.2, §24, §25.5 and WORKPACKAGES.json. Implement JSON-formatted logging, fail-safe secret and API key redaction, contextvars-based correlation and provenance tracking, and leak-proof provider error sanitization.
+
+## Skill
+Use the `codebase-design` skill for this task. Design a deep, robust logging and provenance module that encapsulates formatting, context-local tracking, and fail-closed secret masking.
+
+## Background & Specifications
+Read these exact documents:
+- `ARCHITECTURE_ZERO.md` §23.2 (Secrets: "API keys/tokens: environment variable or OS keyring only; never written to project TOML, SQLite run payloads, logs, benchmark reports, or exported artifacts; redaction applies to exception text and provider HTTP traces").
+- `ARCHITECTURE_ZERO.md` §24 (Error taxonomy & sanitized details), §4.3 (OperationSpec & provenance), §25.5 (Structured audit trails).
+- `WORKPACKAGES.json` entry for package ID "FND-011" (Acceptance: "redaction test", "JSON log option", "provider error cannot leak API key").
+- `AGENTS.md` (Scope law, zero credential leaks, non-destructive requirements).
+- Existing modules:
+  - `src/tarjoman/core/errors.py` (specifically `sanitize_error_message` and `sanitize_details`).
+  - `src/tarjoman/core/config.py` (specifically `to_dict(redacted=True)`).
+  - `src/tarjoman/profiles/models.py` (specifically `ProvenanceReference`, `create_provenance_reference`).
+
+## Required Actions
+1. Implement Structured Logging & Redaction Engine in `src/tarjoman/core/logging.py`:
+   - **Secret Redaction Layer**:
+     - `RedactionFilter(logging.Filter)` and `redact_secrets(val: Any) -> Any`:
+       - Intercepts all log records (`record.msg`, `record.args`, `record.exc_info`, and any `extra` fields).
+       - Regex patterns for API keys and tokens:
+         - Standard OpenAI/Anthropic/generic key patterns (e.g. `sk-[a-zA-Z0-9_-]{20,}`, `ant-[a-zA-Z0-9_-]{20,}`).
+         - Bearer tokens (`Bearer\s+[a-zA-Z0-9._~+/-]+=*`).
+         - Authorization / API key headers (`(?:Authorization|api[_-]?key|x-api-key|secret|token)\s*[:=]\s*['"]?[^\s'",;]+`).
+         - URL query parameter tokens (`[?&](?:api[_-]?key|key|token|secret)=[^&\s]+`).
+       - Replaces secrets with `[REDACTED]`.
+       - Handles nested structures (dict, list, tuple, exceptions, stack traces).
+   - **JSON Log Formatter (`JSONFormatter(logging.Formatter)`)**:
+     - Produces single-line JSON objects with keys:
+       - `timestamp`: ISO-8601 UTC timestamp.
+       - `level`: Log level name (INFO, WARNING, ERROR, DEBUG, etc.).
+       - `logger`: Logger name (e.g. `tarjoman.core`, `tarjoman.pipeline`).
+       - `message`: Sanitized log message.
+       - `correlation_id`: Active correlation ID from contextvars (or None).
+       - `operation_id`: Active operation ID from contextvars (or None).
+       - `job_id`: Active job ID from contextvars (or None).
+       - `project_id`: Active project ID from contextvars (or None).
+       - `provenance`: Active provenance metadata dict if attached.
+       - `exception`: Sanitized exception details / stack trace if `exc_info` is present.
+       - `extra`: Additional sanitized custom fields.
+   - **Plain Text Formatter (`TextFormatter(logging.Formatter)`)**:
+     - Human-readable format with timestamps and redaction for CLI/interactive dev use.
+   - **Context Tracking (`ProvenanceContext` / ContextVars)**:
+     - `set_correlation_id(id: str)`, `get_correlation_id() -> Optional[str]`
+     - `set_operation_context(operation_id: Optional[str] = None, job_id: Optional[str] = None, project_id: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None)`
+     - `bind_provenance(**kwargs)` context manager to scope operation/job IDs and provenance cleanly to async tasks and threads.
+     - `get_provenance_context() -> Dict[str, Any]`
+   - **Configuration Function (`configure_logging`)**:
+     - `configure_logging(level="INFO", format="json"|"text", stream=None, handler=None)`
+     - Reads environment variables `TARJOMAN_LOG_FORMAT` ("json" or "text") and `TARJOMAN_LOG_LEVEL` if not explicitly passed.
+     - Attaches `RedactionFilter` to all handlers by default.
+   - **Provider Error Sanitizer (`sanitize_provider_error`)**:
+     - Helper to wrap or sanitize raw HTTP/SDK provider errors (e.g. 401 Unauthorized containing raw auth header or API key), stripping any credential before logging or raising.
+
+2. Integration:
+   - Re-export in `src/tarjoman/core/__init__.py`:
+     - `JSONFormatter`, `TextFormatter`, `RedactionFilter`, `configure_logging`, `bind_provenance`, `set_correlation_id`, `get_correlation_id`, `redact_secrets`, `sanitize_provider_error`.
+
+3. Comprehensive Test Suite in `tests/test_structured_logging.py`:
+   - **Redaction Tests (`TestSecretRedaction`)**:
+     - Test redaction of OpenAI-style (`sk-...`) and Anthropic-style (`ant-...`) API keys in log messages.
+     - Test redaction of `Bearer <token>` in messages and extra fields.
+     - Test redaction of Authorization headers and query parameter keys (`?api_key=...`).
+     - Test redaction inside nested dictionaries and lists in `extra`.
+     - Test redaction inside multi-line exception stack traces (`logger.error("Failed", exc_info=exc)`).
+   - **JSON Log Option Tests (`TestJSONLogOption`)**:
+     - Configure logging with `format="json"` and capture output in a StringIO stream.
+     - Parse each line with `json.loads()` and verify required fields: `timestamp`, `level`, `logger`, `message`.
+     - Verify `correlation_id`, `operation_id`, and `job_id` correctly populate from `bind_provenance()` context.
+     - Verify timestamps are valid ISO-8601 UTC.
+     - Verify format switches cleanly between `json` and `text`.
+   - **Provider Error Cannot Leak API Key Tests (`TestProviderErrorLeakProtection`)**:
+     - Simulate provider exceptions containing live API keys (e.g., in error message, request URL, or headers).
+     - Test that logging the exception with `exc_info=True` never includes the raw API key in the logged string or JSON output.
+     - Test `sanitize_provider_error()` replaces the key with `[REDACTED]` and retains useful diagnostic info (status code, failure reason) without credentials.
+   - All 448 existing tests and all 10 domain benchmarks must pass with zero regressions.
+
+## Acceptance Criteria
+- [ ] `redaction test`: proven redaction of API keys, bearer tokens, and secrets across message, extra, and exception traces.
+- [ ] `JSON log option`: structured single-line JSON logging option with correlation/operation context verified.
+- [ ] `provider error cannot leak API key`: simulated provider error traces asserted to never emit raw credentials.
+- [ ] All 448 existing tests pass with zero failures.
+- [ ] All 10 domain benchmarks pass.
+
+## Output
+Write report to `/opt/data/projects/tarjoman/FND_011_REPORT.md`.
+Print exactly this as the last line:
+FND_011_COMPLETED /opt/data/projects/tarjoman/FND_011_REPORT.md

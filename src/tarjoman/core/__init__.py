@@ -48,6 +48,20 @@ from tarjoman.core.errors import (
     sanitize_error_message,
 )
 
+from tarjoman.core.logging import (
+    JSONFormatter,
+    RedactionFilter,
+    TextFormatter,
+    bind_provenance,
+    configure_logging,
+    get_correlation_id,
+    get_provenance_context,
+    redact_secrets,
+    sanitize_provider_error,
+    set_correlation_id,
+    set_operation_context,
+)
+
 __all__ = [
     # Contracts
     "DomainType",
@@ -94,6 +108,18 @@ __all__ = [
     "find_secrets_in_dict",
     "get_default_user_config_path",
     "KNOWN_CONFIG_FIELDS",
+    # Structured Logging & Provenance (§23.2, §25.5, FND-011)
+    "JSONFormatter",
+    "TextFormatter",
+    "RedactionFilter",
+    "configure_logging",
+    "bind_provenance",
+    "set_correlation_id",
+    "get_correlation_id",
+    "set_operation_context",
+    "get_provenance_context",
+    "redact_secrets",
+    "sanitize_provider_error",
 ]
 
 

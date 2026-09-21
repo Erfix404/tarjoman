@@ -298,7 +298,7 @@
       "title": "Structured logging/provenance",
       "phase": "1",
       "track": "foundation",
-      "status": "READY",
+      "status": "DONE",
       "required_for_core_v1": true,
       "depends_on": [
         "FND-003",
@@ -319,7 +319,7 @@
       "title": "Architecture-conformance CI",
       "phase": "1",
       "track": "foundation",
-      "status": "PLANNED",
+      "status": "READY",
       "required_for_core_v1": true,
       "depends_on": [
         "FND-001",
