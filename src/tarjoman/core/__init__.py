@@ -1,7 +1,17 @@
 """
-Tarjoman Core Module - Data Contracts, Interfaces, and Error Taxonomy.
+Tarjoman Core Module - Data Contracts, Interfaces, Error Taxonomy, and Configuration.
 """
 
+from tarjoman.core.config import (
+    KNOWN_CONFIG_FIELDS,
+    ConfigLoader,
+    TarjomanConfig,
+    dump_toml,
+    find_secrets_in_dict,
+    get_default_user_config_path,
+    load_config,
+    parse_env_vars,
+)
 from tarjoman.core.contracts import (
     AuditFinding,
     AuditReport,
@@ -75,6 +85,15 @@ __all__ = [
     "get_exit_code",
     "get_http_status",
     "get_mcp_error",
+    # Configuration System (§23, FND-004)
+    "TarjomanConfig",
+    "ConfigLoader",
+    "load_config",
+    "dump_toml",
+    "parse_env_vars",
+    "find_secrets_in_dict",
+    "get_default_user_config_path",
+    "KNOWN_CONFIG_FIELDS",
 ]
 
 

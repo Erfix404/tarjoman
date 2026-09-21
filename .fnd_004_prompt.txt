@@ -1,0 +1,86 @@
+## Task
+Implement Work Package FND-004 (Configuration system) for Tarjoman. Implement the multi-tier configuration resolution engine specified in ARCHITECTURE_ZERO.md §23, enforcing exact precedence (CLI > Env > Project TOML > User Config > Defaults), secret handling and redaction, fail-closed policy for unknown project config keys, configuration snapshot hashing, and comprehensive tests meeting all acceptance criteria.
+
+## Skill
+Use the `codebase-design` skill for this task. Design a deep, robust configuration engine with strong typing (Pydantic), clear precedence, and fail-closed validation.
+
+## Background & Specifications
+Read these exact documents:
+- `ARCHITECTURE_ZERO.md` §23 (Configuration and secret contract) and §19 (Locked decisions D16, D19, D21).
+- `WORKPACKAGES.json` entry for package ID "FND-004".
+- `AGENTS.md` (Scope law, mandatory invariants).
+- Existing `src/tarjoman/core/errors.py` (specifically `ConfigurationError`).
+
+## Required Actions
+1. Implement Configuration Models and Engine in `src/tarjoman/core/config.py`:
+   - **TarjomanConfig** (Pydantic model):
+     - `workspace_root: Optional[Path] = None`
+     - `project_name: str = "default"`
+     - `source_language: str = "en"`
+     - `target_language: str = "fa"`
+     - `domain_profile: str = "literary"`
+     - `style_profile: Optional[str] = None`
+     - `workflow_profile: Optional[str] = None`
+     - `provider: str = "echo"` # default provider is test-only echo
+     - `model: Optional[str] = None`
+     - `api_base_url: Optional[str] = None`
+     - `api_key: Optional[str] = None` # secret, env-only
+     - `timeout_seconds: float = 60.0`
+     - `max_retries: int = 3`
+     - `temperature: float = 0.3`
+     - `local_only: bool = False`
+     - `typography: Dict[str, Any]` (or nested model)
+     - `extra_settings: Dict[str, Any] = Field(default_factory=dict)`
+   - Methods on `TarjomanConfig`:
+     - `to_dict(redacted: bool = True) -> Dict[str, Any]`: redacts `api_key` and any secret-like fields when `redacted=True`.
+     - `compute_hash() -> str`: deterministic SHA-256 of the redacted resolved config for run provenance.
+     - `to_toml() -> str`: serialize config to TOML.
+
+2. Implement Hierarchical Config Loader (`ConfigLoader`):
+   - Precedence (§23.1, D21):
+     1. `cli_args`: explicit dictionary or flags passed at invocation (highest).
+     2. `env_vars`: environment variables prefixed with `TARJOMAN_` (e.g. `TARJOMAN_PROVIDER`, `TARJOMAN_MODEL`, `TARJOMAN_API_KEY`, `TARJOMAN_DOMAIN_PROFILE`, `TARJOMAN_TIMEOUT_SECONDS`).
+     3. `project_toml`: `tarjoman.toml` located in the workspace/project directory.
+     4. `user_config`: user config file in standard OS application config directory (e.g. `~/.config/tarjoman/config.toml`).
+     5. `defaults`: built-in packaged defaults.
+   - Enforce "No hidden current-working-directory config lookup beyond the explicit project file" (§23.1).
+   - Secret security (§23.2):
+     - Secrets (`api_key`, `token`, `password`, `secret`) MUST NOT be present in project `tarjoman.toml`. If project `tarjoman.toml` contains secrets, raise `ConfigurationError`!
+   - Unknown keys policy (§23, acceptance criterion):
+     - Unknown config keys in project `tarjoman.toml` fail by default: raise `ConfigurationError` listing the unknown keys (unless `allow_unknown=True` is explicitly passed). Document this policy in docstring and report.
+
+3. Module Re-exports:
+   - Expose `TarjomanConfig`, `ConfigLoader`, `load_config`, and related helpers from `src/tarjoman/core/config.py` and re-export in `src/tarjoman/core/__init__.py`.
+
+4. Comprehensive Tests in `tests/test_config_system.py`:
+   - **Precedence Matrix Tests**:
+     - Verify CLI overrides Env, Project TOML, User config, and Defaults.
+     - Verify Env overrides Project TOML, User config, and Defaults.
+     - Verify Project TOML overrides User config and Defaults.
+     - Verify User config overrides Defaults.
+     - Verify Defaults apply when no overrides exist.
+   - **Secret Redaction Tests**:
+     - Verify `api_key` is redacted in `to_dict(redacted=True)` and config hash.
+     - Verify placing secrets in project `tarjoman.toml` raises `ConfigurationError`.
+   - **Unknown Config Key Policy Tests**:
+     - Verify unknown keys in project `tarjoman.toml` raise `ConfigurationError` by default.
+     - Verify `allow_unknown=True` allows unknown keys to pass into `extra_settings`.
+   - **Reproducibility Snapshot Tests**:
+     - Verify `compute_hash()` is deterministic across identical configurations and changes when any non-secret setting changes.
+   - All 230 existing tests and all 10 domain benchmarks must pass with zero regressions.
+
+## Acceptance Criteria
+- [ ] `precedence matrix tests`: full matrix covering CLI > Env > Project TOML > User config > Defaults passes.
+- [ ] `secret redaction tests`: secrets redacted in exports/hashes; secrets in project TOML rejected with ConfigurationError.
+- [ ] `unknown config key policy documented`: fail by default for project config implemented and tested.
+- [ ] Reproducibility snapshot hash implemented and verified.
+- [ ] All 230 existing tests pass with zero failures.
+- [ ] All 10 domain benchmarks pass.
+
+## Out of Scope
+- Implementing concrete network calls or LLM execution.
+
+## Output
+Write report to `/opt/data/projects/tarjoman/FND_004_REPORT.md`.
+Print exactly this as the last line:
+FND_004_COMPLETED /opt/data/projects/tarjoman/FND_004_REPORT.md
