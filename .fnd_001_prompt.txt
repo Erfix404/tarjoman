@@ -1,0 +1,69 @@
+## Task
+Implement Work Package FND-001 (Repository/package layout) for Tarjoman. Migrate the project layout to the canonical `src/` layout specified in ARCHITECTURE_ZERO.md §16, update packaging in pyproject.toml, ensure backward compatibility shims for existing imports, and verify clean editable and wheel installs.
+
+## Skill
+Use the `codebase-design` skill for this task. Maintain deep module boundaries and clean seams.
+
+## Background & Specifications
+Read these exact sections:
+- `ARCHITECTURE_ZERO.md` §15 (Packaging and technology), §16 (Target repository layout), and §22 (Implementation architecture: layers and dependency law).
+- `WORKPACKAGES.json` entry for package ID "FND-001".
+- `AGENTS.md` (Scope law, mandatory invariants, PR evidence).
+- `pyproject.toml`.
+
+## Required Actions
+1. Migrate the codebase from the flat `tarjoman/` directory into `src/tarjoman/`:
+   - `src/tarjoman/__init__.py`
+   - `src/tarjoman/cli.py`
+   - `src/tarjoman/composers/`
+   - `src/tarjoman/core/`
+   - `src/tarjoman/domains/`
+   - `src/tarjoman/linter.py`
+   - `src/tarjoman/memory/`
+   - `src/tarjoman/stages/`
+   - Add initial package scaffolding with `__init__.py` for target architecture packages:
+     `src/tarjoman/application/`, `src/tarjoman/providers/`, `src/tarjoman/quality/`, `src/tarjoman/profiles/`, `src/tarjoman/ingest/`, `src/tarjoman/export/`, `src/tarjoman/interfaces/` (including `interfaces/cli/`), `src/tarjoman/audio/`, `src/tarjoman/evals/`, `src/tarjoman/prompts/`.
+2. Provide backward compatibility shims or mechanical compatibility:
+   - Existing imports like `from tarjoman.cli import cli`, `from tarjoman.stages import ...`, `from tarjoman.core.pipeline import ...`, `from tarjoman.domains.router import ...`, `from tarjoman.composers import ...`, `from tarjoman.memory import ...` MUST continue to work without breaking external consumers or benchmarks.
+   - For interfaces/cli, `src/tarjoman/cli.py` can act as the shim pointing to `src/tarjoman/interfaces/cli/` (or vice versa), with a documented deprecation/removal plan comment.
+3. Update `pyproject.toml`:
+   - Configure setuptools package discovery:
+     `[tool.setuptools.packages.find]`
+     `where = ["src"]`
+     `include = ["tarjoman*"]`
+   - Ensure package-data includes registry JSONs:
+     `[tool.setuptools.package-data]`
+     `"tarjoman.domains" = ["registry/*.json"]`
+   - Ensure `project.scripts` correctly points to the CLI entrypoint:
+     `tarjoman = "tarjoman.cli:cli"`
+4. Invariant: `import tarjoman` MUST remain pure and lightweight:
+   - No optional heavy imports (no torch, no whisper, no comet, no fastmcp, no uvicorn) at base import time.
+5. Verification:
+   - Verify `editable install works`: test in the project venv (`.venv/bin/pip install -e .` or `uv pip install -e .`).
+   - Verify `wheel install works in clean venv`: build wheel with `python3 -m build --wheel` and verify installation in a temporary clean virtualenv.
+   - Run the full test suite (`.venv/bin/pytest`) and ensure all 96 tests pass.
+   - Run the 10-domain benchmark (`.venv/bin/python benchmarks/run_benchmarks.py`) and verify all 10 domains PASS and generate outputs.
+
+## Acceptance Criteria
+- [ ] Codebase successfully migrated to `src/tarjoman/` with package scaffolding.
+- [ ] `pyproject.toml` updated for `where = ["src"]` package finding and packaging verified.
+- [ ] Editable install verified working.
+- [ ] Wheel build and install verified in clean venv.
+- [ ] Legacy imports work seamlessly via compatibility shims with documented removal plan.
+- [ ] No optional heavy imports at `import tarjoman`.
+- [ ] All 96 tests in `tests/` pass with zero failures.
+- [ ] All 10 domain benchmarks in `benchmarks/run_benchmarks.py` pass.
+
+## Out of Scope
+- Provider/model feature work unrelated to the foundation package.
+- Modifying test logic to hide failures (all original test assertions must pass legitimately).
+
+## Output
+Write a comprehensive report to `/opt/data/projects/tarjoman/FND_001_REPORT.md` documenting:
+- Exact changes made and files moved.
+- Compatibility shim strategy and removal plan.
+- Verification commands executed and their output evidence (editable install, wheel clean venv test, pytest 96/96, benchmarks 10/10).
+- Acceptance criteria checklist.
+
+Print exactly this as the last line:
+FND_001_COMPLETED /opt/data/projects/tarjoman/FND_001_REPORT.md
