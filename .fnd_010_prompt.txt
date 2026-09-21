@@ -1,0 +1,129 @@
+## Task
+Implement Work Package FND-010 (Versioned behavior and compliance registries) for Tarjoman on branch `phase/1-foundation`. Build the versioned profile taxonomy and compliance registries per ARCHITECTURE_ZERO.md §8.4 and Locked Decisions D11, D12, D13, D40. Ensure explicit schema validation, immutable in-memory registries, profile lookup mechanisms, and strict high-risk domain assertions (legal and medical require human review for APPROVED status by default).
+
+## Skill
+Use the `codebase-design` skill for this task. Design clean, immutable registry deep modules with strong Pydantic typing, version indexing, and robust defaults.
+
+## Background & Specifications
+Read these exact documents:
+- `ARCHITECTURE_ZERO.md` §8.4 (Profile taxonomy — names may not be overloaded: DomainProfile, StyleProfile, WorkflowProfile, ReviewPolicy, PrivacyPolicy/ProviderPolicy/LicensePolicy, Capability Bundle; high-risk domain defaults: legal and medical require human review by default for APPROVED status).
+- `ARCHITECTURE_ZERO.md` §19 (Locked Decisions: D11 separate registries with independent versions, D12 high-risk domain review requirements, D13 in-memory immutability once loaded, D40 distinct types for all profile and policy categories).
+- `WORKPACKAGES.json` entry for package ID "FND-010" (Acceptance: "registry schema validation", "profile lookup tests", "high-risk domain default assertions").
+- `AGENTS.md` (Scope law, non-destructive requirements).
+- Existing `src/tarjoman/profiles/__init__.py` (currently empty scaffold).
+
+## Required Actions
+1. Implement Profile Models in `src/tarjoman/profiles/models.py`:
+   - **DomainProfile**:
+     - `domain_id: str` (e.g. "general", "literary", "scientific", "philosophy", "legal", "technical", "medical", "media", "financial", "classical", "transcreation")
+     - `name: str`
+     - `title_fa: str`
+     - `description: str`
+     - `is_high_risk: bool` (default False, True for "legal" and "medical")
+     - `default_review_policy_id: str` (e.g. "high_risk_strict" for high-risk domains, "standard_review" for standard)
+     - `version: str` = "1.0.0"
+     - `terminology_map: Dict[str, str]` = default_factory(dict)
+     - `banned_calques: List[str]` = default_factory(list)
+     - `few_shot_examples: List[Dict[str, str]]` = default_factory(list)
+     - `metadata: Dict[str, Any]` = default_factory(dict)
+   - **StyleProfile**:
+     - `style_id: str` (e.g. "formal", "neutral", "conversational", "literary")
+     - `name: str`
+     - `register: str`
+     - `audience: str`
+     - `digit_policy: str` ("persian" | "english" | "preserve")
+     - `punctuation_policy: Dict[str, Any]` = default_factory(dict)
+     - `loanword_policy: str` = "minimize"
+     - `terminology_guidance: Optional[str]` = None
+     - `version: str` = "1.0.0"
+     - `metadata: Dict[str, Any]` = default_factory(dict)
+   - **WorkflowProfile**:
+     - `workflow_id: str` (e.g. "translation", "subtitle", "meeting", "lecture_notes", "formal_minutes", "audiobook", "polish_only")
+     - `name: str`
+     - `stages: List[str]`
+     - `version: str` = "1.0.0"
+     - `metadata: Dict[str, Any]` = default_factory(dict)
+   - **ReviewPolicy**:
+     - `policy_id: str`
+     - `name: str`
+     - `requires_human_approval_for_approved_status: bool` (default False; True for high-risk strict policy)
+     - `allow_auto_approval: bool`
+     - `high_risk_override_allowed: bool` (default True, but requires explicit provenance recording)
+     - `version: str` = "1.0.0"
+     - `metadata: Dict[str, Any]` = default_factory(dict)
+   - **Compliance Policies (PrivacyPolicy, ProviderPolicy, LicensePolicy)**:
+     - `PrivacyPolicy`: `policy_id: str`, `allow_external_apis: bool`, `data_retention_days: int`, `pii_redaction_required: bool`, `version: str`
+     - `ProviderPolicy`: `policy_id: str`, `allowed_providers: List[str]`, `max_cost_per_request: Optional[float]`, `version: str`
+     - `LicensePolicy`: `policy_id: str`, `spdx_identifier: str`, `commercial_use_allowed: bool`, `attribution_required: bool`, `version: str`
+   - **CapabilityBundle**:
+     - `bundle_id: str` (e.g. "core", "asr", "tts", "server")
+     - `name: str`
+     - `components: List[str]`
+     - `version: str` = "1.0.0"
+     - `is_content_profile: bool` = False (Strict D40 enforcement: CapabilityBundle is an install/release grouping, NEVER a content profile).
+
+2. Implement Registry Engine in `src/tarjoman/profiles/registry.py`:
+   - `RegistryError` (subclasses `TarjomanError` or re-uses core errors).
+   - Generic base `VersionedRegistry[T]`:
+     - Schema validation on registration.
+     - Storage of entities indexed by ID and version string (supports multi-version lookups and latest resolution).
+     - In-memory immutability once frozen (`freeze()`), preventing runtime tampering (D13).
+     - `get(entity_id: str, version: Optional[str] = None) -> T`
+     - `register(item: T) -> None`
+     - `list_all() -> List[T]`
+     - `contains(entity_id: str, version: Optional[str] = None) -> bool`
+   - Specialized Registries:
+     - `DomainProfileRegistry`
+     - `StyleProfileRegistry`
+     - `WorkflowProfileRegistry`
+     - `ReviewPolicyRegistry`
+     - `ComplianceRegistry` (stores PrivacyPolicy, ProviderPolicy, LicensePolicy)
+     - `CapabilityBundleRegistry`
+   - Default built-in population & singletons:
+     - Built-in `DomainProfileRegistry` with all 10 standard domains + general:
+       - High-risk domain defaults: `legal` and `medical` are initialized with `is_high_risk=True` and `default_review_policy_id="high_risk_strict"`.
+       - Non-high-risk domains: `general`, `technical`, `literary`, `scientific`, `philosophy`, `media`, `financial`, `classical`, `transcreation` have `is_high_risk=False`.
+     - Built-in `ReviewPolicyRegistry`:
+       - `standard_review`: `requires_human_approval_for_approved_status=False`, `allow_auto_approval=True`.
+       - `high_risk_strict`: `requires_human_approval_for_approved_status=True`, `allow_auto_approval=False`, `high_risk_override_allowed=True`.
+     - Built-in `StyleProfileRegistry` (formal, neutral, conversational, literary).
+     - Built-in `WorkflowProfileRegistry` (translation, subtitle, meeting, lecture_notes, formal_minutes, audiobook, polish_only).
+     - Global convenience getters: `get_domain_registry()`, `get_style_registry()`, `get_workflow_registry()`, `get_review_policy_registry()`, `get_compliance_registry()`, `get_capability_registry()`.
+
+3. Re-export in `src/tarjoman/profiles/__init__.py`:
+   - Export all models and registry getters cleanly.
+
+4. Comprehensive Tests in `tests/test_versioned_registries.py`:
+   - **Registry Schema Validation**:
+     - Invalid profile models fail Pydantic validation on registration.
+     - Registration of duplicate ID and same version fails.
+     - Registration of different versions of the same ID succeeds and can be retrieved specifically.
+     - Immutability after `freeze()`: registering on a frozen registry raises `RegistryError`.
+   - **Profile Lookup Tests**:
+     - Lookup all 10 standard domains + general by ID.
+     - Lookup style profiles, workflow profiles, review policies.
+     - Verify `get()` with unknown ID raises `RegistryError` or returns appropriate error.
+   - **High-Risk Domain Default Assertions (§8.4, D12)**:
+     - Assert `legal` domain has `is_high_risk=True`.
+     - Assert `medical` domain has `is_high_risk=True`.
+     - Assert `legal` and `medical` point to a review policy where `requires_human_approval_for_approved_status=True` and `allow_auto_approval=False`.
+     - Assert non-high-risk domains (e.g. `technical`, `general`) do NOT mandate human approval for approved status.
+     - Test override behavior: verify that if an override is provided, the policy allows it (`high_risk_override_allowed=True`) and note provenance logging requirement.
+   - **D40 Profile Taxonomy Distinction**:
+     - Assert `CapabilityBundle` is distinct from content profiles (`is_content_profile is False`).
+   - Zero regressions: all 426 existing tests and all 10 domain benchmarks must pass.
+
+## Acceptance Criteria
+- [ ] `registry schema validation`: Pydantic models with schema versions, duplicate/freeze protections verified.
+- [ ] `profile lookup tests`: lookup by ID and version across all profile types verified.
+- [ ] `high-risk domain default assertions`: legal and medical verified to require human review for APPROVED status by default.
+- [ ] All 426 existing tests pass with zero failures.
+- [ ] All 10 domain benchmarks pass.
+
+## Out of Scope
+- Dynamic database storage of profiles (profiles are immutable in-memory registries in Core v1.0).
+
+## Output
+Write report to `/opt/data/projects/tarjoman/FND_010_REPORT.md`.
+Print exactly this as the last line:
+FND_010_COMPLETED /opt/data/projects/tarjoman/FND_010_REPORT.md
