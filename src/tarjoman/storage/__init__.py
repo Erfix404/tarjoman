@@ -5,7 +5,9 @@ Architecture Zero §22.2, §25, §26:
 - Content-addressed artifact blob storage
 - SQLite transactional database engine and migration runner
 - Typed repositories for Project, Operation, Artifact, Segment, and Job
+- Migration discipline and verification
 """
+from tarjoman.core.errors import MigrationError
 from tarjoman.storage.artifact_store import ArtifactStore, StoredBlob
 from tarjoman.storage.database import DatabaseManager
 from tarjoman.storage.repositories import (
@@ -23,6 +25,7 @@ __all__ = [
     "DatabaseManager",
     "JobRecord",
     "JobRepository",
+    "MigrationError",
     "OperationRepository",
     "ProjectRepository",
     "SegmentRepository",

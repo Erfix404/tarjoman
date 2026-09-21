@@ -1,0 +1,65 @@
+## Task
+Implement Work Package FND-007 (Migration discipline) for Tarjoman on branch `phase/1-foundation`. Harden the migration engine in `src/tarjoman/storage/database.py` and implement comprehensive migration discipline tests verifying idempotence, tamper detection via checksums, atomic rollback on failure, migration locks, and status reporting according to ARCHITECTURE_ZERO.md §18, §24, and §25.5.
+
+## Skill
+Use the `codebase-design` skill for this task. Design a deep, robust migration engine that guarantees data integrity, atomic transitions, and fail-closed safety.
+
+## Background & Specifications
+Read these exact documents:
+- `ARCHITECTURE_ZERO.md` §18 (Versioning and compatibility policy: "Silent downgrade, silent destructive migration, and opening a newer unsupported schema for writing are forbidden"), §24 (MigrationError: no automatic destructive repair), and §25.5 (Database rules: "numbered immutable SQL migrations with checksums", "migration lock before schema changes").
+- `WORKPACKAGES.json` entry for package ID "FND-007".
+- `AGENTS.md` (Scope law, mandatory invariants).
+- Existing `src/tarjoman/storage/database.py`.
+
+## Required Actions
+1. Enhance `DatabaseManager` in `src/tarjoman/storage/database.py`:
+   - **Migration Locking (§25.5)**:
+     - Implement migration locking using an explicit file lock or transactional lock (`acquire_migration_lock()` context manager). For file workspaces, use a lock file (e.g., `<db_parent>/locks/migration.lock` or `<db_path>.migration.lock`). For in-memory, use an in-memory lock.
+     - Protect `apply_migrations()` with this lock to guarantee that concurrent migration attempts do not race.
+   - **Checksum & Tamper Detection**:
+     - `verify_migrations()` method: validates that every migration recorded in `schema_migrations` matches the on-disk file checksum byte-for-byte.
+     - Detects:
+       1. Modified file content (checksum mismatch) -> raises `MigrationError` with file name, expected checksum, and actual checksum.
+       2. Missing applied migration file -> raises `MigrationError`.
+       3. Schema version in DB newer than known code -> raises `MigrationError`.
+   - **Idempotence**:
+     - Calling `apply_migrations()` repeatedly on an up-to-date database is a safe, fast no-op returning `[]`.
+   - **Atomic Rollback on Failure**:
+     - Ensure any failed migration script (whether due to SQL syntax error, constraint failure, or exception) rolls back completely via `ROLLBACK`, leaving the schema at the previous valid version with zero partial state or orphaned entries in `schema_migrations`.
+   - **Migration Status**:
+     - `get_migration_status() -> List[Dict[str, Any]]`: returns structured status for all discovered and applied migrations (version, name, checksum, applied_at, status: "applied" | "pending" | "tampered" | "missing").
+
+2. Re-export and document:
+   - Ensure `verify_migrations` and `get_migration_status` are clean public methods on `DatabaseManager`.
+   - Update `src/tarjoman/storage/__init__.py` if needed.
+
+3. Comprehensive Tests in `tests/test_migration_discipline.py`:
+   - **Migration Idempotence**:
+     - Run `apply_migrations()` 5+ times sequentially on both file and in-memory databases; assert no-op, no error, schema version unchanged.
+   - **Tamper Detection (Checksum Mismatch)**:
+     - Apply migration 001, then edit the on-disk SQL file content (e.g. add a comment or extra space); assert subsequent `apply_migrations()` and `verify_migrations()` fail loudly with `MigrationError`.
+   - **Missing Migration File**:
+     - Apply migration, delete the SQL file from disk; assert `verify_migrations()` / `apply_migrations()` detects missing file and raises `MigrationError`.
+   - **Atomic Rollback on Mid-Script Failure**:
+     - Create a multi-statement migration where statement 3 fails (e.g. invalid syntax or table already exists); assert `MigrationError` raised, transaction rolled back, and neither statement 1 nor statement 2 persisted. Database remains at previous clean version.
+   - **Migration Lock Concurrency**:
+     - Test that migration lock prevents concurrent overlapping migrations.
+   - **Downgrade / Unsupported Future Version Guard**:
+     - Test that if `schema_migrations` contains a version higher than any known migration on disk, opening/migrating raises `MigrationError`.
+   - All 351 existing tests and all 10 domain benchmarks must pass with zero regressions.
+
+## Acceptance Criteria
+- [ ] `migration idempotence check`: repeated `apply_migrations()` calls are proven safe no-ops.
+- [ ] `cannot edit applied migration unnoticed (checksum)`: modifying an applied SQL file fails with `MigrationError`.
+- [ ] `failure rolls back or leaves recoverable state`: mid-script failure rolls back atomically, leaving previous version intact.
+- [ ] Migration lock before schema changes implemented and tested (§25.5).
+- [ ] All 351 existing tests in `tests/` pass with zero failures.
+- [ ] All 10 domain benchmarks pass.
+
+## Out of Scope
+- Writing migration 002+ (this package focuses on migration engine discipline and verification).
+
+## Output
+Write report to `/opt/data/projects/tarjoman/FND_007_REPORT.md`.
+Print exactly this as the last line:
+FND_007_COMPLETED /opt/data/projects/tarjoman/FND_007_REPORT.md
