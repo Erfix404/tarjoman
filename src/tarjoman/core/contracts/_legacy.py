@@ -1,9 +1,15 @@
 """
-Data Contracts and Pydantic Models for Tarjoman Universal Translation Engine.
+Legacy data contracts preserved for backward compatibility.
+
+These models pre-date the canonical IR and remain importable from
+``tarjoman.core.contracts``.  New code should prefer the canonical
+models defined in ``_canonical.py``.
 """
 from __future__ import annotations
+
 from enum import Enum
 from typing import List, Dict, Optional, Any
+
 from pydantic import BaseModel, Field
 
 

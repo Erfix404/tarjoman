@@ -1,0 +1,70 @@
+## Task
+Implement Work Package FND-002 (Canonical contracts) for Tarjoman. Implement the canonical Intermediate Representation (IR) data contracts defined in ARCHITECTURE_ZERO.md §4, ensure complete backward compatibility with existing contracts in `src/tarjoman/core/contracts.py`, add helper functions for stable IDs and content hashing, and write comprehensive contract tests meeting all acceptance criteria.
+
+## Skill
+Use the `codebase-design` skill for this task. Design deep contracts with clear invariants, typed validations, and clean boundaries.
+
+## Background & Specifications
+Read these exact documents:
+- `ARCHITECTURE_ZERO.md` §4 (Canonical intermediate representation (IR)), §19 (Locked decisions D04, D19, D38), and §22.2 (Package ownership for `core.contracts`).
+- `WORKPACKAGES.json` entry for package ID "FND-002".
+- `AGENTS.md` (Scope law, mandatory invariants).
+- Existing `src/tarjoman/core/contracts.py`.
+
+## Required Actions
+1. Implement Canonical IR Models in `src/tarjoman/core/contracts/` or `src/tarjoman/core/contracts.py` (ensure `from tarjoman.core.contracts import ...` exports ALL existing models as well as the new Canonical IR models):
+   - **JobStatus** (Enum): `QUEUED`, `RUNNING`, `WAITING_REVIEW`, `SUCCEEDED`, `FAILED`, `CANCELLED` (Strict invariant D38: no other public spellings!).
+   - **OperationType** (Enum): `translate`, `review`, `formalize`, `summarize`, `transcribe`, `synthesize`, `export`, `evaluate`.
+   - **ArtifactKind** (Enum): `source_document`, `translated_document`, `subtitle`, `audio`, `video`, `transcript_raw`, `transcript_clean`, `notes`, `minutes`, `speech_plan`, `synthesized_audio`, `evaluation_report`, `other`.
+   - **SegmentVersionKind** (Enum): `source`, `draft`, `revised`, `human_edit`, `approved`.
+   - **AuthorType** (Enum): `system`, `model`, `human`.
+   - **ProtectedSpanType** (Enum): `code`, `url`, `email`, `math`, `placeholder`, `citation`, `tag`, `timestamp`, `speaker`, `other`.
+   - **IntegrityPolicy** (Enum): `exact`, `normalized`, `mapped`.
+   - **ProjectSpec**: `project_id`, `name`, optional language defaults (`default_source_language`, `default_target_language`), profile IDs (`default_domain_profile_id`, `default_style_profile_id`, `default_workflow_profile_id`), policy IDs (`privacy_policy_id`, `provider_policy_id`, `review_policy_id`), `created_at`, `updated_at`, `metadata`.
+   - **OperationSpec**: `operation_id`, `project_id`, `operation_type`, `input_artifact_ids`, optional language overrides, profile IDs, `resolved_policy_ids`, `strategy_id`, `config_snapshot_hash`, `created_at`, `metadata`.
+   - **ProtectedSpan**: `span_id`, `type`, `original_text`, `integrity_policy`, optional `placeholder_token`, `metadata`.
+   - **Segment**: `segment_id`, `artifact_id`, `structural_locator`, `source_text`, `source_content_hash`, `language_spans`, `translatable`, `protected_spans`, `structural_context`, `metadata`.
+   - **SegmentVersion**: `segment_version_id`, `segment_id`, `kind`, `text`, `parent_version_id`, `strategy_id`, `provider_id`, `model_id`, `prompt_id`, `profile_version`, `glossary_hash`, `context_hash`, `result_cache_hash`, `author`, `author_id`, `created_at`, `findings`, `provenance`.
+   - **Artifact**: `artifact_id`, `project_id`, `kind`, `raw_sha256`, `canonical_content_hash`, `language_tags`, `source_uri`, `producer_name`, `producer_version`, `parent_artifact_ids`, `sensitivity`, `retention_policy`, `blob_path`, `segments`, `created_at`, `metadata`.
+   - **RunRecord**: `run_id`, `job_id`, `operation_id`, `project_id`, `status` (JobStatus), `stage_checkpoints`, `resolved_config_hash`, `provider`, `model`, `prompt_id`, `profile_id`, `rule_ids`, `strategy_id`, `started_at`, `finished_at`, `usage`, `cost_usd`, `duration_ms`, `error_type`, `error_message`, `retry_count`, `metadata`.
+   - **Workspace**: workspace boundary model referencing `workspace_id`, `root_path`, `created_at`, `metadata`.
+
+2. Add Stable ID and Hash Helpers:
+   - `compute_content_hash(text: str) -> str`: canonical SHA-256 of normalized text.
+   - `compute_segment_id(artifact_id: str, structural_locator: str) -> str`: deterministic stable ID based on artifact and location (Architecture §4.5: stable segment IDs are based on artifact identity + structural locator, not text alone).
+   - `compute_placeholder(span_id: str, prefix: str = "__TRJ_") -> str`: collision-resistant placeholder token.
+
+3. Backward Compatibility:
+   - Ensure all existing models (`DomainType`, `TypographicRules`, `DomainProfile`, `TextSegment`, `StageResult`, `AuditFinding`, `AuditReport`, `BookManifest`) remain directly importable from `tarjoman.core.contracts`.
+
+4. Schema Snapshot generation:
+   - Add schema snapshot export utility or JSON schema representations for the canonical models.
+
+5. Comprehensive Contract Tests in `tests/test_canonical_contracts.py`:
+   - **JSON Round Trip**: serialization (`model_dump_json()`) and deserialization (`model_validate_json()`) preserves 100% of data.
+   - **Schema Snapshots**: generate and verify schema JSON structures for canonical models.
+   - **Stable IDs**: verify `compute_segment_id` is deterministic across repeated calls and distinct for different structural locators even with identical source text.
+   - **Validation Failures**: test illegal statuses (e.g. "completed" is rejected; only QUEUED/RUNNING/WAITING_REVIEW/SUCCEEDED/FAILED/CANCELLED accepted), missing required fields, invalid enum values, invalid timestamps.
+   - Ensure existing tests (`tests/test_contracts.py` and all other 95 tests) continue to pass.
+
+## Acceptance Criteria
+- [ ] Canonical IR models implemented adhering strictly to Architecture Zero §4.
+- [ ] Strict JobStatus vocabulary enforced (only QUEUED, RUNNING, WAITING_REVIEW, SUCCEEDED, FAILED, CANCELLED).
+- [ ] Stable ID and hashing helpers implemented.
+- [ ] Existing contracts preserved with 100% backward compatibility.
+- [ ] Tests in `tests/test_canonical_contracts.py` cover:
+  - JSON round-trip tests for all canonical models.
+  - Schema snapshots tested.
+  - Deterministic stable ID generation tested.
+  - Validation failure cases thoroughly tested.
+- [ ] All tests in `tests/` pass with zero failures.
+- [ ] All 10 domain benchmarks pass.
+
+## Out of Scope
+- Concrete database/repository implementations (covered in FND-006).
+- Concrete provider implementations (covered in TRN-001/002).
+
+## Output
+Write report to `/opt/data/projects/tarjoman/FND_002_REPORT.md`.
+Print exactly this as the last line:
+FND_002_COMPLETED /opt/data/projects/tarjoman/FND_002_REPORT.md
