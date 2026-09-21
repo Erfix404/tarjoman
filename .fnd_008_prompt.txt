@@ -1,0 +1,74 @@
+## Task
+Implement Work Package FND-008 (Legacy-state importer) for Tarjoman on branch `phase/1-foundation`. Build an importer that converts legacy Tarjoman book projects, manifests (`manifest.json`), termbases (`terms.tsv`), and chapter translation caches (`cache.json` / `tarjoman_cache.json`) into canonical SQLite database models and content-addressed artifact store records according to ARCHITECTURE_ZERO.md §4, §25, and ROADMAP.md.
+
+## Skill
+Use the `codebase-design` skill for this task. Design a deep, non-destructive import pipeline with deterministic conflict resolution, clear conversion contracts, and zero data loss.
+
+## Background & Specifications
+Read these exact documents:
+- `ROADMAP.md` entry for FND-008: "fixture conversions; duplicate/conflict policy deterministic; source files never deleted automatically".
+- `WORKPACKAGES.json` entry for package ID "FND-008".
+- `AGENTS.md` (Scope law, mandatory invariants: "Source files never deleted automatically").
+- Existing legacy state implementations: `src/tarjoman/memory/state_manager.py`, `src/tarjoman/memory/cache.py`, `src/tarjoman/core/contracts/_legacy.py` (specifically `BookManifest`).
+- Storage infrastructure: `src/tarjoman/storage/database.py`, `src/tarjoman/storage/repositories/`, and `src/tarjoman/storage/artifact_store.py`.
+
+## Required Actions
+1. Implement `LegacyStateImporter` in `src/tarjoman/storage/importers/legacy.py`:
+   - Conflict resolution policy enum:
+     - `ConflictPolicy`: `SKIP` (preserve existing DB record), `OVERWRITE` (replace existing), `FAIL` (raise typed error). Default MUST be deterministic (`ConflictPolicy.SKIP`).
+   - `ImportSummary` model:
+     - `projects_imported: int`
+     - `artifacts_imported: int`
+     - `segments_imported: int`
+     - `versions_imported: int`
+     - `terms_imported: int`
+     - `conflicts_encountered: int`
+     - `conflicts_resolved: List[Dict[str, Any]]`
+     - `source_files_preserved: List[Path]`
+   - Conversion logic:
+     - **Book Project Import (`import_book_project(project_dir, conflict_policy)`):**
+       - Reads legacy `manifest.json` (BookManifest) -> converts into canonical `ProjectSpec` in `projects` table.
+       - Reads legacy `terms.tsv` (StateManager) -> converts into structured glossary entries stored in project metadata.
+       - Reads legacy `cache.json` or `tarjoman_cache.json` (ResumableCache) -> converts into an `Artifact` representing the document/chapter, and segment entries in `segments` and `segment_versions` (with `kind=DRAFT` for translated_text, or `kind=REVISED` if polished_text exists).
+       - If chapter/text files exist (e.g. `chapter_*.txt` or source text), copies them into `ArtifactStore` and creates `Artifact` records.
+     - **Standalone Cache Import (`import_cache_file(cache_file_path, project_id, ...)`):**
+       - Converts a standalone `tarjoman_cache.json` into segments and versions.
+     - **Standalone Termbase Import (`import_termbase(termbase_tsv_path, project_id, ...)`):**
+       - Parses TSV and integrates terms into project metadata.
+   - **MANDATORY INVARIANT: Source files NEVER deleted automatically**:
+     - The importer must only READ source files (`manifest.json`, `terms.tsv`, `cache.json`, text files).
+     - Under NO circumstances may any source file be unlinked, truncated, moved, or deleted. All source files must remain intact on disk after import.
+   - **Deterministic Conflict Resolution**:
+     - Handle duplicate project IDs, duplicate segments, duplicate terms according to the specified `ConflictPolicy`.
+
+2. Re-export in `src/tarjoman/storage/__init__.py`:
+   - Re-export `ConflictPolicy`, `ImportSummary`, `LegacyStateImporter`.
+
+3. Comprehensive Tests in `tests/test_legacy_importer.py`:
+   - **Fixture Conversions**:
+     - Create realistic legacy project fixtures (`manifest.json`, `terms.tsv`, `tarjoman_cache.json`, chapter text files).
+     - Run `import_book_project` and verify `ProjectSpec`, `Artifact`, `Segment`, and `SegmentVersion` records are properly created in SQLite.
+     - Verify terms from `terms.tsv` are accurately imported.
+     - Verify translated and polished texts from cache are converted into proper `SegmentVersion` records.
+   - **Deterministic Duplicate/Conflict Policy**:
+     - Test `ConflictPolicy.SKIP`: existing records preserved; conflicts counted.
+     - Test `ConflictPolicy.OVERWRITE`: existing records replaced cleanly.
+     - Test `ConflictPolicy.FAIL`: raises `ArtifactValidationError` or `TarjomanError` on conflict.
+   - **Source Files Never Deleted Automatically**:
+     - Verify every input file (`manifest.json`, `terms.tsv`, `cache.json`, `.txt`) exists with unchanged content and SHA-256 after the import finishes.
+   - Verify all 370 existing tests and 10 benchmarks pass with zero regressions.
+
+## Acceptance Criteria
+- [ ] `fixture conversions`: legacy book manifests, caches, and termbases converted to canonical SQLite models.
+- [ ] `duplicate/conflict policy deterministic`: SKIP, OVERWRITE, FAIL policies tested and verified.
+- [ ] `source files never deleted automatically`: source files verified byte-identical before and after import.
+- [ ] All 370 existing tests pass with zero failures.
+- [ ] All 10 domain benchmarks pass.
+
+## Out of Scope
+- Modifying legacy `StateManager` or `ResumableCache` behavior (they remain available for backward compatibility).
+
+## Output
+Write report to `/opt/data/projects/tarjoman/FND_008_REPORT.md`.
+Print exactly this as the last line:
+FND_008_COMPLETED /opt/data/projects/tarjoman/FND_008_REPORT.md

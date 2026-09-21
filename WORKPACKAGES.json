@@ -240,7 +240,7 @@
       "title": "Legacy-state importer",
       "phase": "1",
       "track": "foundation",
-      "status": "READY",
+      "status": "DONE",
       "required_for_core_v1": true,
       "depends_on": [
         "FND-006",
@@ -259,7 +259,7 @@
       "title": "Persian quality split",
       "phase": "1",
       "track": "foundation",
-      "status": "PLANNED",
+      "status": "READY",
       "required_for_core_v1": true,
       "depends_on": [
         "FND-001",
@@ -278,7 +278,7 @@
       "title": "Versioned behavior and compliance registries",
       "phase": "1",
       "track": "foundation",
-      "status": "PLANNED",
+      "status": "READY",
       "required_for_core_v1": true,
       "depends_on": [
         "FND-002",
