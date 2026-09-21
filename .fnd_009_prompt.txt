@@ -1,0 +1,85 @@
+## Task
+Implement Work Package FND-009 (Persian quality split) for Tarjoman on branch `phase/1-foundation`. Split Persian quality into an auto-fix safe normalization layer and a non-destructive diagnostic layer per ARCHITECTURE_ZERO.md §8 and Locked Decision D09 ("Regex anti-calque rules become diagnostics by default; unsafe semantic auto-rewrites are removed"). Implement idempotent normalization, typed diagnostic findings, false-positive regression protections, and comprehensive tests meeting all acceptance criteria.
+
+## Skill
+Use the `codebase-design` skill for this task. Design clean seams between deterministic normalization (safe, idempotent) and diagnostic inspection (read-only, typed findings).
+
+## Background & Specifications
+Read these exact documents:
+- `ARCHITECTURE_ZERO.md` §8 (Persian Quality Engine: §8.1 Auto-fix safe layer, §8.2 Diagnostic layer), §19 (Locked decision D09: "Regex anti-calque rules become diagnostics by default; unsafe semantic auto-rewrites are removed"), and §22.2 (Package ownership for `quality`).
+- `WORKPACKAGES.json` entry for package ID "FND-009".
+- `AGENTS.md` (Scope law, mandatory invariants: "Runtime evaluation never mutates the candidate it scores").
+- Existing `src/tarjoman/stages/anti_calque.py` and `src/tarjoman/linter.py`.
+
+## Required Actions
+1. Implement Auto-Fix Safe Normalization Layer in `src/tarjoman/quality/normalizer.py`:
+   - `PersianNormalizer` class and `normalize_persian(text: str, ...) -> str`:
+     - Arabic Kaf/Yeh normalization (`ك` -> `ک`, `ي` -> `ی`, `ة` -> `ه`, `ۀ` -> `هٔ`).
+     - ZWNJ normalization (standard non-joiner `\u200c`: removes duplicate ZWNJs, fixes ZWNJ before prefixes like `می‌` and `نمی‌`, and after suffixes like `ها`, `تر`, `ترین`, `ه‌ای`, `هایم`).
+     - Spacing and punctuation hygiene: spaces after commas, periods, colons, semi-colons, guillemets (`«` and `»`).
+     - Zero em-dash conversion (enforces zero em-dash policy by converting `—` into balanced Persian syntactic commas or parentheses).
+     - Directional and whitespace hygiene: trims trailing/leading spaces, collapses multiple consecutive regular spaces, fixes mixed bidirectional formatting.
+     - **Strict Idempotence Invariant (§8.1, acceptance criterion)**:
+       `normalize(normalize(text)) == normalize(text)` for ANY valid or messy input string.
+
+2. Implement Diagnostic Layer in `src/tarjoman/quality/calque_detector.py`:
+   - **QualityFinding** (Pydantic model):
+     - `rule_id: str` (e.g. `CALQUE_PASSIVE_BY`, `CALQUE_PLAY_ROLE`, `CALQUE_COUNT_ON`, `CALQUE_AT_END_OF_DAY`, `CALQUE_MAKE_SENSE`, etc.)
+     - `severity: str` ("critical" | "major" | "minor")
+     - `message: str`
+     - `start: int`
+     - `end: int`
+     - `matched_text: str`
+     - `suggested_fix: Optional[str]`
+     - `explanation: str`
+   - `CalqueDetector` class and `detect_calques(text: str) -> List[QualityFinding]`:
+     - **Default Diagnostic Behavior (D09)**: Does NOT rewrite or mutate the source text. It detects issues and returns typed `QualityFinding` objects.
+     - Implements detection rules based on classical Persian linguistic authorities (Abolhassan Najafi, Ahmad Samii Guilani):
+       - Passive with 'توسط'
+       - 'نقش بازی کردن' -> 'نقش ایفا کردن'
+       - 'روی ... حساب کردن' -> 'به ... اعتماد کردن / تکیه کردن'
+       - 'به عنوان عمل کردن'
+       - 'در پایان روز' -> 'در نهایت / سرانجام'
+       - 'حس ایجاد کردن' -> 'معقول / منطقی بودن'
+       - 'یک تصمیم گرفتن' -> 'تصمیم‌گیری کردن / تصمیمی اتخاذ کردن'
+       - 'آتش گشودن' (idiomatic calque)
+       - 'به اندازه کافی عجیب است' -> 'شگفتا / عجیب آن‌که'
+       - 'نقطه نظر' -> 'دیدگاه'
+       - 'به کار بردن برای'
+     - **False-Positive Guards**: Distinguishes literal, valid Persian expressions from calques (e.g., literal children playing "بچه‌ها در حیاط بازی می‌کردند" is NOT a calque; literal fire "آتش بخاری را خاموش کرد" is NOT a calque).
+
+3. Package Integration:
+   - Expose in `src/tarjoman/quality/__init__.py`:
+     - `PersianNormalizer`, `normalize_persian`
+     - `CalqueDetector`, `detect_calques`, `QualityFinding`
+   - Ensure backward compatibility: `src/tarjoman/stages/anti_calque.py` remains functional, delegating or preserving its existing public API for existing stages/tests.
+
+4. Comprehensive Tests in `tests/test_persian_quality_split.py`:
+   - **Normalization Idempotence Tests**:
+     - Test single pass vs double pass across clean, dirty, mixed, and multi-line texts.
+     - Test Arabic characters normalization (`ي/ك`).
+     - Test ZWNJ spacing and punctuation rules.
+   - **Diagnostic vs Auto-Fix Split Tests**:
+     - Verify `detect_calques()` returns structured `QualityFinding` items without mutating the input text.
+     - Verify finding attributes: rule_id, severity, start/end spans, explanation, and suggestion.
+   - **False-Positive Regression Cases**:
+     - Test literal "بازی کردن" (playing games) does NOT trigger role-playing calque.
+     - Test legitimate Persian passive phrases or literal contexts.
+     - Test valid uses of "در پایان" (in the end of a chapter/book) vs calqued "در پایان روز".
+     - Test technical and code blocks with English tokens are not falsely modified.
+   - All 388 existing tests and all 10 domain benchmarks must pass with zero regressions.
+
+## Acceptance Criteria
+- [ ] `normalization idempotence tests`: `normalize(normalize(text)) == normalize(text)` verified on extensive corpus.
+- [ ] `anti-calque rules default diagnostic`: D09 enforced — calques flagged as structured findings without blind auto-replacement.
+- [ ] `false-positive regression cases`: suite of legitimate Persian counter-examples verified not to misfire.
+- [ ] All 388 existing tests pass with zero failures.
+- [ ] All 10 domain benchmarks pass.
+
+## Out of Scope
+- Provider execution / LLM reflection (this is the deterministic core quality module).
+
+## Output
+Write report to `/opt/data/projects/tarjoman/FND_009_REPORT.md`.
+Print exactly this as the last line:
+FND_009_COMPLETED /opt/data/projects/tarjoman/FND_009_REPORT.md

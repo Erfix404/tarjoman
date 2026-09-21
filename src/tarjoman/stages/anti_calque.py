@@ -10,7 +10,10 @@ based on classical Persian linguistic authorities:
 from __future__ import annotations
 
 import re
-from typing import Callable, Dict, List, Pattern, Tuple
+from typing import Any, Callable, Dict, List, Pattern, Tuple, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from tarjoman.quality.calque_detector import QualityFinding
 
 
 class AntiCalqueEngine:
@@ -348,3 +351,12 @@ class AntiCalqueEngine:
                 detected.append(match.group(0).strip())
 
         return detected
+
+    @classmethod
+    def detect_calques_structured(cls, text: str) -> List[QualityFinding]:
+        """
+        Detect calques and return structured QualityFinding items (D09).
+        Delegates to tarjoman.quality.detect_calques.
+        """
+        from tarjoman.quality.calque_detector import detect_calques
+        return detect_calques(text)

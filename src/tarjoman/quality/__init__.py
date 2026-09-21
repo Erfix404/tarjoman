@@ -1,6 +1,25 @@
 """
-Tarjoman quality package — scaffolding for Architecture Zero §16.
+Tarjoman Quality Package — Architecture Zero §8, §19 (D09), §22.2.
 
-This package is part of the target repository layout. Implementation will
-be added by future work packages as the roadmap progresses.
+Deterministic Persian normalization (safe, idempotent auto-fix layer)
+and non-destructive diagnostic calque detection (typed findings).
 """
+from __future__ import annotations
+
+from tarjoman.quality.calque_detector import (
+    CalqueDetector,
+    QualityFinding,
+    detect_calques,
+)
+from tarjoman.quality.normalizer import (
+    PersianNormalizer,
+    normalize_persian,
+)
+
+__all__ = [
+    "PersianNormalizer",
+    "normalize_persian",
+    "CalqueDetector",
+    "detect_calques",
+    "QualityFinding",
+]
