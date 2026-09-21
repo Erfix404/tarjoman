@@ -1,0 +1,75 @@
+## Task
+Implement Work Package FND-006 (SQLite schema 001) for Tarjoman on branch `phase/1-foundation`. Implement the initial SQLite database schema, migration runner, and typed repository layer matching the canonical IR models (ProjectSpec, OperationSpec, Artifact, Segment, SegmentVersion, RunRecord/Job) according to ARCHITECTURE_ZERO.md §4, §25.5, and §26.
+
+## Skill
+Use the `codebase-design` skill for this task. Design a deep storage layer where repositories encapsulate SQL operations and enforce foreign-key integrity, WAL mode, and connection timeouts.
+
+## Background & Specifications
+Read these exact documents:
+- `ARCHITECTURE_ZERO.md` §4 (Canonical IR), §25.5 (Database rules), §26 (Persistent job engine), and §19 (Locked decisions D07, D19, D20, D22, D36, D38).
+- `WORKPACKAGES.json` entry for package ID "FND-006".
+- `AGENTS.md` (Scope law, mandatory invariants: "Large binary artifacts are not SQLite BLOBs", "PRAGMA foreign_keys=ON", "Public job states are exactly: QUEUED, RUNNING, WAITING_REVIEW, SUCCEEDED, FAILED, CANCELLED").
+- `src/tarjoman/core/contracts/` and `src/tarjoman/storage/artifact_store.py`.
+
+## Required Actions
+1. Implement Numbered SQL Migration `001_initial_schema.sql` in `src/tarjoman/storage/migrations/001_initial_schema.sql`:
+   - `schema_migrations`: version (INT PK), name (TEXT), checksum (TEXT), applied_at (TEXT).
+   - `projects`: maps to `ProjectSpec` (project_id PK, name, default languages, profile IDs, policy IDs, timestamps, metadata_json).
+   - `operations`: maps to `OperationSpec` (operation_id PK, project_id FK, operation_type, input_artifact_ids_json, profile/policy IDs, timestamps, metadata_json).
+   - `artifacts`: maps to `Artifact` (artifact_id PK, project_id FK, kind, raw_sha256, canonical_content_hash, language_tags_json, source_uri, producer_name, producer_version, parent_artifact_ids_json, sensitivity, retention_policy, blob_path, timestamps, metadata_json). Invariant D20: No binary BLOB column!
+   - `segments`: maps to `Segment` (segment_id PK, artifact_id FK, structural_locator, source_text, source_content_hash, language_spans_json, translatable, structural_context, metadata_json, UNIQUE(artifact_id, structural_locator)).
+   - `segment_versions`: maps to `SegmentVersion` (segment_version_id PK, segment_id FK, kind, text, parent_version_id FK, strategy/provider/model/prompt versions, hashes, author, author_id, created_at, findings_json, provenance_json).
+   - `jobs`: maps to `RunRecord` and job engine (job_id PK, operation_id FK, project_id FK, status CHECK (status IN ('QUEUED', 'RUNNING', 'WAITING_REVIEW', 'SUCCEEDED', 'FAILED', 'CANCELLED')), priority, attempt, claim_token, lease_owner, lease_expires_at, idempotency_key UNIQUE, started_at, finished_at, error_type, error_message, retry_count, metadata_json).
+   - Create appropriate indexes for lookups: `idx_artifacts_project`, `idx_segments_artifact`, `idx_segment_versions_segment`, `idx_jobs_status_priority`, `idx_operations_project`.
+
+2. Implement Database Engine in `src/tarjoman/storage/database.py`:
+   - `DatabaseManager(db_path: Union[str, Path], busy_timeout_ms: int = 5000)`:
+     - Always executes:
+       - `PRAGMA foreign_keys = ON;`
+       - `PRAGMA journal_mode = WAL;`
+       - `PRAGMA busy_timeout = <busy_timeout_ms>;`
+     - Context manager for connections and transactions (`transaction()`).
+     - Migration runner:
+       - `apply_migrations()`: applies pending migrations in order, verifies SHA-256 checksums, and records in `schema_migrations`.
+       - Handles clean empty database → latest migration.
+
+3. Implement Typed Repositories in `src/tarjoman/storage/repositories/`:
+   - `ProjectRepository`: create, get, list, update, delete (with cascade test).
+   - `ArtifactRepository`: create, get, list_by_project, delete.
+   - `SegmentRepository`: create_batch, get, list_by_artifact, add_version, get_latest_version.
+   - `JobRepository`: create, get, claim_next_job(lease_owner, timeout_seconds), heartbeat(job_id, claim_token), complete(job_id, status, ...), cancel(job_id).
+
+4. Re-export storage classes in `src/tarjoman/storage/__init__.py`.
+
+5. Comprehensive Tests in `tests/test_sqlite_schema.py`:
+   - **Empty → Latest Migration**: verify migrating a brand new in-memory or file database creates all tables, indexes, and records migration 001 with correct checksum.
+   - **Foreign Key Integrity**:
+     - Verify inserting an artifact with non-existent project_id raises `IntegrityError` or `MigrationError`/`TarjomanError`.
+     - Verify cascade delete of project removes associated operations, artifacts, segments, jobs.
+   - **WAL / Busy Timeout**:
+     - Verify PRAGMA foreign_keys is 1 (ON).
+     - Verify PRAGMA journal_mode is WAL (or memory for :memory:).
+     - Verify PRAGMA busy_timeout is set.
+   - **Repository CRUD Tests**:
+     - Complete CRUD lifecycle test for Project, Artifact, Segment, and Job.
+     - Atomic job claim test: claiming updates state to RUNNING and sets lease token; claiming with invalid token fails.
+     - Strict JobStatus test: attempting to insert an invalid status (like 'completed' or 'done') fails database CHECK constraint.
+   - Verify all 324 existing tests and 10 benchmarks pass with zero regressions.
+
+## Acceptance Criteria
+- [ ] `empty → latest migration`: migration runner initializes clean DB and applies 001_initial_schema.sql.
+- [ ] `FK integrity`: foreign keys enforced with PRAGMA foreign_keys=ON; cascade and orphan rejections verified.
+- [ ] `WAL/busy timeout`: WAL journal mode and busy timeout pragmas verified.
+- [ ] `repository CRUD tests`: full CRUD tests for Project, Artifact, Segment, Job repositories.
+- [ ] No large binary BLOB columns in SQLite (D20 enforced).
+- [ ] All 324 existing tests in `tests/` pass with zero failures.
+- [ ] All 10 domain benchmarks pass.
+
+## Out of Scope
+- Implementing migration 002+ (only 001 in this package).
+- Provider API calls.
+
+## Output
+Write report to `/opt/data/projects/tarjoman/FND_006_REPORT.md`.
+Print exactly this as the last line:
+FND_006_COMPLETED /opt/data/projects/tarjoman/FND_006_REPORT.md

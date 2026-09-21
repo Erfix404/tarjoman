@@ -29,3 +29,4 @@ include = ["tarjoman*"]
 
 [tool.setuptools.package-data]
 "tarjoman.domains" = ["registry/*.json"]
+"tarjoman.storage" = ["migrations/*.sql"]
