@@ -1,0 +1,89 @@
+## Task
+Implement Work Package FND-005 (Artifact store) for Tarjoman. Implement the content-addressed artifact blob storage engine specified in ARCHITECTURE_ZERO.md §25, providing atomic two-phase writes, SHA-256 sharded deduplication, strict path-traversal prevention, retention and deletion policies, garbage collection, and comprehensive tests meeting all acceptance criteria.
+
+## Skill
+Use the `codebase-design` skill for this task. Design a deep storage module with clean seams, fail-closed path validation, atomic file operations, and zero data corruption risks.
+
+## Background & Specifications
+Read these exact documents:
+- `ARCHITECTURE_ZERO.md` §25.1 (Workspace layout), §25.2 (Managed source rule), §25.3 (Artifact blob lifecycle), §25.4 (Atomic writes), §4.4 (Artifact IR model), §19 (Locked decisions D19, D20, D43), and §22.2 (Package ownership for `storage`).
+- `WORKPACKAGES.json` entry for package ID "FND-005".
+- `AGENTS.md` (Scope law, mandatory invariants: "Large binary artifacts are not SQLite BLOBs").
+- `src/tarjoman/core/contracts/` and `src/tarjoman/core/errors.py`.
+
+## Required Actions
+1. Implement Artifact Store in `src/tarjoman/storage/artifact_store.py`:
+   - Target directory structure:
+     `<workspace_root>/.tarjoman/artifacts/sha256/<first_2_hex>/<full_sha256>`
+     `<workspace_root>/.tarjoman/tmp/` for temporary writes
+   - **StoredBlob** (Pydantic model or dataclass):
+     - `sha256: str` (64 lowercase hex characters)
+     - `size_bytes: int`
+     - `path: Path`
+     - `mime_type: Optional[str] = None`
+     - `created_at: datetime`
+     - `metadata: Dict[str, Any]`
+   - **ArtifactStore** class:
+     - `__init__(workspace_root: Union[str, Path], max_blob_size_bytes: Optional[int] = None)`
+     - `store_bytes(data: bytes, mime_type: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None) -> StoredBlob`
+     - `store_file(source_path: Union[str, Path], mime_type: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None) -> StoredBlob`
+     - `store_stream(stream: BinaryIO, mime_type: Optional[str] = None, expected_sha256: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None) -> StoredBlob`
+     - `get(sha256: str) -> Optional[StoredBlob]`
+     - `read_bytes(sha256: str) -> bytes`
+     - `open_blob(sha256: str) -> BinaryIO`
+     - `exists(sha256: str) -> bool`
+     - `verify_blob(sha256: str) -> bool`: validates that on-disk file exists, matches expected size, and recomputes SHA-256 to verify byte integrity.
+     - `delete_blob(sha256: str) -> bool`: deletes the blob from storage.
+     - `collect_garbage(referenced_hashes: Set[str]) -> Tuple[int, int]`: scans storage and removes any unreferenced blobs, returning `(blobs_removed, bytes_freed)`.
+     - `list_blobs() -> List[StoredBlob]`
+
+2. Enforce Mandatory Invariants (§25.3, §25.4, D20, D43):
+   - **Atomic Writes (§25.4)**:
+     - Write to a unique temporary file in `<workspace_root>/.tarjoman/tmp/`.
+     - Compute SHA-256 incrementally while streaming/writing.
+     - Flush and fsync (where supported).
+     - Atomic rename (`os.replace`) into `sha256/<ab>/<full_sha256>`.
+     - Interrupted write handling: if an exception occurs (e.g. simulated crash, write error, quota exceeded), temp file is immediately cleaned up and NO partial or completed blob exists in the destination store!
+   - **Deduplication by SHA-256 (§25.3)**:
+     - If the blob with the identical SHA-256 already exists in storage, the store recognizes it, verifies its size, cleans up the temp file, and returns the existing `StoredBlob` without duplicating bytes or corrupting the existing file.
+   - **Path Traversal Escape Guard**:
+     - Strict hash validation: input hashes MUST match `^[a-f0-9]{64}$`.
+     - Paths are resolved canonically using `.resolve()`. Any hash or filename attempting to escape the store (e.g. `../../etc/passwd`, absolute paths, symlinks pointing outside) MUST be rejected by raising `ArtifactValidationError` or `PolicyViolationError`. Filename cannot escape store!
+   - **Retention / Deletion Policy**:
+     - Explicit deletion method.
+     - Garbage collection based on a set of live referenced hashes.
+     - Retention expiration helper or check.
+
+3. Module exports:
+   - Create `src/tarjoman/storage/__init__.py` exporting `ArtifactStore`, `StoredBlob`.
+
+4. Comprehensive Tests in `tests/test_artifact_store.py`:
+   - **Interrupted Write Tests**:
+     - Simulate interrupted write / exception mid-stream; assert temp file cleaned up and no destination artifact exists.
+   - **Deduplication Tests**:
+     - Store identical content twice; assert same SHA-256, single on-disk file, deduplicated storage.
+   - **Filename Cannot Escape Store Tests**:
+     - Attempt path traversal (`../../../etc/passwd`, `../secrets.toml`, invalid hashes); assert strict rejection with typed error (`ArtifactValidationError` or `PolicyViolationError`).
+   - **Retention / Deletion Tests**:
+     - Delete specific blob; assert on-disk file removed.
+     - Test garbage collection: store 3 blobs, mark 1 as referenced, collect garbage, assert 2 unreferenced blobs deleted and bytes freed accurately reported.
+   - **Integrity & Verification Tests**:
+     - `verify_blob()` returns True on valid blob, False or raises on tampered/corrupt blob.
+   - All 266 existing tests and all 10 domain benchmarks must pass with zero regressions.
+
+## Acceptance Criteria
+- [ ] `interrupted write leaves no completed artifact` tested and verified.
+- [ ] `dedup by SHA` tested and verified.
+- [ ] `filename cannot escape store` tested and verified against traversal attacks.
+- [ ] `retention/delete tests` tested and verified (individual delete + garbage collection).
+- [ ] All 266 existing tests pass with zero failures.
+- [ ] All 10 domain benchmarks pass.
+
+## Out of Scope
+- SQLite database tables (covered in FND-006).
+- Provider execution.
+
+## Output
+Write report to `/opt/data/projects/tarjoman/FND_005_REPORT.md`.
+Print exactly this as the last line:
+FND_005_COMPLETED /opt/data/projects/tarjoman/FND_005_REPORT.md
