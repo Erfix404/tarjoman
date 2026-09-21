@@ -108,7 +108,7 @@
       "title": "Repository/package layout",
       "phase": "1",
       "track": "foundation",
-      "status": "READY",
+      "status": "DONE",
       "required_for_core_v1": true,
       "depends_on": [
         "A0-005"
@@ -127,7 +127,7 @@
       "title": "Canonical contracts",
       "phase": "1",
       "track": "foundation",
-      "status": "PLANNED",
+      "status": "READY",
       "required_for_core_v1": true,
       "depends_on": [
         "FND-001"
