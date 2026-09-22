@@ -13,12 +13,17 @@ requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.0.0",
     "click>=8.0.0",
-    "jinja2>=3.0.0"
+    "jinja2>=3.0.0",
+    "packaging>=23.0"
 ]
 
 [project.optional-dependencies]
 pdf = ["typst>=0.11.0"]
+server = ["fastapi>=0.100.0", "uvicorn>=0.22.0"]
+speech = ["faster-whisper>=1.0.0"]
+eval = ["sacrebleu>=2.3.0"]
 dev = ["build>=1.0.0", "twine>=5.0.0", "pytest>=7.0.0"]
+all = ["typst>=0.11.0", "fastapi>=0.100.0", "uvicorn>=0.22.0", "faster-whisper>=1.0.0", "sacrebleu>=2.3.0"]
 
 [project.scripts]
 tarjoman = "tarjoman.cli:cli"

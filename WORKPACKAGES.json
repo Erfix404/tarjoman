@@ -319,7 +319,7 @@
       "title": "Architecture-conformance CI",
       "phase": "1",
       "track": "foundation",
-      "status": "READY",
+      "status": "DONE",
       "required_for_core_v1": true,
       "depends_on": [
         "FND-001",
@@ -346,7 +346,7 @@
       "title": "Provider port/capabilities",
       "phase": "2",
       "track": "translation",
-      "status": "PLANNED",
+      "status": "READY",
       "required_for_core_v1": true,
       "depends_on": [
         "FND-012"

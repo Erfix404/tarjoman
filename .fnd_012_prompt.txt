@@ -1,0 +1,86 @@
+## Task
+Implement Work Package FND-012 (Architecture-conformance CI) for Tarjoman on branch `phase/1-foundation`. This is the final work package of Phase 1 (Foundation). Build the architecture conformance verification system and CI workflows according to ARCHITECTURE_ZERO.md §22 (Architecture boundaries & package ownership), §25.5 (Storage & database rules), ROADMAP.md, and WORKPACKAGES.json.
+
+## Skill
+Use the `codebase-design` skill for this task. Design a clean, deep, and automated architecture-conformance checking engine with AST-based boundary enforcement, layer isolation assertions, and reproducible CI workflows.
+
+## Background & Specifications
+Read these exact documents:
+- `ARCHITECTURE_ZERO.md` §22.1 (Dependency rule):
+  - `core` imports only stdlib + explicitly approved lightweight schema dependencies (pydantic, packaging).
+  - `application` may import `core`, never concrete infrastructure.
+  - `infrastructure/adapters` implement ports defined by core/application.
+  - `interfaces` call application services; one interface NEVER imports another interface (e.g. MCP never imports CLI; API never imports MCP).
+  - Provider SDKs, FastAPI, Uvicorn, MCP SDK, Whisper, Torch, ONNX Runtime, COMET and heavy document libraries are NEVER imported by base-core modules.
+  - "CI must enforce this with import-boundary tests."
+- `ARCHITECTURE_ZERO.md` §22.2 (Package ownership table).
+- `ARCHITECTURE_ZERO.md` §23.2 & §25.5 (Secret leak protection & SQLite rules: no BLOB columns, foreign_keys ON, WAL mode, immutable migration checksums).
+- `ROADMAP.md` entry for FND-012:
+  - "base job installs without speech/eval/server extras; architecture violations fail CI"
+- `WORKPACKAGES.json` entry for package ID "FND-012".
+- `pyproject.toml` and `.github/workflows/test.yml`.
+
+## Required Actions
+1. Configure Optional Dependencies in `pyproject.toml`:
+   - Ensure `[project.dependencies]` contains ONLY minimal base dependencies:
+     - `pydantic>=2.0.0`
+     - `click>=8.0.0`
+     - `jinja2>=3.0.0`
+     - `packaging>=23.0`
+   - Structure `[project.optional-dependencies]` into explicit, orthogonal capability groups:
+     - `pdf = ["typst>=0.11.0"]`
+     - `server = ["fastapi>=0.100.0", "uvicorn>=0.22.0"]`
+     - `speech = ["faster-whisper>=1.0.0"]`
+     - `eval = ["sacrebleu>=2.3.0"]`
+     - `dev = ["build>=1.0.0", "twine>=5.0.0", "pytest>=7.0.0"]`
+     - `all = ["typst>=0.11.0", "fastapi>=0.100.0", "uvicorn>=0.22.0", "faster-whisper>=1.0.0", "sacrebleu>=2.3.0"]`
+
+2. Implement Architecture Conformance Linter & Checker:
+   - Create `src/tarjoman/quality/conformance.py` (and expose via `tarjoman.quality`):
+     - `ArchitectureConformanceChecker`:
+       - Scans Python source files across `src/tarjoman/` using `ast.parse`.
+       - Analyzes all `import` and `import from` statements across packages.
+       - Enforces strict boundary rules (§22.1):
+         - `RULE_CORE_ISOLATION`: Modules in `tarjoman.core.*` (contracts, errors, config, logging) must NEVER import from `tarjoman.storage`, `tarjoman.providers`, `tarjoman.interfaces`, `tarjoman.audio`, `tarjoman.stages`, `fastapi`, `uvicorn`, `torch`, `whisper`, `faster_whisper`, `comet`, etc.
+         - `RULE_INTERFACE_ISOLATION`: Modules in `tarjoman.interfaces.<X>` must NEVER import from `tarjoman.interfaces.<Y>` (e.g. `tarjoman.interfaces.cli` cannot import `tarjoman.interfaces.api` or `mcp`).
+         - `RULE_NO_HEAVY_BASE_IMPORTS`: No module in `core`, `quality`, or `storage` may top-level import heavy optional dependencies (`torch`, `whisper`, `faster_whisper`, `comet`, `onnxruntime`, `fastapi`, `uvicorn`).
+         - `RULE_DATABASE_INVARIANTS`: SQLite migrations and schema must not declare `BLOB` columns for large files (Invariant D20).
+         - `RULE_SECRET_REDACTION`: Checks that error models and loggers enforce redaction and no raw hardcoded API keys exist.
+       - Returns a structured report with violated rules, source files, line numbers, and error messages.
+       - Method `check() -> List[ArchitectureViolation]` and `enforce() -> None` (raises `ArchitectureViolationError` if any violation is found).
+
+3. Comprehensive Architecture Test Suite in `tests/test_architecture_conformance.py`:
+   - **Base Job Installs Without Speech/Eval/Server Extras**:
+     - Verify `import tarjoman` executes in under 200ms and does not require or load optional extras (`torch`, `whisper`, `fastapi`, `uvicorn`, `comet`).
+     - Test that missing optional modules (simulated via `sys.modules[mod] = None`) do NOT break base importing of `tarjoman.core`, `tarjoman.quality`, `tarjoman.storage`, or `tarjoman.profiles`.
+   - **Architecture Violations Fail CI**:
+     - Test that the conformance checker successfully passes on current clean codebase.
+     - Test that synthetic architecture violations FAIL the checker with detailed diagnostics:
+       - Injecting a fake import of `fastapi` or `torch` in `tarjoman.core` triggers `RULE_CORE_ISOLATION`.
+       - Injecting cross-interface import (`interfaces.cli` importing `interfaces.api`) triggers `RULE_INTERFACE_ISOLATION`.
+       - Injecting a `BLOB` column in SQLite migration triggers `RULE_DATABASE_INVARIANTS`.
+   - Test package ownership boundaries per §22.2.
+
+4. Update CI Workflows in `.github/workflows/test.yml`:
+   - Update workflow triggers to run on `push` for `main` and `phase/**`, and all `pull_request` to `main`.
+   - Add explicit **Architecture Conformance & Clean Base Install** job:
+     - Sets up clean Python environment.
+     - Runs `pip install -e .` (WITHOUT any extras).
+     - Verifies base installation imports cleanly.
+     - Runs `pytest tests/test_architecture_conformance.py`.
+     - Runs the full test suite and benchmark suite.
+
+5. Update `WORKPACKAGES.json`:
+   - Mark `FND-012` status as `DONE`.
+
+## Acceptance Criteria
+- [ ] `base job installs without speech/eval/server extras`: clean base install verified without requiring heavy optional dependencies.
+- [ ] `architecture violations fail CI`: import boundaries, cross-interface isolation, and database rules enforced by AST checks and automated tests.
+- [ ] All 505 existing tests pass with zero failures.
+- [ ] All 10 domain benchmarks pass.
+- [ ] Updated CI workflow covers phase branches and PRs.
+
+## Output
+Write report to `/opt/data/projects/tarjoman/FND_012_REPORT.md`.
+Print exactly this as the last line:
+FND_012_COMPLETED /opt/data/projects/tarjoman/FND_012_REPORT.md

@@ -2,11 +2,59 @@ name: Tests and Benchmarks
 
 on:
   push:
-    branches: [main]
+    branches: [main, "phase/**"]
   pull_request:
     branches: [main]
 
 jobs:
+  architecture-conformance:
+    name: Architecture Conformance & Clean Base Install
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install base package WITHOUT extras
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Verify clean base import (no speech/eval/server extras)
+        run: |
+          python -c "import tarjoman; print('tarjoman', tarjoman.__version__)"
+          python -c "import tarjoman.core, tarjoman.quality, tarjoman.storage, tarjoman.profiles; print('base packages import cleanly')"
+          python - <<'EOF'
+          import sys
+          heavy = ["torch", "whisper", "faster_whisper", "comet", "onnxruntime",
+                   "fastapi", "uvicorn", "openai", "anthropic", "mcp", "sacrebleu"]
+          loaded = sorted(m for m in heavy if m in sys.modules)
+          assert not loaded, f"heavy extras leaked into base import: {loaded}"
+          print("no heavy extras loaded by base import")
+          EOF
+
+      - name: Run architecture conformance tests
+        run: |
+          python -m pytest tests/test_architecture_conformance.py -v
+
+      - name: Run full test suite
+        run: |
+          python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Run benchmark suite
+        run: |
+          python benchmarks/run_benchmarks.py
+
   test:
     runs-on: ubuntu-latest
     strategy:
