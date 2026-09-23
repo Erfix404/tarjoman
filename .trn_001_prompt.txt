@@ -1,0 +1,130 @@
+## Task
+Implement Work Package TRN-001 (Provider port/capabilities) for Tarjoman on branch `phase/2-translation`. This is the first work package of Phase 2 (Real translation engine). Build the model harness abstraction layer, provider ports, capabilities contract, fake/test providers, and application translation service integration per ARCHITECTURE_ZERO.md §6, §4.3, §8.4, §22, ROADMAP.md, and WORKPACKAGES.json.
+
+## Skill
+Use the `codebase-design` skill for this task. Design clean, deep abstractions for the Model Harness: a stable port protocol, typed request/response models, test-double providers covering all failure modes, and an application service boundary.
+
+## Background & Specifications
+Read these exact documents:
+- `ARCHITECTURE_ZERO.md` §6 (Model Harness):
+  - §6.1 Required interface:
+    - `ModelProvider(Protocol)` with `async def generate(self, request: ModelRequest) -> ModelResponse` and `def capabilities(self) -> ProviderCapabilities`.
+    - `ModelRequest`: task_type (translate | critique | revise | summarize | extract_terms | formalize), source/target language, messages/structured context, required_output_schema, temperature, seed, timeout, privacy_class, metadata.
+    - `ModelResponse`: text, structured_payload, provider, model, usage (input_tokens, output_tokens, total_tokens, cost_estimate), finish_reason, latency_ms, request_id, warnings.
+    - `ProviderCapabilities`: supports_streaming, supports_structured_output, supports_vision, max_context_window, supported_tasks.
+  - §6.2 Built-in provider order: FakeProvider, EchoProvider, CallableProvider (test/custom integration).
+  - §6.3 Fail-fast rule: `tarjoman translate` must never silently echo source text in production.
+  - §6.4 Harness responsibilities: timeout, error taxonomy mapping, concurrency, cancellation, structured-output validation, capability validation before run, policy enforcement, no secrets in logs.
+- `ARCHITECTURE_ZERO.md` §22 (Package ownership & dependency rule):
+  - `providers`: LLM provider adapters and ports; must not own business decisions or UI.
+  - `application`: application services coordinating use cases and transaction boundaries; reachable by interfaces.
+  - Core and application do NOT import concrete vendor SDKs.
+- `WORKPACKAGES.json` entry for package ID "TRN-001":
+  - Acceptance criteria:
+    1. "component is reachable through application services"
+    2. "fake-provider tests cover success and failure"
+    3. "provenance and policy behavior are asserted"
+
+## Required Actions
+1. Implement Provider Port and Contracts in `src/tarjoman/providers/base.py`:
+   - `TaskType(str, Enum)`: `TRANSLATE`, `CRITIQUE`, `REVISE`, `SUMMARIZE`, `EXTRACT_TERMS`, `FORMALIZE`.
+   - `ModelRequest(BaseModel)`:
+     - `task_type: TaskType = TaskType.TRANSLATE`
+     - `source_language: str = "en"`
+     - `target_language: str = "fa"`
+     - `messages: List[Dict[str, str]]`
+     - `required_output_schema: Optional[Dict[str, Any]] = None`
+     - `temperature: Optional[float] = None`
+     - `seed: Optional[int] = None`
+     - `timeout: Optional[float] = None`
+     - `privacy_class: Optional[str] = None`
+     - `metadata: Dict[str, Any] = Field(default_factory=dict)`
+   - `ModelResponse(BaseModel)`:
+     - `text: str`
+     - `structured_payload: Optional[Dict[str, Any]] = None`
+     - `provider: str`
+     - `model: str`
+     - `usage: Dict[str, Any] = Field(default_factory=dict)`
+     - `finish_reason: str = "stop"`
+     - `latency_ms: float = 0.0`
+     - `request_id: str`
+     - `warnings: List[str] = Field(default_factory=list)`
+   - `ProviderCapabilities(BaseModel)`:
+     - `supports_streaming: bool = False`
+     - `supports_structured_output: bool = False`
+     - `supports_vision: bool = False`
+     - `max_context_window: int = 4096`
+     - `supported_tasks: List[TaskType] = Field(default_factory=list)`
+   - `ModelProvider(ABC)`:
+     - Abstract methods:
+       - `async def generate(self, request: ModelRequest) -> ModelResponse`
+       - `def capabilities(self) -> ProviderCapabilities`
+     - Sync helper:
+       - `def generate_sync(self, request: ModelRequest) -> ModelResponse` (runs event loop safely or executes synchronous logic).
+
+2. Implement Test & Fake Providers in `src/tarjoman/providers/fake.py`:
+   - `FakeProvider(ModelProvider)`:
+     - Configurable canned responses (queue or dictionary keyed by task_type/prompt).
+     - Simulated failure injection (e.g. raise `ProviderAPIError`, `RateLimitError`, `TimeoutError`, `AuthenticationError`, or custom exception on Nth request).
+     - Configurable latency simulation.
+     - Call history tracking (`call_count: int`, `recorded_requests: List[ModelRequest]`).
+   - `EchoProvider(ModelProvider)`:
+     - Returns source text with test prefix or target language indicator; explicitly flags `warnings=["TEST_ONLY: EchoProvider used"]`.
+   - `CallableProvider(ModelProvider)`:
+     - Accepts a sync or async callable `(ModelRequest) -> ModelResponse` for custom mock injection.
+
+3. Implement Application Service in `src/tarjoman/application/translation_service.py`:
+   - `TranslationService`:
+     - Accepts `provider: ModelProvider`, optional `provider_policy: Optional[ProviderPolicy]`, optional `privacy_policy: Optional[PrivacyPolicy]`.
+     - Validates provider capabilities against requested task before execution (§6.4).
+     - Enforces policy compliance:
+       - If `provider_policy` is supplied, ensures `provider.name` is in `provider_policy.allowed_providers`.
+       - If `privacy_policy` is supplied and `privacy_policy.allow_external_apis is False`, ensures provider is marked local/mock.
+     - Attaches correlation/operation provenance using `bind_provenance(...)` from `tarjoman.core.logging`.
+     - Exposes:
+       - `async def translate_text(self, text: str, source_lang: str = "en", target_lang: str = "fa", ...) -> ModelResponse`
+       - `def translate_text_sync(self, text: str, source_lang: str = "en", target_lang: str = "fa", ...) -> ModelResponse`
+       - `async def execute_task(self, request: ModelRequest) -> ModelResponse`
+       - `def execute_task_sync(self, request: ModelRequest) -> ModelResponse`
+
+4. Public Re-exports:
+   - Re-export in `src/tarjoman/providers/__init__.py`:
+     - `ModelProvider`, `ModelRequest`, `ModelResponse`, `ProviderCapabilities`, `TaskType`
+     - `FakeProvider`, `EchoProvider`, `CallableProvider`
+   - Re-export in `src/tarjoman/application/__init__.py`:
+     - `TranslationService`
+
+5. Comprehensive Test Suite in `tests/test_provider_port.py`:
+   - **Reachable through Application Services**:
+     - Instantiate `TranslationService` with `FakeProvider`.
+     - Execute sync and async translation calls; verify valid `ModelResponse` returned.
+   - **Fake-Provider Success and Failure Coverage**:
+     - Test success with text output and structured JSON payloads.
+     - Test failure injection: `RateLimitError`, `TimeoutError`, `ProviderAPIError`, and authentication errors.
+     - Test `EchoProvider` and `CallableProvider`.
+     - Test capability checking: requesting a task not in `supported_tasks` raises `PolicyViolationError` or typed error.
+   - **Provenance and Policy Assertions**:
+     - Verify `request_id`, `latency_ms`, and `usage` are populated on every response.
+     - Verify `bind_provenance` records operation context during generation.
+     - Verify `ProviderPolicy` violation (e.g. unapproved provider) raises `PolicyViolationError`.
+     - Verify `PrivacyPolicy` violation (e.g. external provider when local-only required) raises `PolicyViolationError`.
+   - **Architecture & Regression Integrity**:
+     - All 529 existing tests and all 10 domain benchmarks must pass with zero failures.
+     - `ArchitectureConformanceChecker().enforce()` passes cleanly with no layer violations.
+
+6. Update `WORKPACKAGES.json`:
+   - Update `TRN-001` status to `DONE`.
+   - Promote `TRN-002` status to `READY`.
+
+## Acceptance Criteria
+- [ ] `component is reachable through application services`: TranslationService cleanly wraps provider port.
+- [ ] `fake-provider tests cover success and failure`: FakeProvider exercises success, structured output, and all error conditions.
+- [ ] `provenance and policy behavior are asserted`: Provenance fields populated and ProviderPolicy/PrivacyPolicy checked.
+- [ ] All 529 existing tests pass.
+- [ ] All 10 domain benchmarks pass.
+- [ ] Architecture conformance check passes.
+
+## Output
+Write report to `/opt/data/projects/tarjoman/TRN_001_REPORT.md`.
+Print exactly this as the last line:
+TRN_001_COMPLETED /opt/data/projects/tarjoman/TRN_001_REPORT.md
