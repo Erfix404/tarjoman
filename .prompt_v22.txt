@@ -1,0 +1,128 @@
+## Task
+Execute Work Package TRN-013: Structural Grammar, Ezafe Chain Smoothing, and Advanced Translation Principles (Tarjoman v2.2.0).
+
+## Governance & Authorization
+- Work Package ID: TRN-013 (registered in WORKPACKAGES.json with status READY, depends_on: []).
+- Accepted ADR: `docs/adr/0001-structural-grammar-and-advanced-translation-principles.md` (authorizes D09 style polish additions, D11 draft framing, D14 linter taxonomy, and release versioning for v2.2.0).
+- Owner Authorization: Fully authorized by project owner Erfan Ashouri (Erfix404) per AGENTS.md.
+
+## Skill
+Use the `codebase-design` skill for this task.
+
+## Key Files
+Read these files first:
+- `docs/adr/0001-structural-grammar-and-advanced-translation-principles.md`
+- `tarjoman/stages/stage4_polish.py`
+- `tarjoman/stages/stage2_draft.py`
+- `tarjoman/stages/draft.py`
+- `tarjoman/linter.py`
+- `.claude/skills/tarjoman/scripts/linter.py`
+- `.claude/skills/tarjoman/SKILL.md`
+- `agent-packs/hermes/SKILL.md`
+- `pyproject.toml`
+- `tarjoman/__init__.py`
+
+## Instructions & Specifications
+
+### 1. Comprehensive Reference Document
+Create `.claude/skills/tarjoman/references/structural-grammar-rules.md` in professional Persian Markdown:
+1. **فرمول کلان ریاضیاتی گروه اسمی (Noun Phrase Formula):**
+   - Formula: `NP = (M1)(M2)(M3) N (M4)(M5)`
+   - Components explained clearly:
+     * `M1`: Pre-determiners, Determiners, Quantifiers (حرف تعریف، اشاره، کمیت‌نماها، اعداد و ...)
+     * `M2`: Descriptive Adjectives (صفات بیانی / توصیفی عام)
+     * `M3`: Classifying Adjectives / Noun Adjuncts / Material / Origin (صفات رده‌بندی‌کننده، متمم‌های اسمی، جنس، منشأ)
+     * `N`: Head Noun (هسته اسم)
+     * `M4`: Prepositional Phrases (عبارات حرف اضافه‌ای پسین، متمم‌های قیدی)
+     * `M5`: Relative Clauses & Non-finite Verb Phrases (جمله‌واره‌های موصولی، عبارات وصفی فعلی -ing / -ed)
+   - **الگوریتم توالی ترجمه به زبان فارسی:**
+     `M1 -> N -> M3 -> M2 -> M4/M5`
+     Provide clear English-to-Persian comparative examples illustrating why this sequence preserves natural Persian grammar and avoids calques.
+
+2. **قاعده شکستن زنجیره‌های اضافه (Ezafe Chain Smoothing in of-chains):**
+   - Pattern: `NP1 of NP2 of NP3 ...`
+   - In Persian, chaining 3 or more consecutive ezafes (کسره اضافه ممتد) creates linguistic heaviness (ثقل کلام) and cognitive friction.
+   - Architectural rule: break the sequence using native Persian relational prepositions/connectives:
+     «مربوط به»، «متعلق به»، «وابسته به»، «ناشی از»، «در خصوص» یا تبدیل به صفت نسبی / بند موصولی.
+     Provide concrete before/after transformation examples.
+
+3. **خطاهای پنج‌گانه نابخشودنی در فن ترجمه ساختاری:**
+   1) اسم مفرد قابل‌شمارش بدون M1 (Countable singular noun without M1 — رها کردن اسم مفرد بدون شناسه نکره یا معرفه)
+   2) وارونه‌سازی فاعل/مفعول در ساختار مجهول (Subject/Object inversion in passive constructions)
+   3) نقض وحدت ساختاری در M3 (Violation of unity in M3 — جداسازی ممیز و اسم مضاف از هسته توسط صفات M2)
+   4) برهم زدن توالی NP1 of NP2 (Disruption of NP1 of NP2 sequence)
+   5) افزودن غیرضروری و بی‌دلیل حرف اضافه یا ضمیر موصولی (Unwarranted addition of prepositions or relative pronouns)
+   Thoroughly explain each error with examples of wrong translation vs correct translation.
+
+4. **قاعده تبدیل حرف اضافه به بند قیدی (Prp -> Adv Clause):**
+   - Transformation of prepositions with clauses/gerunds: `after, before, since, until, for, than + S`
+   - Mapping:
+     * `after + S` -> `پس از آنکه / پس از اینکه`
+     * `before + S` -> `پیش از آنکه / قبل از اینکه`
+     * `since + S` -> `از آنجا که (دلیل) / از زمانی که (زمان)`
+     * `until + S` -> `تا اینکه / تا آنکه`
+     * `for + S` -> `چرا که / زیرا که`
+     * `than + S` -> `بیش از آنچه / فراتر از آنچه`
+
+5. **شیوه‌های شش‌گانه ترجمه دقیق حرف تعریف نکره a/an:**
+   1) علامت تهی (Ø / Zero mark) برای اسامی با مفهوم صنف و رده عام در نقش مبتدا (مانند: A doctor must be empathetic -> پزشک باید همدل باشد، نه «یک پزشک باید...»)
+   2) مفهوم عام و نوعی برای داروها، بیماری‌ها، رژیم‌ها و درمان‌ها (مانند: took an aspirin -> آسپرین مصرف کرد، نه «یک آسپرین مصرف کرد»)
+   3) «یکی از» + صفت عالی (مانند: a most significant discovery -> یکی از مهم‌ترین کشفیات، نه «یک مهم‌ترین کشف»)
+   4) پسوند «ی» نکره (مانند: کتابی خرید)
+   5) «یک» + اسم (هنگامی که بر فردیت و وحدت عددی تاکید وجود دارد)
+   6) «نوعی / گونه‌ای از» (برای طبقه‌بندی و اشاره به نوع یا گونه)
+
+6. **لینک کردن سند در مستندات اسکیل:**
+   - Link `structural-grammar-rules.md` in `.claude/skills/tarjoman/SKILL.md` (under references and appropriate sections).
+   - Link `structural-grammar-rules.md` in `agent-packs/hermes/SKILL.md`.
+
+### 2. Implementation in Translation Engine & Polish
+
+1. **`tarjoman/stages/stage4_polish.py`:**
+   - Implement `@classmethod def smooth_ezafe_chains(cls, text: str) -> str`:
+     * Detects heavy consecutive ezafe chains (e.g., 3 or more consecutive ezafe linkages, repetitive `ـه‌ی` / `ـهٔ`, or long genitive noun-phrase sequences that sound heavy in Persian).
+     * Smooths them by inserting authentic connectives (e.g., `مربوط به`, `متعلق به`) or restructuring the 3rd/4th link naturally.
+     * Must be resilient, preserve verbatim code/math/tokens (using `mask_verbatim_spans` / `restore_verbatim_spans`), and not alter legitimate short 2-element phrases.
+   - Integrate `smooth_ezafe_chains` into `StylisticPolishStage.polish(cls, text: str, profile: Optional[DomainProfile] = None) -> str` so it is applied during Stage 4 polish.
+
+2. **`tarjoman/stages/stage2_draft.py` & `tarjoman/stages/draft.py`:**
+   - Add structural grammar guidelines (the NP sequence algorithm `M1 -> N -> M3 -> M2 -> M4/M5` and the 6 methods for `a/an`) to the prompt framing in `NeutralLinguisticFraming` or define `STRUCTURAL_GRAMMAR_PROMPT` so draft generation prompts instruct the translator backend accordingly.
+   - Ensure `tarjoman/stages/draft.py` properly re-exports any new public symbols or constants.
+
+3. **`tarjoman/linter.py` and `.claude/skills/tarjoman/scripts/linter.py`:**
+   - Add new lint validations:
+     * `ezafe-chain`: flags 3 or more consecutive explicit ezafe markers (such as 3+ consecutive `ـه‌ی` or `ـهٔ` or heavily stacked ezafes) advising ezafe smoothing.
+     * `generic-article`: flags redundant «یک» when used with generic class nouns at sentence start (e.g., `^یک\s+[\u0600-\u06FF]+\s+(?:باید|نباید|می‌تواند|است|هستند)` or similar generic subject contexts) suggesting zero-mark (Ø) for generic classes.
+   - Maintain full backwards compatibility with existing linter tests.
+
+4. **Version Bump:**
+   - Update version to `2.2.0` in `pyproject.toml` and `tarjoman/__init__.py`.
+
+5. **Work Package Closure:**
+   - Mark `TRN-013` status as `DONE` in `WORKPACKAGES.json`.
+
+### 3. Comprehensive Test Suite
+Create `tests/test_structural_grammar.py`:
+- Test `smooth_ezafe_chains` thoroughly:
+  * 3+ consecutive ezafe smoothing behavior
+  * Preservation of 1-2 ezafe normal phrases
+  * Preservation of verbatim code/math/placeholders
+  * Edge cases (empty strings, non-Persian text, mixed text)
+- Test structural grammar draft framing and NP translation prompts:
+  * Verification that prompt templates contain NP translation sequence `M1 -> N -> M3 -> M2 -> M4/M5` and 6 a/an rules
+- Test linter checks:
+  * `ezafe-chain` category detection and suggestions
+  * `generic-article` category detection for redundant «یک» in generic subjects
+  * Clean text passing without false positives
+- Run `uv run pytest tests/` and verify that 100% of all tests pass (250+ tests total).
+
+### 4. Git Commit & Push
+- Run `git status` and verify all changed and untracked files are staged.
+- Create an atomic commit with exact message:
+  `feat: Tarjoman v2.2.0 — Structural Grammar, Ezafe Chain Smoothing, and Advanced Translation Principles`
+- Push directly to `origin/main`:
+  `env HOME=/opt/data/profiles/code-master/home git push origin main`
+
+## Output
+At the very end of your response, output:
+`TARJOMAN_V22_STRUCTURAL_COMPLETE`
