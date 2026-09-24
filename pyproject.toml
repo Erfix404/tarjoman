@@ -5,11 +5,32 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tarjoman"
 version = "2.3.0"
-description = "Universal Persian Translation Engine & Multi-Agent Skillpack"
+description = "Autonomous Persian Translation & Publishing Super-Skill for AI Agents"
 readme = "README.md"
-authors = [{ name = "Tarjoman Community" }]
+authors = [
+    { name = "Erfan Ashouri", email = "ashorierfan66@gmail.com" }
+]
+maintainers = [
+    { name = "Erfan Ashouri (@Erfix404)", email = "ashorierfan66@gmail.com" }
+]
 license = { text = "MIT" }
 requires-python = ">=3.10"
+keywords = ["translation", "persian", "farsi", "agent", "claude-code", "hermes-agent", "anti-calque", "epub", "typst", "bilingual", "humanizer", "natural-language"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Persian",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Internationalization",
+    "Topic :: Text Processing :: Linguistic",
+]
 dependencies = [
     "pydantic>=2.0.0",
     "click>=8.0.0",
@@ -24,6 +45,12 @@ dev = ["build>=1.0.0", "twine>=5.0.0", "pytest>=7.0.0"]
 
 [project.scripts]
 tarjoman = "tarjoman.cli:cli"
+
+[project.urls]
+Homepage = "https://github.com/Erfix404/tarjoman"
+Repository = "https://github.com/Erfix404/tarjoman"
+Issues = "https://github.com/Erfix404/tarjoman/issues"
+Author = "https://github.com/Erfix404"
 
 [tool.setuptools.packages.find]
 where = ["."]

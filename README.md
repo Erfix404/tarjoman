@@ -1,348 +1,459 @@
-# Tarjoman Universal Translation Suite (موتور جامع ترجمه «ترجمان»)
+# 🏛️ Tarjoman (موتور جامع ترجمه و نشر «ترجمان»)
 
 <div align="center">
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Multi-Agent](https://img.shields.io/badge/Agents-Claude%20Code%20%7C%20Hermes%20%7C%20Cursor-orange.svg)](#multi-agent-ecosystem)
-[![Domains](https://img.shields.io/badge/Domains-10%20Specialized%20Profiles-success.svg)](#10-domain-taxonomy--capabilities-matrix)
-[![Zero Em-Dash](https://img.shields.io/badge/Typography-Zero%20Em--Dash-purple.svg)](#persian-typography--anti-calque-guarantees)
-[![Typst Native](https://img.shields.io/badge/Publishing-Typst%20%2B%20HTML%20Reader-red.svg)](#publishing-output-showcase)
-[![CI Tests](https://img.shields.io/badge/Tests-96%20Passing-brightgreen.svg)](#testing-and-verification)
+**The Autonomous Persian Translation & Publishing Super-Skill for AI Agents (Claude Code, Hermes, Cursor) & Human Translators**
 
-**The Definitive Open-Source Persian Translation Suite & Multi-Agent Skillpack**
+[![Version](https://img.shields.io/badge/version-v2.3.0-blue.svg)](https://github.com/Erfix404/tarjoman/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![Tests](https://img.shields.io/badge/tests-343%20passing-brightgreen.svg)](#benchmarks--quality-evidence)
+[![Benchmarks](https://img.shields.io/badge/benchmarks-10%2F10%20domains%20100%25%20PASS-success.svg)](#benchmarks--quality-evidence)
+[![Creator](https://img.shields.io/badge/creator-Erfan%20Ashouri%20%28%40Erfix404%29-orange.svg)](https://github.com/Erfix404)
+[![Multi-Agent](https://img.shields.io/badge/agents-Claude%20Code%20%7C%20Hermes%20%7C%20Cursor-purple.svg)](#multi-agent-super-skill-integration)
+[![Typography](https://img.shields.io/badge/typography-Zero%20Em--Dash%20Guarantee-magenta.svg)](#pillar-4-zero-em-dash--strict-orthography-guarantee)
+[![Publishing](https://img.shields.io/badge/publishing-W3C%20EPUB%203%20RTL%20%2B%20Typst%20PDF-red.svg)](#pillar-8-publication-ready-multi-format-composers)
 
-*High-fidelity English-to-Persian translation across 10 specialized domains, featuring an autonomous 5-pass human-reflection pipeline, anti-calque purification, strict Persian typography, and publication-ready Typst & HTML exports.*
+---
 
-[Key Features](#key-features) •
-[Architecture](#architecture-diagram) •
-[10-Domain Taxonomy](#10-domain-taxonomy--capabilities-matrix) •
-[Comparison](#comparison-matrix) •
-[Quickstart](#quickstart-guides) •
-[Publishing Showcase](#publishing-output-showcase) •
-[Contributing](#contributing)
+Tarjoman transforms AI agents into a **full-fledged professional Persian publishing house**. It wraps a deterministic 5-pass translation pipeline, anti-calque linguistic purity engine, Persian de-AI humanizer, and publication-grade multi-format composers into a single skill that any AI coding agent can invoke.
+
+ترجمان، عامل‌های هوش مصنوعی را به یک **انتشارات حرفه‌ای فارسی تمام‌عیار** تبدیل می‌کند. خط لوله‌ی پنج‌مرحله‌ای ترجمه، موتور خالص‌سازی ضد گرته‌برداری، انسانی‌ساز متن فارسی و ابزارهای نشر چندقالبی، همگی در قالب یک مهارت واحد گردآمده‌اند که هر عامل هوشمند برنامه‌نویسی می‌تواند آن را فراخوانی کند.
+
+[Core Architecture](#8-core-architectural-pillars) · [Quick Start](#quickstart--cli-guide) · [Python API](#python-api) · [Benchmarks](#benchmarks--quality-evidence) · [Agent Integration](#multi-agent-super-skill-integration) · [Contributing](#contributing--license)
 
 </div>
 
 ---
 
-## The Value Proposition
+## The Core Problem
 
-Translating English into Persian using raw Large Language Models (LLMs) or classical Machine Translation (MT) services (such as Google Translate or DeepL) routinely produces prose plagued by:
+Translating English into Persian using raw LLMs or traditional machine translation (Google Translate, DeepL) routinely produces prose plagued by systematic failures:
 
-- **Linguistic Calques (گرته‌برداری‌های نحوی)**: Blind translation of passive structures (e.g., using «توسط» for passive voice agent, or «روی چیزی حساب کردن» for *counting on something*).
-- **Broken Typography**: Foreign em-dashes (`—`), straight ASCII quotation marks (`"..."`), missing zero-width non-joiners (نیم‌فاصله‌ها), and Arabic character pollutions (`ي` and `ك`).
-- **Unnatural Literary Voice**: Mechanical attribution in dialogue (e.g. *«او گفت»* placed awkwardly at the front rather than inverted inside natural Persian speech rhythms).
-- **Bidi & Formula Corruption**: Inverting mathematical symbols, scrambling English code fences, and mistranslating international standard terms.
-- **Context Amnesia in Long Books**: Inconsistent character names and terminology drift across multi-chapter book projects.
+### Linguistic Calques (گرته‌برداری)
 
-**Tarjoman** solves this comprehensively. Combining specialized linguistic domain profiles, a 5-pass reflective pipeline, strict rule-based anti-calque engines, and multi-agent skillpacks for **Claude Code**, **Hermes**, and **Cursor**, Tarjoman delivers publication-grade Persian texts ready for print or web publication.
+Blind translation of English syntactic patterns into Persian, creating unnatural constructions:
+
+| Calque Pattern | Example | Natural Persian |
+|:---|:---|:---|
+| Passive «توسط» abuse | *این کار توسط تیم انجام شد* | *تیم این کار را انجام داد* |
+| «نقش بازی کردن» | *آب نقش مهمی بازی می‌کند* | *آب اهمیت زیادی دارد* |
+| «حس ایجاد کردن» | *این حس امنیت ایجاد می‌کند* | *این مایه‌ی آرامش است* |
+| «روی چیزی حساب کردن» | *روی این فرصت حساب کنید* | *به این فرصت امیدوار باشید* |
+
+### AI-Slop & Copula Inflation
+
+Machine-generated Persian is saturated with ceremonial filler and inflated copulas:
+
+- **می‌باشد** / **به شمار می‌رود** / **در راستای** / **لازم به ذکر است**
+- Generic openers: *در دنیای امروز*، *در عصر دیجیتال*
+- Promotional emptiness: *بی‌نظیر*، *فوق‌العاده*، *مثال‌زدنی*
+
+### Broken Orthography
+
+- Foreign em-dashes (`—`) that have no place in Persian punctuation
+- Arabic `ي`/`ك` instead of Persian `ی`/`ک`
+- Missing ZWNJ (نیم‌فاصله): `میکنم` instead of `می‌کنم`
+- Missing or fake tanvin: `گاهاً` instead of `گاهی`
+
+### Context Amnesia in Long Books
+
+Inconsistent character names, terminology drift, and voice changes across chapters when translating book-length works.
+
+### Bidi & Math Corruption
+
+Inverted brackets, broken code fences, mangled formulas, and scrambled LTR terms inside RTL text.
+
+**Tarjoman solves every one of these problems deterministically.**
 
 ---
 
-## Key Features
+## 8 Core Architectural Pillars
 
-- 🏛️ **10 Specialized Domain Profiles**: From literary fiction and continental philosophy to clinical medical research, statutory legal contracts, and developer documentation.
-- 🔄 **5-Pass Reflection Pipeline**: Human-translator emulation through *Drafting*, *Terminology Alignment*, *Anti-Calque Cleansing*, *Cadence Polishing*, and *MQM Quality Auditing*.
-- 🛡️ **Anti-Calque & Purity Engine**: Detects and eliminates structural and lexical loan-translations with rule-backed severity reporting.
-- 📐 **Zero Em-Dash & Persian Typography**: Automatic conversion of em-dashes into balanced Persian syntactic equivalents, guillemets (`«...»`), and standard ZWNJ half-spaces.
-- 📚 **Book-Scale Translation Memory**: Resumable chapter cache, progress manifests, and dynamic terminology extraction (`terms.tsv`).
-- 🖨️ **Publication-Ready Multi-Format Composers**:
-  - **Typst PDF**: Flawless Persian bidirectional typesetting (A4 paper or Book layout with Vazirmatn font).
-  - **Interactive HTML Reader**: Side-by-side synchronized bilingual reading with glassmorphism UI and search.
-  - **Bilingual Markdown**: Segment-aligned tables for revision and human post-editing.
-- 🤖 **Universal Multi-Agent Native Skillpacks**: Native integrations for **Claude Code CLI** (`/tarjoman`), **Hermes Autonomous Agent**, and **Cursor / Windsurf** (`.cursorrules`).
+### Pillar 1: 5-Pass Reflective Translation Pipeline
 
----
-
-## Architecture Diagram
+Every text passes through five sequential stages that emulate how a professional human translator works:
 
 ```
-                              ┌──────────────────────────┐
-                              │  Source English Content  │
-                              │ (Article / Chapter / Doc)│
-                              └────────────┬─────────────┘
-                                           │
-                                           ▼
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                        TARJOMAN 5-PASS REFLECTION PIPELINE                             │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                        │
-│  Stage 1: Domain Classification & Routing                                              │
-│  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
-│  │ DomainRouter (Heuristic Keyword Density & Statistical Classifier)                │  │
-│  │ Selects 1 of 10 Profiles: Literary | Scientific | Philosophy | Legal | Tech ...  │  │
-│  └───────────────────────────────────┬──────────────────────────────────────────────┘  │
-│                                      ▼                                                 │
-│  Stage 2: Contextual Drafting & Dynamic Termbase                                       │
-│  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
-│  │ Context-aware segment translation with domain terminology & few-shot grounding   │  │
-│  └───────────────────────────────────┬──────────────────────────────────────────────┘  │
-│                                      ▼                                                 │
-│  Stage 3: Anti-Calque Cleansing & Persian Typography                                   │
-│  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
-│  │ • Regex-driven banned calque replacement (e.g. passive «توسط», «به عنوانِ»)      │  │
-│  │ • Zero Em-dash enforcement (— -> parentheses/commas)                             │  │
-│  │ • Character normalization (ي/ك -> ی/ک) & Persian quotes («...»)                  │  │
-│  └───────────────────────────────────┬──────────────────────────────────────────────┘  │
-│                                      ▼                                                 │
-│  Stage 4: Cadence & Tone Polishing                                                     │
-│  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
-│  │ • Dialogue inversion (e.g. «گفت فلان» -> گفت‌وگوی روان)                          │  │
-│  │ • Etymological precision, bidi code fence isolation, and rhythmic flow           │  │
-│  └───────────────────────────────────┬──────────────────────────────────────────────┘  │
-│                                      ▼                                                 │
-│  Stage 5: Multidimensional Quality Metric (MQM) Audit                                  │
-│  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
-│  │ Automated audit evaluating omission, terminology compliance, and typography      │  │
-│  └───────────────────────────────────┬──────────────────────────────────────────────┘  │
-└──────────────────────────────────────┼─────────────────────────────────────────────────┘
-                                       │
-            ┌──────────────────────────┼──────────────────────────┐
-            ▼                          ▼                          ▼
- ┌──────────────────────┐   ┌──────────────────────┐   ┌──────────────────────┐
- │  Typst PDF Composer  │   │ Interactive HTML     │   │  Bilingual Markdown  │
- │  • A4 Academic / Book│   │  • Side-by-Side Dual │   │  • Aligned Table     │
- │  • Native Persian RTL│   │  • Synchronized Scroll│  │  • Post-Editing      │
- │  • Vector Typography │   │  • Offline Portable  │   │  • Git-trackable     │
- └──────────────────────┘   └──────────────────────┘   └──────────────────────┘
-            │                          │                          │
-            └──────────────────────────┼──────────────────────────┘
-                                       ▼
-            ┌─────────────────────────────────────────────────────┐
-            │               MULTI-AGENT INTERFACES                │
-            │  Claude Code (/tarjoman) | Hermes | Cursor Rules    │
-            └─────────────────────────────────────────────────────┘
+Source Text
+    │
+    ▼
+┌─────────────────────────────────────────────────┐
+│  Pass 1 · Pre-Analysis & Token Masking          │
+│  Shields code, math, URLs, emails, numbers      │
+├─────────────────────────────────────────────────┤
+│  Pass 2 · Contextual Semantic Draft             │
+│  Domain-aware translation with termbase          │
+├─────────────────────────────────────────────────┤
+│  Pass 3 · Anti-Calque Cleansing & Reflection    │
+│  4-axis MQM critique → iterative refinement     │
+├─────────────────────────────────────────────────┤
+│  Pass 4 · De-AI Humanizing & Stylistic Polish   │
+│  18-pattern humanizer, cadence, typography      │
+├─────────────────────────────────────────────────┤
+│  Pass 5 · MQM Quality Audit                     │
+│  Score ≥ 90.0, zero critical findings            │
+└─────────────────────────────────────────────────┘
+    │
+    ▼
+Publication-Ready Persian Text
 ```
 
+### Pillar 2: Anti-Calque & Linguistic Purity Engine
+
+Exhaustive rule sets drawn from the two definitive Persian editorial authorities:
+
+- **Abolhassan Najafi** (*غلط ننویسیم*): canonical reference on Persian calques and usage errors
+- **Ahmad Samii Guilani** (*نگارش و ویرایش*): comprehensive editing and style guide
+
+The engine detects and eliminates structural calques (passive voice abuse, false compounds), lexical calques (loan-translations), and stylistic calques (unnatural word order).
+
+### Pillar 3: Persian De-AI & Humanizer (T1-T18)
+
+The `PersianHumanizer` applies 18 transformation patterns to strip machine-generated artifacts:
+
+| ID | Pattern | Action |
+|:---|:---|:---|
+| T1 | Copula inflation (می‌باشد, به شمار می‌رود) | Rewrite to natural forms |
+| T2 | Ceremonial fillers (لازم به ذکر, شایان ذکر) | Remove |
+| T3 | Significance inflation (اهمیت ویژه, نقش بسزا) | Simplify |
+| T4 | Generic openers/closers (در دنیای امروز) | Remove |
+| T5 | «در راستای» abuse | Replace with «برای» |
+| T6 | Promotional emptiness (بی‌نظیر, فوق‌العاده) | Strip |
+| T7-T8 | Rule-of-three, negative parallelism | Detect & flag |
+| T9 | Tacked-on analysis (نشان‌دهنده, بیانگر) | Simplify |
+| T10-T11 | Vague authority, false ranges | Detect & flag |
+| T12 | Foreign em-dashes and en-dashes | Convert to «،» |
+| T13 | English calques in Persian | Rewrite idiomatically |
+| T14 | همچنین pileup | Detect & flag |
+| T15 | Fake tanvin (گاهاً → گاهی) | Correct |
+| T16-T18 | Bold-header lists, chatbot markers, catch-all | Detect/remove |
+
+Code blocks, inline code, and markdown tables are **shielded** before any transformation and restored byte-identical afterward.
+
+### Pillar 4: Zero Em-Dash & Strict Orthography Guarantee
+
+- **Zero foreign dashes**: every `—` and `–` is converted to Persian commas or parentheses
+- **Standard Persian quotes**: `«...»` guillemets replace straight ASCII quotes
+- **Clean ZWNJ**: proper half-space insertion for verb prefixes and compound words
+- **Tanvin auto-repair**: 18 Arabic loanwords get correct tanvin (لطفا → لطفاً)
+- **Fake tanvin correction**: 8 Persian words wrongly carrying tanvin (گاهاً → گاهی)
+- **Arabic character normalization**: `ي` → `ی`, `ك` → `ک`
+
+### Pillar 5: 10 Specialized Domain Profiles
+
+Each domain profile carries its own terminology, style constraints, and quality thresholds:
+
+| # | Domain | Key Characteristics |
+|:---|:---|:---|
+| 1 | **Literary & Fiction** | Dialogue tag inversion, poetic cadence, narrative register |
+| 2 | **Scientific & Academic** | Formal academic prose, citation preservation |
+| 3 | **Philosophy & Humanities** | Conceptual precision, Continental terminology |
+| 4 | **Legal & Statutory** | Statutory language, clause numbering integrity |
+| 5 | **Technical & Engineering** | Code-aware, LTR isolate preservation |
+| 6 | **Medical & Clinical** | Clinical terminology, dosage precision |
+| 7 | **Media & Journalism** | News style, headline conventions |
+| 8 | **Financial & Economics** | Monetary formatting, indicator terminology |
+| 9 | **Classical & Historical** | Archaic register, classical Persian vocabulary |
+| 10 | **Transcreation & Creative** | Brand voice adaptation, creative liberty |
+
+### Pillar 6: Dual-Level Technical Terminology
+
+Two terminology modes for technical content:
+
+- **System-Docs Mode**: developer-facing terms stay in English inside Unicode LTR isolates (`⁦term⁩`), so code references remain copy-pasteable
+- **Journal/Scholarly Mode**: all terms rendered in formal Persian with parenthetical English on first occurrence
+
+### Pillar 7: Long-Form Book Continuity Engine
+
+Purpose-built for translating entire books across hundreds of pages:
+
+- **Character & Style Bible**: tracks character names, speech patterns, and relationships for consistency across chapters
+- **Scene Continuity Tracker**: monitors POV, location, atmosphere, and timeline
+- **SHA-256 Chunk Caching**: resumable translation with content-addressed caching so interrupted jobs pick up exactly where they stopped
+- **Dynamic Termbase**: auto-extracts and aligns terminology in `terms.tsv`
+
+### Pillar 8: Publication-Ready Multi-Format Composers
+
+| Format | Description |
+|:---|:---|
+| **W3C EPUB 3 RTL** | True bidirectional ebook with chapter navigation, RTL styling, and metadata |
+| **Typst PDF** | Vector-grade Persian typesetting with Vazirmatn font (A4 / Book layouts) |
+| **Interactive HTML Reader** | Synchronized bilingual scrolling, glassmorphism UI, real-time search |
+| **Bilingual Markdown** | Segment-aligned tables for human post-editing (MTPE) |
+
 ---
 
-## 10-Domain Taxonomy & Capabilities Matrix
+## Multi-Agent Super-Skill Integration
 
-| Domain ID | English Title | نام فارسی دامنه | Key Stylistic & Linguistic Rules | Primary Use Cases |
-|:---|:---|:---|:---|:---|
-| `literary` | **Literary & Fiction** | ادبی، رمان و داستان | Dialogue attribution inversion, rhythmic cadence, zero em-dash, rich sensory vocabulary. | Fiction, novels, drama, narrative non-fiction. |
-| `scientific` | **Scientific & Academic** | علمی، دانشگاهی و مقالات | Strict formula/code isolation, standard Academy terms, LTR citation markers, formal prose. | Journal papers, university theses, academic textbooks. |
-| `philosophy` | **Philosophy & Thought** | فلسفه و علوم انسانی | Heideggerian/existential etymological rigor, conceptual precision, avoidance of modern buzzwords. | Continental & analytic philosophy, critical theory, ethics. |
-| `legal` | **Legal & Contracts** | حقوقی و اسناد رسمی | Zero ambiguity, statutory terminology (قانون مدنی), preservation of condition clauses, solemn register. | Commercial contracts, treaties, court documents, terms of service. |
-| `technical` | **Software & Engineering** | فنی، نرم‌افزار و مهندسی | Unaltered code blocks, untouched CLI flags, Persian-first documentation prose, exact technical glossary. | Developer docs, API references, architecture guides, tutorials. |
-| `medical` | **Medical & Clinical** | پزشکی و داروسازی | INN generic drug names, clinical precision, precise dosages, pathology and diagnostic terminology. | Clinical trials, medical textbooks, patient guidelines. |
-| `media` | **Media & Journalism** | رسانه‌ای و ژورنالیسم | Inverted pyramid structure, punchy active headlines, concise narrative flow, objective tone. | News dispatches, press releases, editorial journalism. |
-| `financial` | **Finance & Economics** | مالی، اقتصاد و بازرگانی | IFRS/GAAP accounting terminology, macro/micro indicators, balance sheet standards, analytical tone. | Annual reports, investment analyses, financial audits. |
-| `classical` | **Classical & Historical** | متون کهن و تاریخی | Archaic register, rhythmic eloquence, traditional syntactic constructions, historic titles. | Medieval chronicles, ancient manuscripts, classical epics. |
-| `transcreation` | **Creative & Advertising** | بازآفرینی خلاق و تبلیغات | Cultural adaptation over literalism, emotional resonance, memorable taglines, localized idioms. | Brand campaigns, marketing copy, slogans, product landing pages. |
+Tarjoman is designed as a **skill** that AI coding agents load and invoke autonomously.
 
----
+### Claude Code CLI
 
-## Comparison Matrix
-
-| Feature / Metric | Tarjoman Master Suite | Raw GPT-4 / Claude | Google / DeepL |
-|:---|:---:|:---:|:---:|
-| **Linguistic Calque Elimination (گرته‌برداری)** | ✅ **Automated & Rule-Backed** | ⚠️ Unreliable / Inconsistent | ❌ Rampant (Literal English calques) |
-| **Zero Em-Dash Guarantee** | ✅ **100% Guaranteed** | ❌ Frequently outputs `—` | ❌ Retains English `—` |
-| **Persian Quotes («...»)** | ✅ **Enforced via Linter** | ⚠️ Frequently uses `"` or `“”` | ❌ Uses ASCII `"` |
-| **Dialogue Attribution Inversion** | ✅ **Built into Literary Engine** | ❌ Places "او گفت" first | ❌ Robotic word-order |
-| **10 Domain-Specific Registries** | ✅ **Built-in Registry & Routing** | ❌ Generic general prompting | ❌ Single generic statistical model |
-| **Code & Formula Bidi Isolation** | ✅ **Strict RTL/LTR Fencing** | ⚠️ Often breaks equation direction | ❌ Scrambles mixed math/Persian |
-| **Book Translation Resumable Memory** | ✅ **Manifest + Dynamic Termbase** | ❌ Context window overflow | ❌ Not supported |
-| **Multi-Agent Skillpack (Claude / Hermes / Cursor)** | ✅ **Native Bundles Included** | ❌ Manual setup required | ❌ None |
-| **Typeset Typst PDF Output** | ✅ **Native RTL PDF Generator** | ❌ Plain text only | ❌ Plain text only |
-| **Interactive Bilingual HTML Reader** | ✅ **Single-File Synchronized Reader** | ❌ None | ❌ None |
-
----
-
-## Quickstart Guides
-
-### 1. Claude Code CLI (`/tarjoman`)
-
-Tarjoman includes a bundled native Claude Code skillpack in `.claude/skills/tarjoman/`.
+Add the skill directory to your Claude Code skills:
 
 ```bash
-# Launch Claude Code inside your project
-claude
+# Symlink or copy the skill pack
+cp -r agent-packs/cursor/ ~/.claude/skills/tarjoman
 
-# Invoke Tarjoman directly:
-/tarjoman "Marcus turned around slowly, wondering if he would ever see home again." --domain literary
+# Invoke directly
+/tarjoman translate my_article.txt --domain technical
 ```
 
-Features available in Claude Code:
-- Automatic domain classification if `--domain` is omitted.
-- Access to all 10 domain reference guides in `.claude/skills/tarjoman/references/`.
-- Built-in linting against `.claude/skills/tarjoman/scripts/linter.py`.
+### Hermes Agent
 
-### 2. Hermes Autonomous Agent
-
-The Hermes agent skillpack lives in `agent-packs/hermes/SKILL.md`. To equip your Hermes instance:
-
-```bash
-# Copy or symlink into your Hermes skills directory
-cp -r agent-packs/hermes/ ~/.hermes/skills/tarjoman
+```python
+# Hermes autonomous agent integration
+skill_view(name='tarjoman')
 ```
 
-Hermes will autonomously detect English source files, orchestrate the 5-pass reflection process, extract terms into `terms.tsv`, and compile publication outputs.
+### Cursor / Windsurf
 
-### 3. Cursor & Windsurf (`.cursorrules`)
-
-Integrate Tarjoman's Persian translation rules directly into your editor:
+The `.cursorrules` file at the repository root provides editor-level integration. Copy it to your project:
 
 ```bash
-# Copy into your project root:
-cp agent-packs/cursor/.cursorrules ./.cursorrules
+cp .cursorrules /path/to/your/project/.cursorrules
 ```
 
-Now, every translation or Persian text edit generated in Cursor AI will automatically conform to:
-- Zero em-dash policy
-- Persian quotation marks (`«` and `»`)
-- Banned calque avoidance
-- Correct non-joiner (`‌`) usage
+---
 
-### 4. Standalone Python CLI
+## Installation & Requirements
 
-Install Tarjoman locally:
+### Prerequisites
+
+- Python 3.10 or later
+- (Optional) [Typst](https://typst.app/) for PDF compilation
+
+### Install
 
 ```bash
+# Clone the repository
+git clone https://github.com/Erfix404/tarjoman.git
+cd tarjoman
+
+# Install in editable mode
 pip install -e .
-```
 
-#### A. Route and Classify Domain
-```bash
-# Inspect detected domain, Persian title, and confidence score:
-tarjoman route "The randomized clinical trial evaluated patient response."
-```
+# With PDF support
+pip install -e ".[pdf]"
 
-#### B. Translate a Document
-```bash
-# Translate text with domain selection:
-tarjoman translate chapter1.txt -d literary -o chapter1_fa.md
-
-# Translate and output as an aligned bilingual Markdown table:
-tarjoman translate paper.txt -d scientific -o paper_bilingual.md --composer bilingual
-```
-
-#### C. Compose Publication Outputs
-```bash
-# 1. Generate Interactive Bilingual HTML Reader:
-tarjoman compose html source_en.txt translation_fa.txt -o reader.html --title "هوش مصنوعی"
-
-# 2. Generate and Compile Typst PDF:
-tarjoman compose typst translation_fa.txt -s book -o book.typ --compile
-```
-
-#### D. Run MQM Quality Audit & Linter
-```bash
-# Run Stage 5 MQM audit against source and domain rules:
-tarjoman audit translation_fa.txt -s source_en.txt -d literary
-
-# Run the Persian typography linter:
-tarjoman lint document_fa.md
-```
-
-#### E. Manage Book Projects
-```bash
-# Initialize a new book project with manifest.json and terms.tsv:
-tarjoman book init "The Odyssey" -o my_book
-
-# Check project translation progress and dynamic terms:
-tarjoman book status my_book
+# With development tools
+pip install -e ".[dev]"
 ```
 
 ---
 
-## Publishing Output Showcase
+## Quickstart & CLI Guide
 
-### 1. Typst PDF Publishing
-Tarjoman generates pristine, vector-grade PDFs using [Typst](https://typst.app/), the modern alternative to LaTeX.
-- **Academic Papers (`--style paper`)**: A4 format, two-column or single-column layout, Persian Vazirmatn typography, automatic LTR isolation for English math equations and citations.
-- **Books & Novels (`--style book`)**: Standard octavo/novel book format, comfortable margins, elegant header running titles, and proper Persian paragraph indentations.
+### Translate a Document
 
 ```bash
-tarjoman compose typst novel_chapter.txt -s book -o novel.typ --compile
+# Auto-detect domain and translate
+tarjoman translate article.txt
+
+# Specify domain and output file
+tarjoman translate paper.txt --domain scientific --output paper_fa.txt
 ```
 
-### 2. Standalone Interactive HTML Reader
-The HTML composer outputs a single, zero-dependency HTML file featuring:
-- **Synchronized Scrolling**: Scroll Persian or English side; the opposite column tracks seamlessly.
-- **Glassmorphism UI**: Modern, dark-mode-ready, accessible interface powered by the beautiful Vazirmatn font.
-- **Interactive Search**: Real-time bilingual search filtering across both languages simultaneously.
+### Manage a Book Project
 
 ```bash
-tarjoman compose html original.txt translated.txt -o reader.html
+# Initialize a book project
+tarjoman book init "My Novel" --source-dir chapters/
+
+# Translate all chapters
+tarjoman book translate
+
+# Check progress
+tarjoman book status
 ```
 
-### 3. Bilingual Markdown
-Generates GitHub-flavored aligned Markdown tables, ideal for translators performing human post-editing (MTPE) or committing to Git repositories with line-by-line diff tracking.
+### EPUB Roundtrip
+
+```bash
+# Translate an EPUB preserving structure and styling
+tarjoman epub roundtrip input.epub --output output_fa.epub
+```
+
+### Quality Linting & Auto-Fixing
+
+```bash
+# Lint Persian text for calques, typography, and orthography issues
+tarjoman lint translated_text.txt
+
+# Run MQM quality audit
+tarjoman audit translated_text.txt
+```
+
+### Multi-Format Composing
+
+```bash
+# Compose Typst PDF
+tarjoman compose typst source.txt translated.txt --output book.pdf
+
+# Compose interactive HTML reader
+tarjoman compose html source.txt translated.txt --output reader.html
+
+# Compose EPUB
+tarjoman compose epub source.txt translated.txt --output book.epub
+
+# Compose bilingual Markdown
+tarjoman compose markdown source.txt translated.txt --output bilingual.md
+```
+
+### Domain Detection
+
+```bash
+# Detect the domain of a text
+tarjoman route "The court hereby declares..."
+# → Legal & Statutory (confidence: 0.94)
+```
 
 ---
 
-## Repository Structure
+## Python API
 
-```text
-tarjoman/
-├── .github/
-│   └── workflows/
-│       ├── test.yml            # Multi-Python matrix tests (3.10-3.13) & benchmark CI
-│       └── release.yml         # Automated PyPI & GitHub release packaging
-├── .claude/
-│   └── skills/
-│       └── tarjoman/           # Native Claude Code skillpack & 12 reference guides
-├── agent-packs/
-│   ├── hermes/                 # Autonomous Hermes agent skillpack
-│   └── cursor/                 # Editor rules for Cursor and Windsurf (.cursorrules)
-├── benchmarks/
-│   ├── run_benchmarks.py       # 10-domain automated benchmark suite
-│   └── outputs/                # Generated artifacts from benchmark executions
-├── tarjoman/
-│   ├── core/                   # Pydantic data contracts and schemas
-│   ├── domains/                # Domain registry & statistical keyword router
-│   │   └── registry/*.json     # 10 JSON domain configuration profiles
-│   ├── stages/                 # 5-pass reflection pipeline stages
-│   │   ├── draft.py            # Stage 2: Initial contextual drafting
-│   │   ├── anti_calque.py      # Stage 3: Anti-calque & typography sanitizer
-│   │   ├── cadence.py          # Stage 4: Tone, cadence, & dialogue inversion
-│   │   └── audit.py            # Stage 5: Multidimensional Quality Metric (MQM)
-│   ├── composers/              # Typst PDF, HTML Reader, and Markdown composers
-│   ├── memory/                 # Book project manifest and termbase managers
-│   └── cli.py                  # Full Click CLI implementation
-├── tests/                      # 96 comprehensive unit and integration tests
-├── CONTRIBUTING.md             # Developer guidelines & calque submission instructions
-├── LICENSE                     # MIT Open-Source License
-├── pyproject.toml              # Build system configuration
-└── README.md                   # Project documentation
+```python
+from tarjoman.core.pipeline import TranslationPipeline
+from tarjoman.core.contracts import DomainProfile, DomainType
+from tarjoman.domains.router import DomainRegistry, DomainRouter
+from tarjoman.stages.humanizer import PersianHumanizer
+from tarjoman.stages.anti_calque import AntiCalqueEngine
+
+# 1. Route to the correct domain
+router = DomainRouter()
+domain_type = router.route("The cellular membrane exhibits selective permeability...")
+profile = DomainRegistry.get_profile(domain_type)
+
+# 2. Run the 5-pass translation pipeline
+pipeline = TranslationPipeline()
+segments, audit = pipeline.run(
+    raw_text="The cellular membrane exhibits selective permeability...",
+    profile=profile,
+)
+
+# 3. Access translation results
+for seg in segments:
+    print(seg.translated_text)
+
+print(f"MQM Score: {audit.score}")
+print(f"Critical findings: {len(audit.critical_findings)}")
+
+# 4. Humanize existing Persian text (strip AI artifacts)
+humanized = PersianHumanizer.humanize(
+    "این موضوع دارای اهمیت ویژه‌ای می‌باشد.",
+    register="formal-human",
+)
+# → "این موضوع اهمیت زیادی دارد."
+
+# 5. Detect calques in Persian text
+calques = AntiCalqueEngine.detect_calques("او نقش مهمی بازی می‌کند.")
+# → ["نقش بازی کردن → idiomatic rewrite needed"]
 ```
 
 ---
 
-## Testing and Verification
+## Benchmarks & Quality Evidence
 
-Tarjoman adheres to strict verification discipline. All 96 unit tests and the 10-domain benchmark suite are validated on every commit:
+All 10 domain benchmarks pass with MQM scores ≥ 90.0 and zero critical findings.
+
+Run the benchmark suite:
 
 ```bash
-# Run unit tests
-python -m unittest discover -s tests -p "test_*.py"
-
-# Run 10-domain verification benchmark
 python benchmarks/run_benchmarks.py
 ```
 
-CI automatically validates all pull requests across Python 3.10, 3.11, 3.12, and 3.13 on `ubuntu-latest`.
+| # | Domain | MQM Score | Critical | Status |
+|:---|:---|:---:|:---:|:---:|
+| 1 | Literary & Fiction | ≥ 90.0 | 0 | ✅ PASS |
+| 2 | Scientific & Academic | ≥ 90.0 | 0 | ✅ PASS |
+| 3 | Philosophy & Humanities | ≥ 90.0 | 0 | ✅ PASS |
+| 4 | Legal & Statutory | ≥ 90.0 | 0 | ✅ PASS |
+| 5 | Technical & Engineering | ≥ 90.0 | 0 | ✅ PASS |
+| 6 | Medical & Clinical | ≥ 90.0 | 0 | ✅ PASS |
+| 7 | Media & Journalism | ≥ 90.0 | 0 | ✅ PASS |
+| 8 | Financial & Economics | ≥ 90.0 | 0 | ✅ PASS |
+| 9 | Classical & Historical | ≥ 90.0 | 0 | ✅ PASS |
+| 10 | Transcreation & Creative | ≥ 90.0 | 0 | ✅ PASS |
+
+**Unit Tests**: 343 passing (265 core + 78 humanizer/de-AI)
+
+```bash
+pytest  # Run full test suite
+```
 
 ---
 
-## Contributing
+## Project Structure
 
-We welcome contributions! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
-- Adding or refining domain profiles in `tarjoman/domains/registry/`
-- Reporting and registering new linguistic calques in `tarjoman/stages/anti_calque.py`
-- Enhancing multi-agent prompts and composers
+```
+tarjoman/
+├── core/                  # Pipeline orchestration & data contracts
+│   ├── pipeline.py        # TranslationPipeline (5-pass)
+│   └── contracts.py       # TextSegment, DomainProfile, AuditReport
+├── stages/                # Pipeline stages
+│   ├── stage1_pre_analysis.py   # Token masking (code, math, URLs)
+│   ├── stage2_draft.py          # Semantic drafting with termbase
+│   ├── stage3_reflection.py     # 4-axis MQM reflection
+│   ├── stage4_polish.py         # Typography, cadence, anti-calque
+│   ├── stage5_audit.py          # Quality audit & scoring
+│   ├── anti_calque.py           # Najafi/Guilani rule engine
+│   ├── humanizer.py             # PersianHumanizer (T1-T18)
+│   └── poetic_adapter.py        # Verse classification & adaptation
+├── composers/             # Multi-format output
+│   ├── typst_pdf.py       # Typst PDF composer
+│   ├── epub3.py           # W3C EPUB 3 RTL composer
+│   ├── epub_roundtrip.py  # EPUB translation roundtrip
+│   ├── html_reader.py     # Interactive bilingual HTML
+│   └── bilingual_md.py    # Segment-aligned Markdown
+├── domains/               # 10 specialized domain profiles
+│   └── router.py          # DomainRouter & DomainRegistry
+├── memory/                # Long-form book support
+│   ├── character_bible.py # Character & Style Bible
+│   ├── scene_continuity.py# Scene Continuity Tracker
+│   ├── cache.py           # SHA-256 chunk caching
+│   ├── termbase.py        # Dynamic terminology extraction
+│   └── manifest.py        # Book manifest management
+├── parsers/               # Input parsers
+│   └── epub_parser.py     # EPUB structure parser
+├── linter.py              # Persian linguistic & typography linter
+└── cli.py                 # Click CLI entry point
+```
 
 ---
 
-## License
+## Creator & Maintainer
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/Erfix404">
+        <img src="https://github.com/Erfix404.png" width="120px;" alt="Erfan Ashouri"/>
+        <br />
+        <sub><b>Erfan Ashouri (عرفان عاشوری)</b></sub>
+      </a>
+      <br />
+      <sub>Creator, Author & Maintainer</sub>
+      <br />
+      <a href="https://github.com/Erfix404">@Erfix404</a>
+    </td>
+  </tr>
+</table>
+
+---
+
+## Contributing & License
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding guidelines, and the pull request process.
+
+**License**: [MIT](LICENSE)
 
 ---
 
 <div align="center">
-<b>Tarjoman Master Suite</b> - <i>Crafted for the Persian language, AI researchers, and translators worldwide.</i>
+
+*Built with obsessive attention to Persian linguistic purity.*
+
+**[Tarjoman](https://github.com/Erfix404/tarjoman)** · Created by [Erfan Ashouri (@Erfix404)](https://github.com/Erfix404)
+
 </div>
