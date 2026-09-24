@@ -14,6 +14,33 @@ from typing import Any, Dict, List, Optional, Union
 
 ADDRESS_PRONOUNS = ("تو", "شما")
 
+VOICE_PRESETS: Dict[str, Dict[str, Any]] = {
+    "formal_scholar": {
+        "tone": "formal_scholar",
+        "default_address": "شما",
+        "speech_quirks": ["مطنطن", "کلمات فاخر و کهن", "ساختار نحوی فخیم", "عدم استفاده از واژگان عامیانه"],
+        "notes": "دانشمند، استاد و ادیب با لحن رسمی و فخیم",
+    },
+    "colloquial_rustic": {
+        "tone": "colloquial_rustic",
+        "default_address": "تو",
+        "speech_quirks": ["شکسته‌نویسی شیرین محلی", "اصطلاحات عامیانه صمیمی", "تکیه‌کلام‌های روستایی و خودمانی"],
+        "notes": "شخصیت روستایی یا صمیمی با زبان گفتاری شیرین",
+    },
+    "aristocratic_cynic": {
+        "tone": "aristocratic_cynic",
+        "default_address": "شما",
+        "speech_quirks": ["طعنه‌آمیز", "کنایه‌دار", "لحن سرد و اشرافی", "مودب اما تحقیرآمیز"],
+        "notes": "اشراف‌زاده بدبین و متفرعن",
+    },
+    "disciplinarian": {
+        "tone": "disciplinarian",
+        "default_address": "شما",
+        "speech_quirks": ["دستوری", "نظامی", "جملات کوتاه و قاطع", "بدون حاشیه و مقتدر"],
+        "notes": "سخت‌گیر، مقتدر و منظم",
+    },
+}
+
 
 @dataclass
 class CharacterProfile:
@@ -146,6 +173,42 @@ class CharacterBible:
 
     def count(self) -> int:
         return len(self._characters)
+
+    # ------------------------------------------------------------------
+    # Voice presets
+    # ------------------------------------------------------------------
+
+    def list_voice_presets(self) -> List[str]:
+        """Return available voice preset keys."""
+        return list(VOICE_PRESETS)
+
+    def get_voice_preset(self, preset_name: str) -> Optional[Dict[str, Any]]:
+        """Return the preset dict for ``preset_name``, or None."""
+        preset = VOICE_PRESETS.get(preset_name)
+        return dict(preset) if preset else None
+
+    def create_from_preset(
+        self,
+        name: str,
+        preset_name: str,
+        persian_name: str = "",
+        gender: str = "",
+        **overrides: Any,
+    ) -> CharacterProfile:
+        """Create a CharacterProfile from a preset merged with ``overrides``."""
+        preset = VOICE_PRESETS.get(preset_name)
+        if preset is None:
+            raise ValueError(f"Unknown voice preset: {preset_name}")
+        fields: Dict[str, Any] = {
+            "tone": preset["tone"],
+            "default_address": preset["default_address"],
+            "speech_quirks": list(preset["speech_quirks"]),
+            "notes": preset["notes"],
+        }
+        fields.update(overrides)
+        return self.record_character(
+            name, persian_name=persian_name, gender=gender, **fields
+        )
 
     # ------------------------------------------------------------------
     # Persistence

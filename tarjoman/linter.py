@@ -8,6 +8,10 @@ Checks Persian text/markdown files for:
 4. Missing ZWNJ after verbal prefixes می/نمی
 5. Unbalanced Persian quotation marks ('«' vs '»')
 6. Non-standard Arabic characters ('ي', 'ك', 'ى', 'ة', 'ـ')
+7. Bidi isolation: unbalanced LRI/RLI/FSI vs PDI, and unisolated Latin
+   tokens in Persian sentences (flagged always when they risk bidi
+   corruption, or for every bare Latin token when enforce_bidi_isolation
+   is set)
 
 Both this module and the skillpack script
 (``.claude/skills/tarjoman/scripts/linter.py``) consume the shared pattern
@@ -39,7 +43,7 @@ RESET = "\033[0m"
 @dataclass
 class LintIssue:
     line_number: int
-    category: str  # "em-dash", "quote-style", "calque", "zwnj", "quote", "arabic"
+    category: str  # "em-dash", "quote-style", "calque", "zwnj", "quote", "arabic", "bidi-isolate"
     message: str
     snippet: str
     suggestion: str = field(default="")
@@ -59,13 +63,26 @@ _ZWNJ_PATTERNS: List[Pattern] = [
 
 _DOUBLE_HYPHEN_PATTERN: Pattern = re.compile(LINT_DOUBLE_HYPHEN_RE)
 
+#: Unicode bidi isolates: LRI/RLI/FSI open an isolation, PDI closes it.
+_BIDI_OPEN_CHARS = ("\u2066", "\u2067", "\u2068")
+_BIDI_CLOSE_CHAR = "\u2069"
+_BIDI_ISOLATED_SPAN_RE: Pattern = re.compile("[\u2066-\u2068][^\u2069]*\u2069")
+_BIDI_LATIN_TOKEN_RE: Pattern = re.compile(r"[A-Za-z][A-Za-z0-9_./:-]*")
+_PERSIAN_CHAR_RE: Pattern = re.compile("[\u0600-\u06FF]")
+_INLINE_CODE_SPAN_RE: Pattern = re.compile(r"`[^`\n]+`")
 
-def lint_text(content: str, skip_code_blocks: bool = True) -> List[LintIssue]:
+
+def lint_text(
+    content: str, skip_code_blocks: bool = True, enforce_bidi_isolation: bool = False
+) -> List[LintIssue]:
     """Analyze Persian text and return list of detected lint issues.
 
     Args:
         content: The text/markdown content to analyze.
         skip_code_blocks: If True, ignore lines inside fenced code blocks (```).
+        enforce_bidi_isolation: If True, every bare Latin token in a Persian
+            sentence is flagged; otherwise only tokens risking bidi corruption
+            (digits, dots, slashes, or other neutrals inside the token).
     """
     issues: List[LintIssue] = []
     lines = content.splitlines()
@@ -163,6 +180,43 @@ def lint_text(content: str, skip_code_blocks: bool = True) -> List[LintIssue]:
                     suggestion="Run AntiCalqueEngine.standardize_arabic_chars().",
                 )
             )
+
+        # 7. Bidi isolation: unbalanced isolates + unisolated Latin tokens.
+        # Ceiling: counts only (order not validated); bare-token scan strips
+        # already-isolated spans and inline code before matching.
+        opens = sum(line.count(ch) for ch in _BIDI_OPEN_CHARS)
+        closes = line.count(_BIDI_CLOSE_CHAR)
+        if opens != closes:
+            issues.append(
+                LintIssue(
+                    line_number=idx,
+                    category="bidi-isolate",
+                    message=(
+                        f"Unbalanced bidi isolates: {opens} opener(s) "
+                        f"(LRI/RLI/FSI) vs {closes} closer(s) (PDI)."
+                    ),
+                    snippet=line.strip(),
+                    suggestion="Close every isolate with U+2069 PDI (⁩).",
+                )
+            )
+        elif _PERSIAN_CHAR_RE.search(line):
+            bare = _INLINE_CODE_SPAN_RE.sub("", _BIDI_ISOLATED_SPAN_RE.sub("", line))
+            match = _BIDI_LATIN_TOKEN_RE.search(bare)
+            if match and (
+                enforce_bidi_isolation or re.search(r"[0-9/.:_\-]", match.group(0))
+            ):
+                issues.append(
+                    LintIssue(
+                        line_number=idx,
+                        category="bidi-isolate",
+                        message=(
+                            f"Unisolated Latin token {match.group(0)!r} in Persian "
+                            "sentence; bidi reordering may corrupt it."
+                        ),
+                        snippet=line.strip(),
+                        suggestion="Wrap in LRI…PDI (U+2066…U+2069) isolates.",
+                    )
+                )
 
         # Quote counting
         total_opening_quotes += line.count("«")

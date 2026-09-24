@@ -489,5 +489,113 @@ def book_terms_cmd(
     click.echo(f"Termbase: {project.name} ({total} terms)")
 
 
+# -----------------------------------------------------------------------------
+# epub command group (roundtrip)
+# -----------------------------------------------------------------------------
+@cli.group("epub")
+def epub_group() -> None:
+    """Roundtrip translation of EPUB e-books."""
+    pass
+
+
+@epub_group.command("roundtrip")
+@click.argument("input_epub", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("-o", "--output", "output_epub", default=None, type=click.Path(dir_okay=False, path_type=Path), help="Output translated EPUB path")
+@click.option("--domain", default="literary", help="Translation domain")
+def epub_roundtrip_cmd(input_epub: Path, output_epub: Optional[Path], domain: str) -> None:
+    """Parse input EPUB, translate text nodes, and compose a translated EPUB."""
+    from tarjoman.composers.epub_roundtrip import EpubRoundtripComposer
+    from tarjoman.parsers.epub_parser import EpubParser
+
+    parsed = EpubParser().parse(input_epub)
+    translations = {
+        node.id: node.html_content
+        for chapter in parsed.chapters
+        for node in chapter.text_nodes
+    }
+    out = output_epub or input_epub.with_name(f"{input_epub.stem}_translated.epub")
+    EpubRoundtripComposer().compose(parsed, translations=translations, output_path=out)
+    click.echo(f"EPUB roundtrip (domain: {domain})")
+    click.echo(f"Chapters: {len(parsed.chapters)}")
+    click.echo(f"Text nodes: {len(translations)}")
+    click.echo(f"Output: {out}")
+
+
+# -----------------------------------------------------------------------------
+# scene command group (continuity tracker)
+# -----------------------------------------------------------------------------
+@cli.group("scene")
+def scene_group() -> None:
+    """Track narrative scene continuity (POV, location, atmosphere, pronouns)."""
+    pass
+
+
+def _load_scene_tracker(state_file: Optional[Path] = None):
+    from tarjoman.memory import SceneContinuityTracker
+
+    path = Path(state_file) if state_file else Path("scene_state.json")
+    if path.exists():
+        return SceneContinuityTracker(state_path=path)
+    return SceneContinuityTracker(state_path=path)
+
+
+@scene_group.command("status")
+@click.option("--state-file", "state_file", default=None, type=click.Path(path_type=Path), help="Tracker state file")
+def scene_status_cmd(state_file: Optional[Path]) -> None:
+    """Display current POV, location, atmosphere, and pronoun references."""
+    tracker = _load_scene_tracker(state_file)
+    state = tracker.get_current_state()
+    if state is None:
+        click.echo("No scene recorded yet.")
+        return
+    click.echo(f"POV: {state.pov}")
+    click.echo(f"Location: {state.location}")
+    click.echo(f"Atmosphere: {state.atmosphere}")
+    click.echo(f"Pronouns: {state.pronoun_references}")
+
+
+@scene_group.command("record")
+@click.option("--chapter", default="", help="Chapter id")
+@click.option("--pov", default="third_person", help="Point of view")
+@click.option("--location", default="", help="Spatial location")
+@click.option("--atmosphere", default="", help="Atmosphere/mood")
+@click.option("--state-file", "state_file", default=None, type=click.Path(path_type=Path), help="Tracker state file")
+def scene_record_cmd(chapter: str, pov: str, location: str, atmosphere: str, state_file: Optional[Path]) -> None:
+    """Record a scene state."""
+    tracker = _load_scene_tracker(state_file)
+    tracker.record_scene(chapter_id=chapter, pov=pov, location=location, atmosphere=atmosphere)
+    tracker.save()
+    click.echo(f"Scene recorded: chapter={chapter} pov={pov}")
+
+
+@scene_group.command("check")
+@click.option("--state-file", "state_file", default=None, type=click.Path(path_type=Path), help="Tracker state file")
+def scene_check_cmd(state_file: Optional[Path]) -> None:
+    """Check continuity against the last recorded state."""
+    tracker = _load_scene_tracker(state_file)
+    state = tracker.get_current_state()
+    if state is None:
+        click.echo("No scene recorded yet.")
+        return
+    warnings = tracker.check_continuity(state)
+    if not warnings:
+        click.echo("Continuity OK.")
+    else:
+        for warning in warnings:
+            click.echo(f"Warning: {warning}")
+
+
+@scene_group.command("reset")
+@click.option("--state-file", "state_file", default=None, type=click.Path(path_type=Path), help="Tracker state file")
+def scene_reset_cmd(state_file: Optional[Path]) -> None:
+    """Reset/clear the tracker state."""
+    from tarjoman.memory import SceneContinuityTracker
+
+    path = Path(state_file) if state_file else Path("scene_state.json")
+    fresh = SceneContinuityTracker(state_path=path)
+    fresh.save(path)
+    click.echo("Scene tracker reset.")
+
+
 if __name__ == "__main__":
     cli()

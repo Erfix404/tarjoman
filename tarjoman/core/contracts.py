@@ -42,8 +42,15 @@ class DomainProfile(BaseModel):
     system_prompt: str
     banned_calques: List[str] = Field(default_factory=list)
     terminology_map: Dict[str, str] = Field(default_factory=dict)
+    terminology_levels: Dict[str, Dict[str, str]] = Field(default_factory=dict)
     typography: TypographicRules = Field(default_factory=TypographicRules)
     few_shot_examples: List[Dict[str, str]] = Field(default_factory=list)
+
+    def get_terms(self, level: Optional[str] = None) -> Dict[str, str]:
+        """Effective terminology for a level; level entries overlay the base map."""
+        if level and level in self.terminology_levels:
+            return {**self.terminology_map, **self.terminology_levels[level]}
+        return dict(self.terminology_map)
 
 
 class TextSegment(BaseModel):

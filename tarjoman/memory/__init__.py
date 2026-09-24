@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from tarjoman.memory.cache import ResumableCache
 from tarjoman.memory.character_bible import CharacterBible, CharacterProfile
+from tarjoman.memory.scene_continuity import SceneContinuityTracker, SceneState
 from tarjoman.memory.manifest import (
     CHUNK_STATUS_FAILED,
     CHUNK_STATUS_PENDING,
@@ -38,6 +39,8 @@ __all__ = [
     "CHUNK_STATUS_FAILED",
     "CharacterBible",
     "CharacterProfile",
+    "SceneContinuityTracker",
+    "SceneState",
     "Termbase",
     "TermRecord",
     "CascadeEvent",

@@ -170,7 +170,7 @@ class DomainRegistry:
         self._cache[domain] = profile
         return profile
 
-    def get(self, domain_type: Union[DomainType, str]) -> DomainProfile:
+    def get(self, domain_type: Union[DomainType, str], level: Optional[str] = None) -> DomainProfile:
         """
         Get a domain profile by DomainType enum or alias string.
         """
@@ -187,7 +187,10 @@ class DomainRegistry:
 
         if key not in self._cache:
             self._load_domain(key)
-        return self._cache[key]
+        profile = self._cache[key]
+        if level is not None and level not in profile.terminology_levels:
+            raise ValueError(f"Unknown terminology level: '{level}'")
+        return profile
 
     def list_all(self) -> List[DomainProfile]:
         """
@@ -287,7 +290,9 @@ class DomainRouter:
             for domain, patterns in DOMAIN_PATTERNS.items()
         }
 
-    def route(self, text: str, override: Optional[str] = None) -> Tuple[DomainProfile, float]:
+    def route(
+        self, text: str, override: Optional[str] = None, level: Optional[str] = None
+    ) -> Tuple[DomainProfile, float]:
         """
         Route text to the appropriate domain profile.
 
@@ -306,7 +311,8 @@ class DomainRouter:
                     target_domain = DomainType(normalized)
                 except ValueError:
                     raise ValueError(f"Unknown domain override: '{override}'")
-            return self.registry.get(target_domain), 1.0
+            profile = self.registry.get(target_domain, level=level)
+            return profile, 1.0
 
         # Pattern scoring
         scores: Dict[DomainType, float] = {domain: 0.0 for domain in DomainType}
@@ -322,8 +328,8 @@ class DomainRouter:
 
         if best_score <= 0.0:
             # Fallback to literary with minimal baseline confidence
-            return self.registry.get(DomainType.LITERARY), 0.30
+            return self.registry.get(DomainType.LITERARY, level=level), 0.30
 
         # Compute confidence based on score strength
         confidence = min(0.99, max(0.50, round(0.50 + (best_score / (best_score + 4.0)) * 0.49, 2)))
-        return self.registry.get(best_domain), confidence
+        return self.registry.get(best_domain, level=level), confidence

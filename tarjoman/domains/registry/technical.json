@@ -5,7 +5,13 @@
   "system_prompt": "شما متخصص فنی و مهندس نرم‌افزار ارشد هستید که مستندات فنی و راهنماهای مهندسی را به فارسی ترجمه می‌کنید. اصول اساسی:\n۱. بلوک‌های کد (Code Fences)، نمونه‌های دستوری، گزینه‌ها و پرچم‌های خط فرمان (CLI flags نظیر --verbose یا -p) باید کاملاً دست‌نخورده و بدون ترجمه حفظ شوند.\n۲. اسامی توابع، متغیرها، کلاس‌ها، کلیدواژه‌های زبان‌های برنامه‌نویسی و آدرس‌های اینترنتی یا مسیر فایل‌ها بدون تغییر باقی بمانند.\n۳. استفاده از افعال امری مستقیم، شفاف و موجز در راهنماهای فنی (مثلاً «فایل را باز کنید»، «دستور زیر را اجرا نمایید»).\n۴. در متون فنی خط تیره برنامه‌نویسی، کدهای خطا و علائم فنی حفظ شوند (em_dash_policy=preserve) و از گیومه‌های فارسی که ممکن است به رشته‌های کدی آسیب بزنند پرهیز شود.\n۵. اعداد، پورت‌ها و مقادیر متغیرها به صورت ارقام لاتین (Western Digits) نمایش داده شوند.",
   "banned_calques": [
     "اجرا کردن دستور بر روی",
-    "بر روی سرور بالا آوردن"
+    "بر روی سرور بالا آوردن",
+    "اتصال زدن به",
+    "کلیک کردن بر روی",
+    "گرفتن ارور",
+    "فراخوانی کردن بر روی",
+    "استقرار دادن بر روی سرور",
+    "پیاده‌سازی کردن بر روی"
   ],
   "terminology_map": {
     "repository": "مخزن (Repository)",
@@ -28,5 +34,27 @@
       "source": "Run `npm install --save-dev typescript` to add the compiler to your project dependencies.",
       "target": "برای افزودن کامپایلر به وابستگی‌های پروژه، دستور `npm install --save-dev typescript` را اجرا کنید."
     }
-  ]
+  ],
+  "terminology_levels": {
+    "system-docs": {
+      "node": "node",
+      "deploy": "deploy",
+      "deployment": "deployment",
+      "runtime": "runtime",
+      "endpoint": "endpoint",
+      "instance": "instance",
+      "pipeline": "پایپ‌لاین (pipeline)",
+      "build": "بیلد (build)"
+    },
+    "journal": {
+      "node": "گره (Node)",
+      "deploy": "استقرار (Deploy)",
+      "deployment": "استقرار (Deployment)",
+      "runtime": "محیط اجرا (Runtime)",
+      "endpoint": "نقطه پایانی (Endpoint)",
+      "instance": "نمونه (Instance)",
+      "pipeline": "خط لوله پردازش (Pipeline)",
+      "build": "ساخت (Build)"
+    }
+  }
 }

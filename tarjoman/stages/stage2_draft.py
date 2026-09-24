@@ -5,10 +5,14 @@ Provides:
 - TranslationBackend (ABC): Base contract for LLM or rule-based backends.
 - CallableTranslationBackend: Wraps an arbitrary callable (prompt, system_prompt) -> str.
 - EchoDraftBackend: Deterministic backend for testing and offline runs.
+- NeutralLinguisticFraming / sanitize_for_neutral_framing: strips commercial
+  book metadata (titles, publisher boilerplate, copyright, ISBNs) and wraps
+  prompts as neutral linguistic-analysis chunks.
 - SemanticDraftStage: Translates source text into translated_text for each segment.
 """
 from __future__ import annotations
 
+import re
 from abc import ABC, abstractmethod
 from typing import Callable, List, Optional
 
@@ -56,13 +60,56 @@ class EchoDraftBackend(TranslationBackend):
         return prompt
 
 
+ISBN_PATTERN = (
+    r"(?:ISBN(?:-1[03])?:?\s*)?(?=[0-9X]{10}|(?=(?:[0-9]+[-\s]){3})[-\s0-9X]{13}|"
+    r"97[89][0-9]{10}|(?=(?:[0-9]+[-\s]){4})[-\s0-9]{17})"
+    r"(?:97[89][- ]?(?:[0-9][- ]?){9}[0-9]|[0-9][- 0-9X]*[0-9X])"
+)
+
+_BOILERPLATE_PATTERNS = (
+    r"all rights reserved",
+    r"copyright\s*(?:©|\(c\)|\d{4}).*",
+    r"published by\s+.*",
+    r"penguin books|harpercollins|random house|simon & schuster|macmillan|hachette",
+    r"printed in\s+.*",
+    r"library of congress.*",
+)
+
+
+class NeutralLinguisticFraming:
+    """Strips commercial metadata and wraps text as neutral linguistic chunks."""
+
+    def sanitize(self, text: str) -> str:
+        cleaned = re.sub(ISBN_PATTERN, "", text, flags=re.IGNORECASE)
+        for pattern in _BOILERPLATE_PATTERNS:
+            cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+        return re.sub(r"\n{3,}", "\n\n", cleaned).strip()
+
+    def wrap(self, text: str) -> str:
+        return (
+            "Translate the following linguistic text excerpt accurately "
+            f"into standard literary Persian:\n\n{text}"
+        )
+
+
+def sanitize_for_neutral_framing(text: str) -> str:
+    """Convenience function applying NeutralLinguisticFraming sanitization."""
+    return NeutralLinguisticFraming().sanitize(text)
+
+
 class SemanticDraftStage(BaseStage):
     """
     Stage 2: Generates initial semantic draft translations using a TranslationBackend.
     """
 
-    def __init__(self, backend: Optional[TranslationBackend] = None) -> None:
+    def __init__(
+        self,
+        backend: Optional[TranslationBackend] = None,
+        neutral_framing: bool = True,
+    ) -> None:
         self.backend = backend or EchoDraftBackend()
+        self.neutral_framing = neutral_framing
+        self._framing = NeutralLinguisticFraming()
 
     def process(self, segments: List[TextSegment], profile: DomainProfile) -> StageResult:
         """
@@ -76,8 +123,11 @@ class SemanticDraftStage(BaseStage):
             if seg.is_protected:
                 seg_copy.translated_text = seg.source_text
             else:
+                prompt = seg.source_text
+                if self.neutral_framing:
+                    prompt = self._framing.sanitize(prompt)
                 seg_copy.translated_text = self.backend.translate(
-                    prompt=seg.source_text,
+                    prompt=prompt,
                     system_prompt=profile.system_prompt,
                 )
             processed_segments.append(seg_copy)

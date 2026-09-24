@@ -57,6 +57,21 @@ ARABIC_CHAR_MAP: Dict[str, str] = {
 #: Tatweel (کشیda) — always stripped in standard Persian orthography.
 _TATWEEL_RE: Pattern = re.compile("ـ")
 
+#: 34-verb ZWNJ engine: strict present/past stems for common Persian verbs.
+#: Ceiling: only these attested stems; new verbs extend this alternation.
+_VERB_34_STEMS = (
+    r"(?:رو|رفت|آی|آمد|گو|گفت|زن|زد|بین|دید|گذار|گذاشت|خوان|نوشت|دان|"
+    r"رسید|رس|بر|برد|خور|پوش|خواب|ایست|نشین|شنو|شنید|پرس|خر|خرید|فروش|"
+    r"فروخت|آور|آورد|افت|افتاد|فرست|بند|بست|شوی|شست|ساز|ساخت|پز|پخت|"
+    r"سوز|سوخت|ترس|کش|کشت|میر|مرد|تاب|روی|پیچ)\w*"
+)
+#: Strict left boundary (start / whitespace / brackets / quotes / ZWNJ) so
+#: embedded «می» words (صمیمی، زمین، شیمی، امید) are never touched.
+_VERB_34_RE: Pattern = re.compile(
+    r"(?<![^\s\(\[\{«\"'‌])(می|نمی)\s+(" + _VERB_34_STEMS + r")",
+    re.UNICODE,
+)
+
 #: Generic کردن-family verb alternation reused by new lexical rules.
 _KARDAN_VERBS = (
     r"(?:کردن|کرد|کردند|کردم|کردی|کردیم|کرده است|کرده‌اند|کرده|"
@@ -441,6 +456,67 @@ class AntiCalqueEngine:
     }
 
     # =========================================================================
+    # v2.1 reverse technical calques (گرته‌برداری‌های معکوس فنی)
+    # Ceiling: only the attested dev-doc phrasings below; new verbs join the
+    # _TECH_ON_VERBS alternation instead of growing new rules.
+    # =========================================================================
+
+    # 31. «TECH-VERB بر روی OBJ» (run/click/call/deploy on) -> «روی OBJ TECH-VERB»
+    _TECH_ON_VERBS = r"(?:اجرا|کلیک|فراخوانی|پیاده‌سازی)"
+    _TECH_ON_PATTERN: Pattern = re.compile(
+        r"\b(?P<tech_verb>" + _TECH_ON_VERBS + r")\s+(?P<tech_v>" + _KARDAN_VERBS + r")\s+بر\s+روی\s+(?P<tech_obj>[^،.؟!:\n]{1,60})"
+        r"|\bاستقرار\s+(?P<est_v>" + _DADAN_VERBS + r")\s+بر\s+روی\s+(?P<est_obj>[^،.؟!:\n]{1,60})"
+        r"|\bبالا\s+(?P<bala_v>آوردن|آورد|آوردند|آورده است|آورده‌اند|آورده|(?:می‌|می\s+)آورد|بیاورد)\s+بر\s+روی\s+(?P<bala_obj>[^،.؟!:\n]{1,60})",
+        re.UNICODE,
+    )
+
+    # 32. اتصال زدن-family -> متصل شدن-family (the «به X» complement stays put)
+    _ETTESAL_PATTERN: Pattern = re.compile(
+        r"\bاتصال\s+(زدن|زد|زدند|زده است|زده‌اند|زده|(?:ن?می‌|ن?می\s+)زند|(?:ن?می‌|ن?می\s+)زنند|بزن|بزنند|نزن)\b",
+        re.UNICODE,
+    )
+    _ETTESAL_MAP: Dict[str, str] = {
+        "زدن": "متصل شدن",
+        "زد": "متصل شد",
+        "زدند": "متصل شدند",
+        "زده": "متصل شده",
+        "زده است": "متصل شده است",
+        "زده‌اند": "متصل شده‌اند",
+        "می‌زند": "متصل می‌شود",
+        "نمی‌زند": "متصل نمی‌شود",
+        "می‌زنند": "متصل می‌شوند",
+        "بزن": "متصل شو",
+        "بزنند": "متصل شوند",
+        "نزن": "متصل نشو",
+    }
+
+    # 33. استقرار + دادن-family -> مستقر + کردن-family
+    _ESTEGHRAR_PATTERN: Pattern = re.compile(
+        r"\bاستقرار\s+(" + _DADAN_VERBS + r")\b",
+        re.UNICODE,
+    )
+    _ESTEGHRAR_MAP: Dict[str, str] = {
+        "دادن": "مستقر کردن",
+        "داد": "مستقر کرد",
+        "دادند": "مستقر کردند",
+        "دادم": "مستقر کردم",
+        "داده": "مستقر کرده",
+        "داده است": "مستقر کرده است",
+        "داده‌اند": "مستقر کرده‌اند",
+        "می‌دهد": "مستقر می‌کند",
+        "می‌دهند": "مستقر می‌کنند",
+        "بدهد": "مستقر بکند",
+        "بدهند": "مستقر بکنند",
+        "ندهید": "مستقر نکنید",
+    }
+
+    # 34. ارور + گرفتن-family (either order) -> خطا + گرفتن-family (noun swap only)
+    _ERROR_GET_PATTERN: Pattern = re.compile(
+        r"\b(ارور)\s+(" + _GEREFTAN_VERBS + r")\b|\b(" + _GEREFTAN_VERBS + r")\s+(ارور)\b",
+        re.UNICODE,
+    )
+
+    # =========================================================================
     # Original auxiliary mappings (preserved verbatim)
     # =========================================================================
     _COUNT_ON_VERB_MAP: Dict[str, str] = {
@@ -664,7 +740,8 @@ class AntiCalqueEngine:
             return text
         zwnj = ZWNJ
 
-        # 1. Verbal prefixes: می‌, نمی‌
+        # 1. Verbal prefixes: می‌, نمی‌ (34-verb strict engine, then generic fallback)
+        text = _VERB_34_RE.sub(rf"\1{zwnj}\2", text)
         text = re.sub(r"(?<![آ-یء-ي])(ن?می)\s+([آ-یء-ي])", rf"\1{zwnj}\2", text)
 
         # 2. Subjunctive / imperative single-letter prefixes: ب‌, ن‌
@@ -937,6 +1014,37 @@ class AntiCalqueEngine:
 
         result = cls._GHALAMDAD_PATTERN.sub(_replace_ghalamdad, result)
 
+        # ---- v2.1 reverse technical calques 31–34 ----
+        # 31. «VERB بر روی OBJ» -> «روی OBJ VERB»
+        def _replace_tech_on(m: re.Match) -> str:
+            if m.group("tech_verb"):
+                return f"روی {m.group('tech_obj').strip()} {m.group('tech_verb')} {_norm_verb(m.group('tech_v'))}"
+            if m.group("est_v") is not None:
+                return f"روی {m.group('est_obj').strip()} استقرار {_norm_verb(m.group('est_v'))}"
+            return f"روی {m.group('bala_obj').strip()} بالا {_norm_verb(m.group('bala_v'))}"
+
+        result = cls._TECH_ON_PATTERN.sub(_replace_tech_on, result)
+
+        # 32. اتصال زدن -> متصل شدن
+        def _replace_ettesal(m: re.Match) -> str:
+            return cls._ETTESAL_MAP.get(_norm_verb(m.group(1)), "متصل شدن")
+
+        result = cls._ETTESAL_PATTERN.sub(_replace_ettesal, result)
+
+        # 33. استقرار دادن -> مستقر کردن (also fixes rule-31 output «روی OBJ استقرار دادن»)
+        def _replace_esteghrar(m: re.Match) -> str:
+            return cls._ESTEGHRAR_MAP.get(_norm_verb(m.group(1)), "مستقر کردن")
+
+        result = cls._ESTEGHRAR_PATTERN.sub(_replace_esteghrar, result)
+
+        # 34. ارور + گرفتن-family (either order) -> خطا + گرفتن-family (noun swap only)
+        def _replace_error(m: re.Match) -> str:
+            if m.group(1):
+                return f"خطا {_norm_verb(m.group(2))}"
+            return f"{_norm_verb(m.group(3))} خطا"
+
+        result = cls._ERROR_GET_PATTERN.sub(_replace_error, result)
+
         return result
 
     @classmethod
@@ -984,6 +1092,10 @@ class AntiCalqueEngine:
             (cls._DAR_RABETE_PATTERN, "در رابطه با"),
             (cls._ONVAN_PATTERN, "عنوان کردن"),
             (cls._GHALAMDAD_PATTERN, "قلمداد/تلقی کردن"),
+            (cls._TECH_ON_PATTERN, "فعل فنی + بر روی (reverse technical calque)"),
+            (cls._ETTESAL_PATTERN, "اتصال زدن"),
+            (cls._ESTEGHRAR_PATTERN, "استقرار دادن"),
+            (cls._ERROR_GET_PATTERN, "گرفتن ارور"),
         ]
 
         for pat, _label in patterns:
@@ -1065,6 +1177,24 @@ LINT_CALQUE_PATTERNS: List[Tuple[str, str]] = [
     ("عنوان کردن (mention calque)", r"\bعنوان\s+(?:کرد\w*|می‌کن\w*|کن\w*)\b"),
     ("قلمداد/تلقی کردن (consider calque)", r"(?:قلمداد|تلقی)\s+(?:کرد\w*|می‌کن\w*)\b"),
     ("وی به‌جای او (pronoun calque)", r"\bوی\b"),
+    (
+        "فعل فنی + بر روی (reverse technical calque)",
+        r"(?:اجرا|کلیک|فراخوانی|پیاده‌سازی)\s+(?:کرد\w*|می‌کن\w*|کن\w*)\s+بر\s+روی",
+    ),
+    (
+        "استقرار دادن بر روی (reverse technical calque)",
+        r"استقرار\s+(?:داد\w*|ده\w*)\s+بر\s+روی",
+    ),
+    (
+        "بالا آوردن بر روی (reverse technical calque)",
+        r"بالا\s+آورد\w*\s+بر\s+روی",
+    ),
+    ("اتصال زدن به (reverse technical calque)", r"اتصال\s+(?:زد\w*|زن\w*|بزن\w*)"),
+    ("استقرار دادن (reverse technical calque)", r"استقرار\s+(?:داد\w*|ده\w*)\b"),
+    (
+        "گرفتن ارور (reverse technical calque)",
+        r"ارور\s+(?:گرفت\w*|گیر\w*)|(?:گرفتن|گرفت\w*|گیر\w*)\s+ارور",
+    ),
 ]
 
 #: Standalone double-hyphen (em-dash category): matched only when the token is
