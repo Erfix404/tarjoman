@@ -156,6 +156,75 @@ class StylisticPolishStage(BaseStage):
 
         return cls._DIALOGUE_TAG_PATTERN.sub(_invert, text)
 
+    # A word carrying an explicit ezafe marker: silent-heh ezafe
+    # (X-heh + ZWNJ/space + yeh, or heh + hamza-above/U+0674) or a word
+    # ending in kasra (U+0650).
+    _EZAFE_WORD_RE = (
+        r"[\u0600-\u06FF\u200c]+?"
+        r"(?:[\u0647\u06be](?:\u200c[\u06cc\u064a]|[\u0654\u0674]|[\s][\u06cc\u064a])|[\u0650])"
+    )
+
+    # Three or more consecutive ezafe-marked words = heavy chain.
+    _EZAFE_CHAIN_RE = None  # built lazily (class-level re with interpolation)
+
+    @classmethod
+    def _ezafe_chain_pattern(cls) -> "re.Pattern[str]":
+        if cls._EZAFE_CHAIN_RE is None:
+            cls._EZAFE_CHAIN_RE = re.compile(
+                rf"(?:{cls._EZAFE_WORD_RE}\s+){{2,}}{cls._EZAFE_WORD_RE}",
+                re.UNICODE,
+            )
+        return cls._EZAFE_CHAIN_RE
+
+    @classmethod
+    def _strip_ezafe_suffix(cls, word: str) -> str:
+        """Return *word* with its trailing ezafe marker removed."""
+        if word.endswith("\u0650"):
+            return word[:-1]
+        if re.search(r"[\u0647\u06be][\u0654\u0674]$", word):
+            return word[:-1]
+        m = re.search(r"([\u0647\u06be])(?:\u200c[\u06cc\u064a]|[\s][\u06cc\u064a])$", word)
+        if m:
+            return word[: m.start()] + m.group(1)
+        return word
+
+    @classmethod
+    def smooth_ezafe_chains(cls, text: str) -> str:
+        """
+        Smooth heavy consecutive ezafe chains (3+ linkages).
+
+        A chain of three or more ezafe-marked words (e.g. ``NP1-ez NP2-ez NP3``)
+        creates cognitive heaviness (thoqal-e kalam) in Persian. The chain is
+        broken after its second link by stripping that link's ezafe marker and
+        inserting the native relational connective ``\u0645\u0631\u0628\u0648\u0637 \u0628\u0647``
+        ("morbut be" / related to)::
+
+            W1-ez W2-ez W3 [-ez ...]  ->  W1-ez W2 \u0645\u0631\u0628\u0648\u0637 \u0628\u0647 W3 ...
+
+        Guarantees:
+
+        - verbatim spans (code, math, URLs, emails) are masked before scanning
+          and restored afterwards, so technical content is never corrupted;
+        - legitimate short 1-2 ezafe phrases are left untouched;
+        - empty / non-Persian input is returned unchanged.
+        """
+        if not text:
+            return text
+        if re.search(r"[\u0600-\u06FF]", text) is None:
+            return text
+        masked, table = mask_verbatim_spans(text)
+
+        def _break_chain(m: "re.Match[str]") -> str:
+            words = m.group(0).split()
+            if len(words) < 3:
+                return m.group(0)
+            head = words[0] + " " + cls._strip_ezafe_suffix(words[1])
+            rest = " ".join(words[2:])
+            return f"{head} \u0645\u0631\u0628\u0648\u0637 \u0628\u0647 {rest}"
+
+        smoothed = cls._ezafe_chain_pattern().sub(_break_chain, masked)
+        return restore_verbatim_spans(smoothed, table)
+
     @classmethod
     def clean_punctuation_hygiene(cls, text: str) -> str:
         """
@@ -215,6 +284,11 @@ class StylisticPolishStage(BaseStage):
 
         # 4. Em-dash handling
         result = cls.apply_em_dash_policy(result, typo.em_dash_policy)
+
+        # 4b. Ezafe chain smoothing (TRN-013): break heavy 3+ ezafe chains
+        # with a native relational connective; verbatim-safe, 1-2 link
+        # phrases untouched.
+        result = cls.smooth_ezafe_chains(result)
 
         # 5. Persian quotes enforcement
         if typo.enforce_persian_quotes:

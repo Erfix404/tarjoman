@@ -55,6 +55,7 @@ When input text is received without an explicit domain override, Tarjoman analyz
 | 10 | `transcreation` | تبلیغات و پیام‌های بازاریابی | Slogans, emotional hooks, punchlines, brand identity, CTAs | Cultural adaptation, idiomatic resonance, punchy rhyming or rhythmic cadence |
 
 Detailed guides for each domain are available in `references/<domain>.md`.
+Structural syntax rules (noun-phrase formula `M1 -> N -> M3 -> M2 -> M4/M5`, ezafe-chain smoothing, five structural sins, `Prp -> Adv Clause`, six `a/an` methods) live in `references/structural-grammar-rules.md`.
 
 ---
 
@@ -126,6 +127,8 @@ The model reflects upon its draft across 4 evaluation axes:
 - **Fluency**: Does the text sound like natural Persian written by an educated native speaker?
 - **Terminology**: Are specialized terms translated consistently with standard domain glossaries?
 - **Style & Register**: Does the text adhere to the domain's emotional and formal register?
+
+Structural grammar reference: `references/structural-grammar-rules.md` (NP order, ezafe smoothing via `smooth_ezafe_chains`, `ezafe-chain` / `generic-article` lint).
 
 ### Stage 4: Typographic & Anti-Calque Polishing
 Applies automated transformations:

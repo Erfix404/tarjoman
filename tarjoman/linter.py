@@ -12,6 +12,10 @@ Checks Persian text/markdown files for:
    tokens in Persian sentences (flagged always when they risk bidi
    corruption, or for every bare Latin token when enforce_bidi_isolation
    is set)
+8. Heavy ezafe chains: 3+ consecutive explicit ezafe markers
+   (TRN-013 structural grammar)
+9. Redundant generic article: sentence-initial «یک» with a generic class
+   subject + generic predicate (TRN-013 structural grammar)
 
 Both this module and the skillpack script
 (``.claude/skills/tarjoman/scripts/linter.py``) consume the shared pattern
@@ -43,7 +47,7 @@ RESET = "\033[0m"
 @dataclass
 class LintIssue:
     line_number: int
-    category: str  # "em-dash", "quote-style", "calque", "zwnj", "quote", "arabic", "bidi-isolate"
+    category: str  # "em-dash", "quote-style", "calque", "zwnj", "quote", "arabic", "bidi-isolate", "ezafe-chain", "generic-article"
     message: str
     snippet: str
     suggestion: str = field(default="")
@@ -70,6 +74,26 @@ _BIDI_ISOLATED_SPAN_RE: Pattern = re.compile("[\u2066-\u2068][^\u2069]*\u2069")
 _BIDI_LATIN_TOKEN_RE: Pattern = re.compile(r"[A-Za-z][A-Za-z0-9_./:-]*")
 _PERSIAN_CHAR_RE: Pattern = re.compile("[\u0600-\u06FF]")
 _INLINE_CODE_SPAN_RE: Pattern = re.compile(r"`[^`\n]+`")
+
+
+#: TRN-013 structural grammar: a word carrying an explicit ezafe marker
+#: (silent-heh ezafe or kasra). Three or more in a row = heavy chain.
+_EZAFE_WORD_RE: Pattern = re.compile(
+    r"[\u0600-\u06FF\u200c]+?"
+    r"(?:[\u0647\u06be](?:\u200c[\u06cc\u064a]|[\u0654\u0674]|[\s][\u06cc\u064a])|[\u0650])"
+)
+_EZAFE_CHAIN_RE: Pattern = re.compile(
+    rf"(?:{_EZAFE_WORD_RE.pattern}\s+){{2,}}{_EZAFE_WORD_RE.pattern}",
+    re.UNICODE,
+)
+
+#: TRN-013 structural grammar: redundant generic «یک» before a generic
+#: class subject at sentence start followed by a generic predicate.
+_GENERIC_ARTICLE_RE: Pattern = re.compile(
+    r"(?:^|[.؟!؛\n]\s*|«\s*)یک\s+[\u0600-\u06FF\u200c]+\s+"
+    r"(?:باید|نباید|می‌تواند|نمی‌تواند|است|هستند|می‌بایست|شاید)\b",
+    re.UNICODE,
+)
 
 
 def lint_text(
@@ -217,6 +241,38 @@ def lint_text(
                         suggestion="Wrap in LRI…PDI (U+2066…U+2069) isolates.",
                     )
                 )
+
+        # 8. Heavy ezafe chain (TRN-013): 3+ consecutive ezafe markers.
+        if _EZAFE_CHAIN_RE.search(line):
+            issues.append(
+                LintIssue(
+                    line_number=idx,
+                    category="ezafe-chain",
+                    message=(
+                        "Heavy ezafe chain (3+ consecutive ezafe linkages) "
+                        "found; break with a native connective "
+                        "(marbut be / motaalleq be) or a relative clause."
+                    ),
+                    snippet=line.strip(),
+                    suggestion="Run StylisticPolishStage.smooth_ezafe_chains().",
+                )
+            )
+
+        # 9. Redundant generic article (TRN-013): sentence-initial «یک»
+        # with a generic class subject; zero-mark (Ø) is idiomatic.
+        if _GENERIC_ARTICLE_RE.search(line):
+            issues.append(
+                LintIssue(
+                    line_number=idx,
+                    category="generic-article",
+                    message=(
+                        "Redundant generic «یک» with a generic class subject; "
+                        "Persian idiom uses the zero mark (Ø)."
+                    ),
+                    snippet=line.strip(),
+                    suggestion="Drop «یک» for generic class subjects.",
+                )
+            )
 
         # Quote counting
         total_opening_quotes += line.count("«")

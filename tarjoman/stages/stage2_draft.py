@@ -76,7 +76,26 @@ _BOILERPLATE_PATTERNS = (
 )
 
 
+#: Structural grammar guidance (TRN-013 / ADR 0001) injected into draft
+#: prompts so the translator backend follows authentic Persian noun-phrase
+#: order and idiomatic indefinite-article rendering.
+STRUCTURAL_GRAMMAR_PROMPT = """Structural grammar rules (EN->FA):
+1. Noun-phrase order: English NP = (M1)(M2)(M3) N (M4)(M5); render in Persian
+   as M1 -> N -> M3 -> M2 -> M4/M5 (determiner, head noun, classifying
+   adjective/material/origin, descriptive adjective, post modifiers).
+2. Break of-chains of 3+ ezafe linkages with native connectives
+   (marbut be / motaalleq be / vabaste be) or a relative clause.
+3. Indefinite article a/an, six methods: (1) zero mark for generic class
+   subjects; (2) generic sense for drugs/diseases/regimens; (3) yeki az +
+   superlative; (4) indefinite -i suffix; (5) yek + noun for numeric unity;
+   (6) noei / goonei az for kind classification.
+4. Preposition + clause mapping: after->pas az anke, before->pish az anke,
+   since->az anja ke (cause) / az zamani ke (time), until->ta inke,
+   for->chera ke / zira ke, than->bish az anche."""
+
+
 class NeutralLinguisticFraming:
+
     """Strips commercial metadata and wraps text as neutral linguistic chunks."""
 
     def sanitize(self, text: str) -> str:
@@ -88,7 +107,8 @@ class NeutralLinguisticFraming:
     def wrap(self, text: str) -> str:
         return (
             "Translate the following linguistic text excerpt accurately "
-            f"into standard literary Persian:\n\n{text}"
+            f"into standard literary Persian.\n{STRUCTURAL_GRAMMAR_PROMPT}"
+            f"\n\n{text}"
         )
 
 

@@ -13,6 +13,9 @@ Checks Persian text/markdown files for:
 4. Missing ZWNJ after verbal prefixes می/نمی
 5. Unbalanced Persian quotation marks ('«' vs '»')
 6. Non-standard Arabic characters ('ي', 'ك', 'ى', 'ة', 'ـ')
+7. Heavy ezafe chains: 3+ consecutive explicit ezafe markers (TRN-013)
+8. Redundant generic article: sentence-initial «یک» with generic class
+   subject + generic predicate (TRN-013)
 
 Exit codes:
 - 0: Clean / PASSED
@@ -46,7 +49,7 @@ RESET = "\033[0m"
 @dataclass
 class LintIssue:
     line_number: int
-    category: str  # "em-dash", "quote-style", "calque", "zwnj", "quote", "arabic"
+    category: str  # "em-dash", "quote-style", "calque", "zwnj", "quote", "arabic", "ezafe-chain", "generic-article"
     message: str
     snippet: str
     suggestion: str = field(default="")
@@ -177,6 +180,24 @@ _ZWNJ_PATTERNS: List[Pattern] = [
 _DOUBLE_HYPHEN_PATTERN: Pattern = re.compile(_DOUBLE_HYPHEN_RE)
 
 
+#: TRN-013 structural grammar: explicit ezafe word + heavy-chain detector.
+_EZAFE_WORD_PATTERN = (
+    r"[\u0600-\u06FF\u200c]+?"
+    r"(?:[\u0647\u06be](?:\u200c[\u06cc\u064a]|[\u0654\u0674]|[\s][\u06cc\u064a])|[\u0650])"
+)
+_EZAFE_CHAIN_PATTERN: Pattern = re.compile(
+    rf"(?:{_EZAFE_WORD_PATTERN}\s+){{2,}}{_EZAFE_WORD_PATTERN}",
+    re.UNICODE,
+)
+
+#: TRN-013 structural grammar: redundant generic «یک» at sentence start.
+_GENERIC_ARTICLE_PATTERN: Pattern = re.compile(
+    r"(?:^|[.؟!؛\n]\s*|«\s*)یک\s+[\u0600-\u06FF\u200c]+\s+"
+    r"(?:باید|نباید|می‌تواند|نمی‌تواند|است|هستند|می‌بایست|شاید)\b",
+    re.UNICODE,
+)
+
+
 def lint_text(content: str, skip_code_blocks: bool = True) -> List[LintIssue]:
     """Analyze Persian text and return list of detected lint issues.
 
@@ -281,6 +302,38 @@ def lint_text(content: str, skip_code_blocks: bool = True) -> List[LintIssue]:
                     message=f"Non-standard Arabic characters {chars_str} detected. Normalize to Persian 'ی' and 'ک'.",
                     snippet=line.strip(),
                     suggestion="Normalize: ي→ی، ك→ک.",
+                )
+            )
+
+        # 7. Heavy ezafe chain (TRN-013): 3+ consecutive ezafe markers.
+        if _EZAFE_CHAIN_PATTERN.search(line):
+            issues.append(
+                LintIssue(
+                    line_number=idx,
+                    category="ezafe-chain",
+                    message=(
+                        "Heavy ezafe chain (3+ consecutive ezafe linkages) "
+                        "found; break with a native connective "
+                        "(marbut be / motaalleq be) or a relative clause."
+                    ),
+                    snippet=line.strip(),
+                    suggestion="Run StylisticPolishStage.smooth_ezafe_chains().",
+                )
+            )
+
+        # 8. Redundant generic article (TRN-013): sentence-initial «یک»
+        # with a generic class subject; zero-mark is idiomatic.
+        if _GENERIC_ARTICLE_PATTERN.search(line):
+            issues.append(
+                LintIssue(
+                    line_number=idx,
+                    category="generic-article",
+                    message=(
+                        "Redundant generic «یک» with a generic class subject; "
+                        "Persian idiom uses the zero mark."
+                    ),
+                    snippet=line.strip(),
+                    suggestion="Drop «یک» for generic class subjects.",
                 )
             )
 

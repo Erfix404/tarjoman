@@ -136,6 +136,10 @@ Step 8: Call selected composer (Typst/EPUB3/HTML/Bilingual) -> Produce deliverab
 
 ---
 
+## 4b. Structural Grammar (v2.2.0)
+
+Follow `.claude/skills/tarjoman/references/structural-grammar-rules.md`: NP order `M1 -> N -> M3 -> M2 -> M4/M5`, break 3+ ezafe chains (`smooth_ezafe_chains` / `ezafe-chain` lint), six `a/an` methods (`generic-article` lint for redundant sentence-initial «یک»).
+
 ## 5. Resumable Book Projects (v2)
 
 Long-form Hermes translations run as resumable book projects with three memory modules:
