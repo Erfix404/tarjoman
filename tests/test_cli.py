@@ -239,3 +239,97 @@ class TestCliSuite(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPackCCli(unittest.TestCase):
+    """Pack C: `epub roundtrip` and `scene` command groups."""
+
+    def setUp(self) -> None:
+        self.runner = CliRunner()
+
+    def _make_epub(self, path: Path) -> None:
+        import zipfile
+
+        container = (
+            '<container version="1.0" '
+            'xmlns="urn:oasis:names:tc:opendocument:xmlns:container">'
+            '<rootfiles><rootfile full-path="OEBPS/content.opf" '
+            'media-type="application/oebps-package+xml"/></rootfiles></container>'
+        )
+        opf = (
+            '<package xmlns="http://www.idpf.org/2007/opf" version="3.0">'
+            '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">'
+            "<dc:title>T</dc:title><dc:language>en</dc:language>"
+            "<dc:creator>A</dc:creator></metadata>"
+            '<manifest><item id="ch1" href="ch1.xhtml" '
+            'media-type="application/xhtml+xml"/></manifest>'
+            '<spine><itemref idref="ch1"/></spine></package>'
+        )
+        ch1 = (
+            "<html><head><title>Ch1</title></head>"
+            "<body><p>Hello world</p></body></html>"
+        )
+        with zipfile.ZipFile(path, "w") as zf:
+            zf.writestr("mimetype", "application/epub+zip")
+            zf.writestr("META-INF/container.xml", container)
+            zf.writestr("OEBPS/content.opf", opf)
+            zf.writestr("OEBPS/ch1.xhtml", ch1)
+
+    def test_epub_roundtrip_default_output(self) -> None:
+        """Verify epub roundtrip composes a translated EPUB with default name."""
+        with self.runner.isolated_filesystem():
+            src = Path("book.epub")
+            self._make_epub(src)
+            result = self.runner.invoke(cli, ["epub", "roundtrip", str(src)])
+            self.assertEqual(result.exit_code, 0, result.output)
+            self.assertIn("Chapters: 1", result.output)
+            self.assertIn("Text nodes: 1", result.output)
+            self.assertTrue(Path("book_translated.epub").exists())
+
+    def test_epub_roundtrip_custom_output_and_domain(self) -> None:
+        """Verify epub roundtrip honors -o and --domain options."""
+        with self.runner.isolated_filesystem():
+            src = Path("book.epub")
+            self._make_epub(src)
+            result = self.runner.invoke(
+                cli,
+                ["epub", "roundtrip", str(src), "-o", "out.epub",
+                 "--domain", "technical"],
+            )
+            self.assertEqual(result.exit_code, 0, result.output)
+            self.assertIn("technical", result.output)
+            self.assertTrue(Path("out.epub").exists())
+
+    def test_scene_record_status_check_reset(self) -> None:
+        """Verify scene record/status/check/reset lifecycle."""
+        with self.runner.isolated_filesystem():
+            state = "scene.json"
+            result = self.runner.invoke(
+                cli,
+                ["scene", "record", "--chapter", "ch1", "--pov", "first_person",
+                 "--location", "Library", "--atmosphere", "gloomy",
+                 "--state-file", state],
+            )
+            self.assertEqual(result.exit_code, 0, result.output)
+            self.assertIn("Scene recorded", result.output)
+
+            result = self.runner.invoke(cli, ["scene", "status", "--state-file", state])
+            self.assertEqual(result.exit_code, 0, result.output)
+            self.assertIn("first_person", result.output)
+            self.assertIn("Library", result.output)
+
+            result = self.runner.invoke(cli, ["scene", "check", "--state-file", state])
+            self.assertEqual(result.exit_code, 0, result.output)
+            self.assertIn("Continuity OK", result.output)
+
+            result = self.runner.invoke(cli, ["scene", "reset", "--state-file", state])
+            self.assertEqual(result.exit_code, 0, result.output)
+
+    def test_scene_status_empty(self) -> None:
+        """Verify scene status with no recorded state."""
+        with self.runner.isolated_filesystem():
+            result = self.runner.invoke(
+                cli, ["scene", "status", "--state-file", "missing.json"]
+            )
+            self.assertEqual(result.exit_code, 0, result.output)
+            self.assertIn("No scene recorded", result.output)

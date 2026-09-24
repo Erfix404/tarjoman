@@ -1,11 +1,20 @@
 ---
 name: tarjoman
-description: Universal multi-domain Persian translation master skill covering 10 domains with 5-pass reflection pipeline, anti-calque enforcement, and Typst/HTML/Bilingual composers.
+description: Universal multi-domain Persian translation super-skill (v2) covering 10 domains with 5-pass reflection pipeline, Najafi/Samii anti-calque engine, ZERO em-dash typography, Typst PDF/EPUB3/HTML/Bilingual composers, and resumable book projects with character bible + termbase.
 ---
 
-# Tarjoman Universal Translation Engine (موتور جامع ترجمه «ترجمان»)
+# Tarjoman Autonomous Super-Skill v2 (موتور جامع ترجمه «ترجمان»)
 
-Welcome to **Tarjoman** — the production-grade, multi-domain English-to-Persian translation and localization intelligence system. Tarjoman transcends raw machine translation by enforcing classical Persian linguistic purity, dynamic equivalence, five-pass human-emulation reflection, and multi-format publication composition.
+Welcome to **Tarjoman v2** — the agent-native, production-grade, multi-domain English-to-Persian translation and publishing super-skill. Tarjoman transcends raw machine translation by enforcing classical Persian linguistic purity (Najafi/Samii), dynamic equivalence, five-pass human-emulation reflection, and multi-format publication composition (Typst PDF, EPUB3, HTML, Bilingual MD).
+
+## Virtual Editorial Team (agent workflow)
+
+When an agent (Claude Code, Hermes, Cursor) runs a Tarjoman book or long-document task, it plays four roles in order:
+
+1. **Planner** — `tarjoman route TEXT` to pick one of the 10 domains; `tarjoman book init --title T [--out-dir D]` to scaffold the project (`manifest.json`, `characters.json`, `terms.sqlite`).
+2. **Translator** — `tarjoman translate --input SRC --output OUT [--domain D]`; per-chapter state resumes from `manifest.json` (SHA-256 chunk cache: already-translated chunks are skipped).
+3. **Anti-Calque Editor** — Najafi/Samii rewrite pass + `tarjoman lint FILE` until clean (ZERO em-dash, «», ZWNJ, ي/ك normalization). Consult the Character Bible for voice consistency (`tarjoman book characters --list`) and the termbase for domain terms.
+4. **Typesetter** — `tarjoman compose typst|epub|html|bilingual` to produce the deliverable (Vazirmatn, RTL, bidi-isolated code/citations/formulas).
 
 ---
 
@@ -137,47 +146,64 @@ Performs automated verification:
 
 ## 5. Publishing Composers Integration
 
-Tarjoman includes three native publishing composers:
+Tarjoman includes four native publishing composers:
 
 1. **Typst PDF Composer (`TypstPdfComposer`)**:
-   Generates publication-ready PDF documents with native RTL typography, Vazirmatn font bindings, balanced margins, running headers, and table of contents:
+   Generates publication-ready Typst source + PDF with native RTL typography and Vazirmatn font bindings, LaTeX-to-Typst math conversion, and bidi isolation for code blocks, citations, and formulas:
    - Book template (A5 format, chapter numbering, inner/outer margins)
    - Academic paper template (A4 format, bilingual abstract, two-column support)
 
-2. **Interactive HTML Reader (`HtmlReaderComposer`)**:
+2. **EPUB3 Composer (`Epub3Composer`, stdlib-only)**:
+   Produces a valid W3C EPUB3 e-book (mimetype STORED first, `container.xml`, OPF metadata/manifest/spine, nav `toc.xhtml`, chapter XHTML with `dir="rtl" xml:lang="fa"` and `direction: rtl` CSS):
+   - Automatic chapter splitting, RTL book CSS, LTR spans for code/citations/formulas
+   - Verifiable with `Epub3Composer.inspect_epub(bytes)` (checks mimetype order, container, OPF, nav, well-formed chapters)
+
+3. **Interactive HTML Reader (`HtmlReaderComposer`)**:
    Produces a standalone, self-contained HTML5 reader:
    - Embedded Vazirmatn font CDN
    - Real-time Toggle: Bilingual Parallel Mode vs. Persian-Only Reader Mode
    - Dark / Light theme switcher with local storage persistence
    - One-click copy for paragraphs and chapters
 
-3. **Bilingual Markdown Composer (`BilingualMarkdownComposer`)**:
+4. **Bilingual Markdown Composer (`BilingualMarkdownComposer`)**:
    Aligns English source paragraphs and polished Persian target paragraphs into clean GitHub-flavored Markdown tables.
 
 ---
 
 ## 6. Command-Line Interface (CLI) Quickstart
 
-The Tarjoman engine is accessible via the CLI:
+The Tarjoman engine is accessible via the CLI (actual signatures — `translate` takes a positional `INPUT_FILE`; there are no `--input`/`--source`/`--target`/`--local`/`--model`/`--provider` flags):
 
 ```bash
 # 1. Route text to determine domain
 tarjoman route "The quantum state vector undergoes unitary transformation."
 
-# 2. Translate text with automatic domain routing
-tarjoman translate --input document.txt --output translated.md
+# 2. Translate a file with automatic domain routing
+tarjoman translate document.txt -o translated.md
 
-# 3. Translate with explicit domain override
-tarjoman translate --input chapter1.txt --domain literary --composer bilingual
+# 3. Translate with explicit domain override + composer
+tarjoman translate chapter1.txt -d literary --composer bilingual -o chapter1.fa.md
 
-# 4. Generate publication-ready Typst PDF
-tarjoman compose typst --input translated.md --style book --output book.pdf
+# 4. Generate publication-ready Typst source (add --compile when a typst backend is installed)
+tarjoman compose typst translated.md -o book.typ --style book
 
-# 5. Generate interactive HTML reader
-tarjoman compose html --source document.txt --target translated.md --output reader.html
+# 5. Generate a valid EPUB3 e-book
+tarjoman compose epub translated.md -o book.epub --title "My Book" --author "Translator"
 
-# 6. Audit an existing Persian translation for calques and typographic issues
-tarjoman audit --input translated.md
+# 6. Generate interactive HTML reader
+tarjoman compose html document.txt translated.md -o reader.html
+
+# 7. Audit an existing Persian translation for calques and typographic issues
+tarjoman audit translated.md
+
+# 8. Lint a file for ZERO em-dash / calque / quote / ZWNJ / Arabic issues
+tarjoman lint translated.md
+
+# 9. Resumable book project: manifest cache + character bible + termbase
+tarjoman book init "My Book" -o ./my-book
+tarjoman book manifest ./my-book
+tarjoman book characters ./my-book --add "Harry:هری:brave:شما" --list
+tarjoman book terms ./my-book --add "wand=چوب‌دستی:literary" --search wand --cascades
 ```
 
 ---

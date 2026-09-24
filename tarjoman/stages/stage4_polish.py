@@ -2,13 +2,18 @@
 Stage 4: Stylistic and Typographic Polish Stage for Tarjoman Universal Translation Engine.
 
 Enforces:
-- Em-dash policies (ERADICATE, ADAPT, PRESERVE)
+- Guaranteed ZERO em-dash policy (paired dashes -> parentheses, lone -> Persian comma)
 - Persian quotation marks («...»)
 - Dialogue tag inversion for literary register
 - Strict ZWNJ for Persian affixes and clitics
 - Arabic character standardization (ي -> ی, ك -> ک)
 - Punctuation and spacing hygiene
-- Anti-calque transformations
+- Anti-calque transformations (Najafi/Samii, original + v2 rules)
+
+Super-Skill v2: typography and calque handling delegate to
+:class:`tarjoman.stages.anti_calque.AntiCalqueEngine` as the single source of
+truth; verbatim spans (code, math, URLs, emails) are masked before normalization
+so technical content is never corrupted.
 """
 from __future__ import annotations
 
@@ -22,7 +27,13 @@ from tarjoman.core.contracts import (
     TextSegment,
     TypographicRules,
 )
-from tarjoman.stages.anti_calque import AntiCalqueEngine
+from tarjoman.stages.anti_calque import (
+    LRI,
+    PDI,
+    AntiCalqueEngine,
+    mask_verbatim_spans,
+    restore_verbatim_spans,
+)
 from tarjoman.stages.base import BaseStage
 
 
@@ -45,41 +56,84 @@ class StylisticPolishStage(BaseStage):
         re.UNICODE,
     )
 
+    # -------------------------------------------------------------------------
+    # Delegating primitives (single source of truth: AntiCalqueEngine)
+    # -------------------------------------------------------------------------
+
     @classmethod
     def standardize_arabic_chars(cls, text: str) -> str:
-        """
-        Normalize Arabic kaf and ya to Persian characters.
-        """
-        return text.replace("ي", "ی").replace("ك", "ک")
+        """Normalize Arabic kaf and ya to Persian characters."""
+        return AntiCalqueEngine.standardize_arabic_chars(text)
 
     @classmethod
     def apply_em_dash_policy(cls, text: str, policy: EmDashPolicy) -> str:
         """
-        Handle em-dashes and en-dashes according to domain typographic policy.
+        Handle em-dashes, en-dashes, and standalone double hyphens.
+
+        - ERADICATE: ZERO em-dash policy — paired dashes become parentheses,
+          lone dashes become Persian commas.
+        - ADAPT: convert to a spaced hyphen.
+        - PRESERVE: keep as-is (explicit opt-in only).
         """
         if policy == EmDashPolicy.PRESERVE:
             return text
         elif policy == EmDashPolicy.ERADICATE:
-            # Replace em-dashes, en-dashes, and double hyphens with Persian comma
-            return re.sub(r"\s*[—–]\s*|\s*--\s*", "، ", text)
+            return AntiCalqueEngine.eliminate_em_dashes(text)
         elif policy == EmDashPolicy.ADAPT:
-            # Convert to spaced hyphen
-            return re.sub(r"\s*[—–]\s*|\s*--\s*", " - ", text)
+            # Convert to spaced hyphen (standalone -- preserved when attached
+            # to tokens, e.g. CLI flags).
+            text = re.sub(r"\s*[—–]\s*", " - ", text)
+            text = re.sub(r"(?<!\S)--(?!\S)", " - ", text)
+            return text
         return text
 
     @classmethod
     def enforce_persian_quotes(cls, text: str) -> str:
+        """Convert straight/curly quotes to Persian guillemets «...»."""
+        return AntiCalqueEngine.normalize_quotes(text)
+
+    @classmethod
+    def enforce_strict_zwnj(cls, text: str) -> str:
         """
-        Convert English/ASCII double quotes and curly quotes to Persian quotes «...».
+        Apply strict Zero-Width Non-Joiner (ZWNJ) rules to Persian affixes:
+        - Prefixes: می‌, نمی‌, ب‌, ن‌
+        - Plural suffixes: ‌ها, ‌های
+        - Comparative suffixes: تر, ‌ترین
+        - Pronominal clitics: ‌ام, ‌ات, ‌اش, ‌مان, ‌تان, ‌شان
+        - Indefinite suffix: ‌ه‌ای, silent-heh ezafe: ‌ه‌ی
         """
-        # ASCII quotes
-        text = re.sub(r'"([^"\n]+)"', r"«\1»", text)
-        # Curly quotes “...” and ”...“
-        text = re.sub(r'["“”]([^"“”\n]+)["“”]', r"«\1»", text)
-        # Clean internal space in Persian quotes
-        text = re.sub(r"«\s+", "«", text)
-        text = re.sub(r"\s+»", "»", text)
-        return text
+        return AntiCalqueEngine.normalize_zwnj(text)
+
+    @classmethod
+    def isolate_bidi(cls, text: str) -> str:
+        """
+        Wrap LTR spans (Latin words, digits, math, URLs) in bidi isolates
+        (U+2066 LRI … U+2069 PDI) so RTL rendering never corrupts them.
+        Verbatim spans (code/math/URLs) are excluded — they carry their own
+        directionality in composers. ASCII-only runs (e.g. Typst markup) are
+        left untouched so composer output stays parseable.
+        """
+        if not text:
+            return text
+        if re.search(r"[؀-ۿ]", text) is None:
+            return text
+        masked, table = mask_verbatim_spans(text)
+
+        def _wrap(m: re.Match) -> str:
+            span = m.group(0)
+            # Leave placeholder sentinels (PROTECTED / VERBATIM) untouched so
+            # the audit's exact-match check and token restoration keep working.
+            if span.startswith("\u27e6"):
+                return span
+            if span.startswith(LRI):
+                return span
+            return f"{LRI}{span}{PDI}"
+
+        # Latin runs, digit runs (incl. Persian digits), and parenthesized LTR.
+        # The leading alternative keeps bracketed placeholders intact.
+        masked = re.sub(r"\u27e6[^\u27e6\u27e7\s]*\u27e7|[A-Za-z][A-Za-z0-9_./:@-]*", _wrap, masked)
+        masked = re.sub(rf"(?<!{LRI})[0-9۰-۹]+(?:[./:][0-9۰-۹]+)+", _wrap, masked)
+        return restore_verbatim_spans(masked, table)
 
     @classmethod
     def invert_dialogue_tags(cls, text: str) -> str:
@@ -101,45 +155,6 @@ class StylisticPolishStage(BaseStage):
             return f"{subject} {verb}: «{quote}»"
 
         return cls._DIALOGUE_TAG_PATTERN.sub(_invert, text)
-
-    @classmethod
-    def enforce_strict_zwnj(cls, text: str) -> str:
-        """
-        Apply strict Zero-Width Non-Joiner (ZWNJ) rules to Persian affixes:
-        - Prefix: می‌, نمی‌
-        - Plural suffix: ‌ها, ‌های
-        - Comparative suffix: تر, ‌ترین
-        - Pronominal clitics: ‌ام, ‌ات, ‌اش, ‌مان, ‌تان, ‌شان
-        - Indefinite suffix: ‌ه‌ای
-        """
-        zwnj = "‌"
-
-        # 1. Verbal prefixes: می‌, نمی‌
-        text = re.sub(r"(?<![آ-یء-ي])(ن?می)\s+([آ-یء-ي])", rf"\1{zwnj}\2", text)
-
-        # 2. Plural suffixes: ‌ها, ‌های
-        text = re.sub(r"([آ-یء-ي])\s+(های|ها)(?![آ-یء-ي])", rf"\1{zwnj}\2", text)
-
-        # 3. Comparative suffixes: تر, ‌ترین
-        text = re.sub(r"([آ-یء-ي])\s+(ترین|تر)(?![آ-یء-ي])", rf"\1{zwnj}\2", text)
-
-        # 4. Pronominal clitics: ‌ام, ‌ات, ‌اش, ‌مان, ‌تان, ‌شان
-        text = re.sub(
-            r"([آ-یء-ي])\s+(ام|ات|اش|مان|تان|شان)(?![آ-یء-ي])",
-            rf"\1{zwnj}\2",
-            text,
-        )
-
-        # 5. Indefinite suffix: ‌ه‌ای
-        text = re.sub(r"([آ-یء-ي]ه)\s+ای(?![آ-یء-ي])", rf"\1{zwnj}ای", text)
-
-        # Clean duplicate ZWNJs
-        text = re.sub(rf"{zwnj}{{2,}}", zwnj, text)
-
-        # Clean spacing around ZWNJ
-        text = re.sub(rf"\s+{zwnj}|{zwnj}\s+", zwnj, text)
-
-        return text
 
     @classmethod
     def clean_punctuation_hygiene(cls, text: str) -> str:
@@ -177,14 +192,19 @@ class StylisticPolishStage(BaseStage):
     def polish(cls, text: str, profile: Optional[DomainProfile] = None) -> str:
         """
         Apply complete polishing pipeline to a single text string.
+        Verbatim spans (code, math, URLs) are masked before normalization
+        so technical content is never corrupted, then restored.
         """
         if not text:
             return text
 
         typo = profile.typography if profile else TypographicRules()
 
+        # Mask verbatim spans first so typography never touches code/math/URLs.
+        masked, verbatim_table = mask_verbatim_spans(text)
+
         # 1. Arabic character standardization (ي -> ی, ك -> ک)
-        result = cls.standardize_arabic_chars(text)
+        result = cls.standardize_arabic_chars(masked)
 
         # 2. Strict ZWNJ (normalize verbal prefixes before anti-calque)
         if typo.strict_zwnj:
@@ -208,10 +228,15 @@ class StylisticPolishStage(BaseStage):
         if typo.strict_zwnj:
             result = cls.enforce_strict_zwnj(result)
 
-        # 8. Punctuation hygiene
+        # 8. Optional bidi isolation for LTR spans
+        if typo.isolate_english_terms:
+            result = cls.isolate_bidi(result)
+
+        # 9. Punctuation hygiene
         result = cls.clean_punctuation_hygiene(result)
 
-        return result
+        # Restore verbatim spans untouched.
+        return restore_verbatim_spans(result, verbatim_table)
 
     def process(self, segments: List[TextSegment], profile: DomainProfile) -> StageResult:
         """

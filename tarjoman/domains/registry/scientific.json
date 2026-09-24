@@ -28,5 +28,26 @@
       "source": "The empirical findings indicate a statistically significant correlation (p < 0.01) between the two variables.",
       "target": "یافته‌های تجربی نشان‌دهنده همبستگی معنادار از نظر آماری (p < 0.01) میان این دو متغیر است."
     }
-  ]
+  ],
+  "terminology_levels": {
+    "system-docs": {
+      "node": "node",
+      "deploy": "deploy",
+      "deployment": "deployment",
+      "runtime": "runtime",
+      "endpoint": "endpoint",
+      "instance": "instance",
+      "pipeline": "پایپ‌لاین (pipeline)",
+      "build": "بیلد (build)"
+    },
+    "journal": {
+      "node": "گره (Node)",
+      "deploy": "استقرار (Deploy)",
+      "deployment": "استقرار (Deployment)",
+      "runtime": "محیط اجرا (Runtime)",
+      "endpoint": "نقطه پایانی (Endpoint)",
+      "hypothesis": "فرضیه",
+      "correlation": "همبستگی معنادار"
+    }
+  }
 }

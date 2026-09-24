@@ -1,11 +1,13 @@
 ---
 name: tarjoman-hermes
-description: Hermes Agent runtime skillpack for Tarjoman universal Persian translation, autonomous tool orchestration, and multi-domain reflection.
+description: Hermes Agent runtime skillpack (v2) for Tarjoman universal Persian translation, Najafi/Samii anti-calque editing, Typst PDF/EPUB3 typesetting, and resumable book projects with manifest cache, character bible, and termbase.
 ---
 
-# Tarjoman Skillpack for Hermes Agent Runtime (پکیج تخصصی هرمس برای ترجمان)
+# Tarjoman Super-Skill v2 for Hermes Agent Runtime (پکیج تخصصی هرمس برای ترجمان)
 
-This skillpack integrates the **Tarjoman Universal Persian Translation Engine** with the **Hermes Agent** runtime (including Hermes 2 Pro, Hermes 3, and OpenHermes agentic reasoning loops). It enables autonomous multi-turn translation workflows, automated CLI tool invocation, and multi-domain human-emulation reflection.
+This skillpack integrates the **Tarjoman Universal Persian Translation Engine v2** with the **Hermes Agent** runtime (including Hermes 2 Pro, Hermes 3, and OpenHermes agentic reasoning loops). It enables autonomous multi-turn translation workflows, automated CLI tool invocation, Najafi/Samii anti-calque editing, Typst PDF + EPUB3 typesetting, and resumable book projects with manifest cache, character bible, and domain termbase.
+
+> Actual CLI signatures: `translate` takes a positional `INPUT_FILE` (use `-o` for output, `-d` for domain, `--composer` for format). There are no `--input`/`--local`/`--model`/`--provider` flags. Composers: `bilingual`, `html`, `typst`, `epub`.
 
 ---
 
@@ -66,7 +68,7 @@ Hermes Agents can directly invoke Tarjoman CLI tools or Python libraries via str
           },
           "composer": {
             "type": "string",
-            "enum": ["bilingual", "html", "typst"],
+            "enum": ["bilingual", "html", "typst", "epub"],
             "description": "Publishing composer format"
           }
         },
@@ -95,23 +97,24 @@ Hermes Agents can directly invoke Tarjoman CLI tools or Python libraries via str
 
 ## 3. Local vs. Remote Inference Routing
 
-Hermes Agent workflows support dual-tier execution:
+Hermes Agent workflows support dual-tier execution. Route Tier A/B through your own Hermes runtime configuration; the Tarjoman CLI itself has no `--local`/`--model`/`--provider` flags — it runs the deterministic 5-pass pipeline locally:
 
 ### Tier A: Local Autonomous Inference (Offline / Private)
 - **Engines**: Ollama, vLLM, llama.cpp, or ExLlamaV2.
 - **Recommended Models**: `Hermes-3-Llama-3.1-8B`, `Hermes-3-Llama-3.1-70B`, `Qwen-2.5-Coder-32B`.
 - **Use Cases**: Confidential legal contracts, proprietary software codebases, patient medical data, and offline batch translation.
-- **CLI Command**:
+- **CLI Command** (Tarjoman side — deterministic pipeline, no model flags):
   ```bash
-  python -m tarjoman.cli translate --input document.txt --local --model hermes-3:8b
+  tarjoman translate document.txt -o document.fa.md
   ```
 
 ### Tier B: Remote High-Capacity Cloud Inference
 - **Providers**: Together AI, OpenRouter, Anthropic Claude 3.5/3.7, OpenAI GPT-4o.
 - **Use Cases**: Long-form classic literature, high-complexity philosophical treatises, large-scale book localization.
-- **CLI Command**:
+- **CLI Command** (Tarjoman side — translate first, then typeset):
   ```bash
-  python -m tarjoman.cli translate --input book.txt --provider together --model nousresearch/hermes-3-llama-3.1-70b
+  tarjoman translate book.txt -d literary -o book.fa.md
+  tarjoman compose epub book.fa.md -o book.epub --title "My Book"
   ```
 
 ---
@@ -128,5 +131,22 @@ Step 4: Generate Draft Segment by Segment (consulting StateManager termbase)
 Step 5: Execute Self-Critique (Accuracy, Fluency, Terminology, Style)
 Step 6: Apply AntiCalqueEngine and TypographicRefiner
 Step 7: Run AuditStage & Linter -> If quality < 85%, iterate polish
-Step 8: Call selected composer (Typst/HTML/Bilingual) -> Produce deliverable
+Step 8: Call selected composer (Typst/EPUB3/HTML/Bilingual) -> Produce deliverable
 ```
+
+---
+
+## 5. Resumable Book Projects (v2)
+
+Long-form Hermes translations run as resumable book projects with three memory modules:
+
+```bash
+tarjoman book init "My Book" -o ./my-book   # scaffold manifest.json + terms.tsv
+tarjoman book manifest ./my-book            # SHA-256 chunk cache: resume, skip translated
+tarjoman book characters ./my-book --add "Harry:هری:brave:شما" --list
+tarjoman book terms ./my-book --add "wand=چوب‌دستی:literary" --search wand --cascades
+```
+
+- **Manifest** (`tarjoman.memory.BookManifestManager`): SHA-256 chunk/chapter caching; `pending_chunks()` tells the agent what still needs translation.
+- **Character Bible** (`tarjoman.memory.CharacterBible`): voice, transliteration, gender, tone, تو/شما address pronoun per character — query before drafting dialogue.
+- **Termbase** (`tarjoman.memory.Termbase`, SQLite): domain-tagged EN→FA terms with cascade re-translation events; acknowledge cascades after re-translating affected segments.
