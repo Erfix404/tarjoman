@@ -211,6 +211,17 @@ tarjoman book terms ./my-book --add "wand=چوب‌دستی:literary" --search w
 
 ---
 
+## 6b. De-AI Humanizer (v2.3.0)
+
+Tarjoman v2.3.0 integrates the Persian De-AI Humanizer that eradicates 18 AI-tell
+patterns, auto-repairs tanvin on Arabic loanwords, corrects fake tanvin on Persian
+words, and detects hekasre errors. Code blocks, inline code, and markdown tables
+are shielded and restored byte-for-byte.
+
+Full reference: `references/de-ai-humanizer.md`
+
+The linter now also detects `hekasre` and `tanvin` categories.
+
 ## 7. Quality Linter Script
 
 Use the built-in quality linter to verify any Persian text or translation output:

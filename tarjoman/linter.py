@@ -14,7 +14,12 @@ Checks Persian text/markdown files for:
    is set)
 8. Heavy ezafe chains: 3+ consecutive explicit ezafe markers
    (TRN-013 structural grammar)
-9. Redundant generic article: sentence-initial «یک» with a generic class
+9. Redundant generic article:
+   subject + generic predicate (TRN-013 structural grammar)
+10. Hekasre detection: ezafe kasre confused with colloquial clitic
+11. Tanvin: missing tanvin on Arabic loans, fake tanvin on Persian words
+
+Both this module and the skillpack script sentence-initial «یک» with a generic class
    subject + generic predicate (TRN-013 structural grammar)
 
 Both this module and the skillpack script
@@ -35,6 +40,62 @@ from tarjoman.stages.anti_calque import (
     LINT_ZWNJ_RES,
 )
 
+
+# ---------------------------------------------------------------------------
+# Hekasre detection (v2.3.0)
+# ---------------------------------------------------------------------------
+_HE_NOUNS = set("""خانه خونه نامه برنامه هفته پروژه مدرسه نقشه جمعه قهوه بچه شنبه دقیقه
+ثانیه پنجره اندازه سفره کوچه میوه لحظه جمله مرحله نتیجه مقاله هزینه گزینه نمونه زمینه
+دسته بسته پوشه شبکه حوزه دوره چهره سلیقه علاقه سابقه تجربه قطعه منطقه فاصله مجموعه
+موسسه مسئله مساله وسیله هدیه اجاره اداره اشاره ستاره کناره ساده آماده ایده شماره
+اجازه انگیزه اندیشه ترانه بهانه نشانه خاطره پرونده آینده گذشته رابطه ضابطه قاعده
+مبادله معامله محاسبه مطالعه مراجعه مصاحبه مقایسه مناقصه مزایده""".split())
+
+_PRON = r'(?:من|تو|ما|شما|او|اون|ایشون|اونا|اینا|خودم|خودت|خودش|این|آن)'
+
+# Tanvin: Arabic loans needing tanvin (v2.3.0)
+_TANVIN_NEEDED = {
+    "لطفا": "لطفاً", "حتما": "حتماً", "واقعا": "واقعاً", "اصلا": "اصلاً",
+    "کاملا": "کاملاً", "مثلا": "مثلاً", "معمولا": "معمولاً",
+    "تقریبا": "تقریباً", "دقیقا": "دقیقاً", "فعلا": "فعلاً",
+    "قطعا": "قطعاً", "اتفاقا": "اتفاقاً", "احتمالا": "احتمالاً",
+    "مخصوصا": "مخصوصاً", "اساسا": "اساساً", "عملا": "عملاً",
+    "اولا": "اولاً", "ضمنا": "ضمناً",
+}
+
+# Fake tanvin: Persian words wrongly carrying tanvin (v2.3.0)
+_FAKE_TANVIN = {
+    "گاهاً": "گاهی", "گاها": "گاهی", "دوماً": "دوم اینکه",
+    "سوماً": "سوم اینکه", "ناچاراً": "به‌ناچار",
+    "زباناً": "به زبان", "تلفناً": "تلفنی", "خواهشاً": "خواهش می‌کنم",
+}
+
+_FA_B_L_LINT = r"(?<![؀-ۿ‌])"
+_FA_B_R_LINT = r"(?![؀-ۿً-ّ‌])"
+
+
+def find_hekasre(text: str) -> List[Tuple[str, str, str]]:
+    """Return [(matched_text, suggestion, tier)] for probable hekasre errors.
+
+    Tier A (high confidence): the suffixed form with he is not a known
+    noun while the stem is, and it sits before another word.
+    Tier B (medium): both forms exist but a pronoun follows.
+    """
+    out: List[Tuple[str, str, str]] = []
+    for m in re.finditer(r'(?<![‌آ-ی])([آ-ی]{2,})ه\s+([آ-ی]{2,})', text):
+        stem, nxt = m.group(1), m.group(2)
+        whole = stem + "ه"
+        if whole in _HE_NOUNS:
+            continue
+        out.append((m.group(0), f'{stem}ِ {nxt}', 'A'))
+    for m in re.finditer(r'(?<![‌آ-ی])([آ-ی]{2,})ه\s+(' + _PRON + r')(?![آ-ی])', text):
+        stem, nxt = m.group(1), m.group(2)
+        whole = stem + "ه"
+        if whole in _HE_NOUNS:
+            continue
+        out.append((m.group(0), f'{stem}ِ {nxt}', 'B'))
+    return out
+
 # ANSI Color Codes
 GREEN = "\033[92m"
 RED = "\033[91m"
@@ -47,7 +108,7 @@ RESET = "\033[0m"
 @dataclass
 class LintIssue:
     line_number: int
-    category: str  # "em-dash", "quote-style", "calque", "zwnj", "quote", "arabic", "bidi-isolate", "ezafe-chain", "generic-article"
+    category: str  # "em-dash", "quote-style", "calque", "zwnj", "quote", "arabic", "bidi-isolate", "ezafe-chain", "generic-article", "hekasre", "tanvin"
     message: str
     snippet: str
     suggestion: str = field(default="")
@@ -273,6 +334,48 @@ def lint_text(
                     suggestion="Drop «یک» for generic class subjects.",
                 )
             )
+
+        # 10. Hekasre detection (v2.3.0)
+        for hit, fix, tier in find_hekasre(line):
+            conf = "likely" if tier == "A" else "possible"
+            issues.append(
+                LintIssue(
+                    line_number=idx,
+                    category="hekasre",
+                    message=(
+                        f"Probable hekasre: \u00ab{hit}\u00bb \u2192 \u00ab{fix}\u00bb ({conf} "
+                        f"\u0647\u06a9\u0633\u0631\u0647: ezafe kasre written as \u0640\u0647)"
+                    ),
+                    snippet=line.strip(),
+                    suggestion=f"\u00ab{hit}\u00bb \u2192 \u00ab{fix}\u00bb",
+                )
+            )
+
+        # 11. Tanvin detection (v2.3.0): missing tanvin on Arabic loans
+        for bare, correct in _TANVIN_NEEDED.items():
+            if re.search(_FA_B_L_LINT + re.escape(bare) + _FA_B_R_LINT, line):
+                issues.append(
+                    LintIssue(
+                        line_number=idx,
+                        category="tanvin",
+                        message=f"Missing tanvin: \u00ab{bare}\u00bb should be \u00ab{correct}\u00bb.",
+                        snippet=line.strip(),
+                        suggestion=f"{bare} \u2192 {correct}",
+                    )
+                )
+
+        # 12. Fake tanvin on Persian words (v2.3.0)
+        for fake, fix in _FAKE_TANVIN.items():
+            if fake in line:
+                issues.append(
+                    LintIssue(
+                        line_number=idx,
+                        category="tanvin",
+                        message=f"Fake tanvin on Persian word: \u00ab{fake}\u00bb \u2192 \u00ab{fix}\u00bb.",
+                        snippet=line.strip(),
+                        suggestion=f"{fake} \u2192 {fix}",
+                    )
+                )
 
         # Quote counting
         total_opening_quotes += line.count("«")

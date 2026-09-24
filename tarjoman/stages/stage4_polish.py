@@ -9,6 +9,8 @@ Enforces:
 - Arabic character standardization (ي -> ی, ك -> ک)
 - Punctuation and spacing hygiene
 - Anti-calque transformations (Najafi/Samii, original + v2 rules)
+- De-AI humanization: 18 AI-Tells (T1-T18), tanvin repair, fake tanvin correction
+- Code & Markdown table shielding (v2.3.0)
 
 Super-Skill v2: typography and calque handling delegate to
 :class:`tarjoman.stages.anti_calque.AntiCalqueEngine` as the single source of
@@ -35,6 +37,7 @@ from tarjoman.stages.anti_calque import (
     restore_verbatim_spans,
 )
 from tarjoman.stages.base import BaseStage
+from tarjoman.stages.humanizer import PersianHumanizer
 
 
 class StylisticPolishStage(BaseStage):
@@ -309,8 +312,15 @@ class StylisticPolishStage(BaseStage):
         # 9. Punctuation hygiene
         result = cls.clean_punctuation_hygiene(result)
 
-        # Restore verbatim spans untouched.
-        return restore_verbatim_spans(result, verbatim_table)
+        # Restore verbatim spans (anti-calque/typo stage).
+        result = restore_verbatim_spans(result, verbatim_table)
+
+        # 10. De-AI humanization (v2.3.0): eradicate AI tells, repair tanvin,
+        # correct fake tanvin. PersianHumanizer.humanize() shields code/tables
+        # internally, so it is safe to run on the restored text.
+        result = PersianHumanizer.humanize(result)
+
+        return result
 
     def process(self, segments: List[TextSegment], profile: DomainProfile) -> StageResult:
         """

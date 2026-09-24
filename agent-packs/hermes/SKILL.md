@@ -140,6 +140,12 @@ Step 8: Call selected composer (Typst/EPUB3/HTML/Bilingual) -> Produce deliverab
 
 Follow `.claude/skills/tarjoman/references/structural-grammar-rules.md`: NP order `M1 -> N -> M3 -> M2 -> M4/M5`, break 3+ ezafe chains (`smooth_ezafe_chains` / `ezafe-chain` lint), six `a/an` methods (`generic-article` lint for redundant sentence-initial «یک»).
 
+## 4c. De-AI Humanizer (v2.3.0)
+
+Tarjoman v2.3.0 includes the Persian De-AI Humanizer: 18 AI-tell patterns (T1-T18),
+tanvin auto-repair, fake tanvin correction, hekasre detection, and Code & Markdown
+Table Shielding. See `.claude/skills/tarjoman/references/de-ai-humanizer.md`.
+
 ## 5. Resumable Book Projects (v2)
 
 Long-form Hermes translations run as resumable book projects with three memory modules:
