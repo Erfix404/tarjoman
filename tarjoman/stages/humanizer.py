@@ -124,8 +124,8 @@ _T1_PATTERNS = [
     (re.compile(r"\bبه حساب می‌آیند\b"), "هستند"),
     (re.compile(r"\bگردیده است\b"), "شده است"),
     (re.compile(r"\bگردیده‌اند\b"), "شده‌اند"),
-    (re.compile(r"\bمی‌گردد\b"), "می‌شود"),
-    (re.compile(r"\bمی‌گردند\b"), "می‌شوند"),
+    # «می‌گردد/می‌گردند» are NOT rewritten: they are also the present tense
+    # of «گشتن» (to search): «دنبال کلید می‌گردد».
     (re.compile(r"\bگردید\b"), "شد"),
     (re.compile(r"\bگردیدند\b"), "شدند"),
 ]
@@ -158,7 +158,7 @@ _T4_PATTERNS = [
     re.compile(r"امروزه با پیشرفت تکنولوژی[،,]?\s*"),
     re.compile(r"با گسترش روزافزون اینترنت[،,]?\s*"),
     re.compile(r"در نهایت می‌توان گفت\s*"),
-    re.compile(r"به طور کلی[،,]?\s*"),
+    # «به طور کلی» is NOT removed: it often carries meaning (in general).
     re.compile(r"آینده‌ای روشن در انتظار[^\n،.]*"),
 ]
 
@@ -169,25 +169,19 @@ _T5_PATTERNS = [
     (re.compile(r"در جهت نیل به\b"), "برای"),
 ]
 
-# T6: Promotional emptiness — strip adjectives
-_T6_WORDS = re.compile(
-    r"\s*(?:بی‌نظیر|فوق‌العاده|مثال‌زدنی|منحصربه‌فرد|با کیفیتی بی‌رقیب)"
-)
+# T6: Promotional emptiness. Detection only (see LINT_AI_TELL_PATTERNS):
+# deleting the adjective broke words («غذای فوق‌العاده‌ای» → «غذای‌ای») and
+# «فوق‌العاده سرد» is a legitimate intensifier.
 
-# T9: Tacked-on analysis clauses
-_T9_PATTERNS = [
-    re.compile(r"[،,]?\s*که نشان‌دهنده‌ی [^.،]*(?:است|می‌باشد)"),
-    re.compile(r"[،,]?\s*که بیانگر [^.،]*(?:است|می‌باشد)"),
-    re.compile(r"[،,]?\s*که حاکی از [^.،]*(?:است|می‌باشد)"),
-    re.compile(r"[،,]?\s*که گواهی است بر [^.،]*"),
-]
+# T9: Tacked-on analysis clauses. Detection only: deleting the clause
+# deleted content («... که نشان‌دهنده‌ی تورم شدید است»).
 
 # T12: Em dashes & English punctuation rhythm — ZERO em-dash guarantee
 _T12_EM_DASH = re.compile(r"\s*[—–]\s*")
 
 # T13: Calque phrases
 _T13_PATTERNS = [
-    (re.compile(r"در پایان روز"), "در نهایت"),
+    # «در پایان روز» is NOT rewritten: it is often literal (end of the day).
     (re.compile(r"نگاهی بیندازیم به"), "ببینیم"),
     (re.compile(r"حس ایجاد کردن"), "معنادار بودن"),
 ]
@@ -200,6 +194,55 @@ _T17_PATTERNS = [
     re.compile(r"خوشحال می‌شوم کمک کنم[.!]?\s*"),
     re.compile(r"امیدوارم مفید بوده باشد[.!]?\s*"),
     re.compile(r"خوشحالم که می‌توانم کمک کنم[.!]?\s*"),
+]
+
+
+# ---------------------------------------------------------------------------
+# Suggest-only AI tells. These are never rewritten automatically, because the
+# right fix depends on meaning. The linter reports them and the agent (or a
+# human editor) decides. Each entry: (label, regex, advice).
+# ---------------------------------------------------------------------------
+LINT_AI_TELL_PATTERNS: List[Tuple[str, str, str]] = [
+    (
+        "T6 promotional adjective",
+        r"بی‌نظیر|فوق‌العاده|مثال‌زدنی|منحصربه‌فرد|بی‌رقیب",
+        "Keep only if the source really says it; otherwise cut or make concrete.",
+    ),
+    (
+        "T9 tacked-on analysis clause",
+        r"که\s+(?:نشان‌دهنده‌ی|نشان‌دهنده|بیانگر|حاکی از|گواهی است بر)",
+        "Say the conclusion plainly or as its own sentence; don't delete facts.",
+    ),
+    (
+        "T3 significance inflation",
+        r"از (?:اهمیت|جایگاه) (?:ویژه‌ای|بالایی|زیادی|خاصی|فراوانی) برخوردار",
+        "Usually «مهم است»، or show why it matters.",
+    ),
+    (
+        "T2 throat-clearing",
+        r"باید توجه داشت که|لازم است اشاره شود|ذکر این نکته ضروری است",
+        "Delete the announcement and state the point.",
+    ),
+    (
+        "T4 essay opener/closer",
+        r"به بررسی\s+[^.،\n]{1,40}?\s+(?:می‌پردازیم|خواهیم پرداخت|پرداخته شده)|در نتیجه[،,]?\s*می‌توان گفت",
+        "Start with the content itself: «در این مقاله ... را بررسی می‌کنیم» or drop it.",
+    ),
+    (
+        "T13 calque: at the end of the day",
+        r"در پایان روز",
+        "Idiom → «در نهایت/آخرش»; keep if literally the end of a day.",
+    ),
+    (
+        "T13 calque: help you to",
+        r"کمک می‌کند تا",
+        "Usually «کمک می‌کند که» or rephrase: «با این ابزار ... می‌شود».",
+    ),
+    (
+        "T13 calque: دست پیدا کردن",
+        r"دست\s+پیدا\s+(?:کرد|کن|می‌کن)",
+        "Prefer «رسیدن به» / «به دست آوردن».",
+    ),
 ]
 
 
@@ -269,17 +312,14 @@ class PersianHumanizer:
         for pat, replacement in _T5_PATTERNS:
             text = pat.sub(replacement, text)
 
-        # T6: Promotional emptiness
-        text = _T6_WORDS.sub("", text)
+        # T6: Promotional emptiness — detection only (see detect()).
 
         # T7: Rule of three — detection only (needs semantic context);
         # we flag but don't auto-rewrite triads as that risks losing meaning.
 
         # T8: Negative parallelism — detection only (semantic rewrite needed).
 
-        # T9: Tacked-on analysis clauses
-        for pat in _T9_PATTERNS:
-            text = pat.sub("", text)
+        # T9: Tacked-on analysis clauses — detection only (see detect()).
 
         # T10: Vague authority — detection only (needs source citation).
 
@@ -314,6 +354,21 @@ class PersianHumanizer:
         text = re.sub(r"\n ", "\n", text)
 
         return text
+
+    @classmethod
+    def detect(cls, text: str) -> List[Tuple[str, str, str]]:
+        """Return suggest-only AI tells as [(label, matched_text, advice)].
+
+        Code fences, inline code and table rows are ignored.
+        """
+        if not text:
+            return []
+        masked, _ = protect_regions(text)
+        found: List[Tuple[str, str, str]] = []
+        for label, pattern, advice in LINT_AI_TELL_PATTERNS:
+            for m in re.finditer(pattern, masked):
+                found.append((label, m.group(0), advice))
+        return found
 
     @classmethod
     def _repair_tanvin(cls, text: str) -> str:

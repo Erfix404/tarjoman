@@ -744,13 +744,9 @@ class AntiCalqueEngine:
         text = _VERB_34_RE.sub(rf"\1{zwnj}\2", text)
         text = re.sub(r"(?<![آ-یء-ي])(ن?می)\s+([آ-یء-ي])", rf"\1{zwnj}\2", text)
 
-        # 2. Subjunctive / imperative single-letter prefixes: ب‌, ن‌
-        #    (requires a standalone single letter so «به خانه» is untouched).
-        text = re.sub(
-            r"(?<![آ-یء-ي\w])([بن])\s+([آ-یء-ي])",
-            rf"\1{zwnj}\2",
-            text,
-        )
+        # 2. (Removed) Joining a standalone «ب»/«ن» to the next word broke
+        #    list items and abbreviations («الف، ب و ج» → «ب‌و ج»), and the
+        #    joined form «ب‌خوان» is itself wrong Persian (it is «بخوان»).
 
         # 3. Plural suffixes: ‌ها, ‌های
         text = re.sub(r"([آ-یء-ي])\s+(های|ها)(?![آ-یء-ي])", rf"\1{zwnj}\2", text)
@@ -826,6 +822,9 @@ class AntiCalqueEngine:
         def _replace_play_role(m: re.Match) -> str:
             role_part = m.group(2) or "نقش"
             intervening = m.group(3) or ""
+            # «نقش هملت را بازی کرد» is literal acting, not a calque.
+            if re.search(r"(?:^|\s)را(?:\s|$)", intervening):
+                return m.group(0)
             verb = _norm_verb(m.group(4))
             return f"{role_part}{intervening}ایفا {verb}"
 
@@ -850,7 +849,8 @@ class AntiCalqueEngine:
         result = cls._ACT_AS_PATTERN.sub(_replace_act_as, result)
 
         # 5. At the end of the day -> در نهایت
-        result = cls._END_OF_DAY_PATTERN.sub("در نهایت", result)
+        # «در پایان روز» is NOT auto-rewritten: it is just as often literal
+        # («در پایان روز به خانه برگشتیم»). The linter reports it instead.
 
         # 6. Makes sense -> منطقی است
         def _replace_makes_sense(m: re.Match) -> str:
@@ -929,7 +929,13 @@ class AntiCalqueEngine:
 
         # 15. گردید family -> شد family
         def _replace_gardid(m: re.Match) -> str:
-            return cls._GARDID_MAP.get(_norm_verb(m.group(1)), "شد")
+            verb = _norm_verb(m.group(1))
+            # Present/subjunctive «گرد» is also the stem of «گشتن» (to search,
+            # wander): «دنبال کلید می‌گردد». Only past forms of «گردیدن»
+            # are unambiguous, so only those are rewritten.
+            if "گردید" not in verb:
+                return m.group(0)
+            return cls._GARDID_MAP.get(verb, "شد")
 
         result = cls._GARDID_PATTERN.sub(_replace_gardid, result)
 
@@ -998,12 +1004,8 @@ class AntiCalqueEngine:
         result = cls._DAR_RABETE_PATTERN.sub("درباره", result)
 
         # 28. جهت (= برای) -> برای, guarded against از/بدین/همین/این/آن/چه جهت
-        def _replace_jahat(m: re.Match) -> str:
-            if m.group(1):
-                return m.group(0)
-            return "برای"
-
-        result = cls._JAHAT_PATTERN.sub(_replace_jahat, result)
+        # «جهت» is NOT auto-rewritten: the noun sense (direction) is too
+        # common («جهت باد عوض شد»). The linter reports the «برای» sense.
 
         # 29. عنوان + کرد-family -> مطرح + کرد-family
         result = cls._ONVAN_PATTERN.sub(r"مطرح \1", result)

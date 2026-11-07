@@ -72,12 +72,11 @@ class TestAntiCalqueEngine(unittest.TestCase):
         self.assertNotIn("حساب کردن", cleaned3)
         self.assertIn("به کسی اعتماد کردن", cleaned3)
 
-    def test_end_of_day_calque_removal(self):
-        """Test 'در پایان روز' -> 'در نهایت'."""
-        bad = "در پایان روز ما باید تصمیم بگیریم."
-        cleaned = AntiCalqueEngine.eliminate_calques(bad)
-        self.assertNotIn("در پایان روز", cleaned)
-        self.assertIn("در نهایت", cleaned)
+    def test_end_of_day_is_detected_not_rewritten(self):
+        """'در پایان روز' is often literal, so it is only detected."""
+        text = "در پایان روز به خانه برگشتیم."
+        self.assertEqual(AntiCalqueEngine.eliminate_calques(text), text)
+        self.assertIn("در پایان روز", AntiCalqueEngine.detect_calques(text))
 
     def test_makes_sense_calque_removal(self):
         """Test 'حس ایجاد می‌کند' / contextual 'این ادعا معنا می‌دهد' -> 'منطقی است'."""

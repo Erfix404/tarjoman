@@ -142,9 +142,10 @@ class TestT1CopulaInflation(unittest.TestCase):
         result = PersianHumanizer.humanize("تکمیل گردیده است.")
         self.assertIn("شده است", result)
 
-    def test_migardad(self) -> None:
-        result = PersianHumanizer.humanize("انجام می‌گردد.")
-        self.assertIn("می‌شود", result)
+    def test_migardad_not_rewritten(self) -> None:
+        # Present «می‌گردد» is also «گشتن» (to search).
+        text = "علی دنبال کلیدش می‌گردد."
+        self.assertEqual(PersianHumanizer.humanize(text), text)
 
     def test_gardid(self) -> None:
         result = PersianHumanizer.humanize("اعلام گردید.")
@@ -208,9 +209,10 @@ class TestT4GenericOpenersClosers(unittest.TestCase):
         result = PersianHumanizer.humanize("در نهایت می‌توان گفت موفق بودیم.")
         self.assertNotIn("در نهایت می‌توان گفت", result)
 
-    def test_be_tor_kolli(self) -> None:
+    def test_be_tor_kolli_kept(self) -> None:
+        # «به طور کلی» carries meaning (in general); never deleted.
         result = PersianHumanizer.humanize("به طور کلی نتایج مثبت بود.")
-        self.assertNotIn("به طور کلی", result)
+        self.assertIn("به طور کلی", result)
 
 
 # =========================================================================
@@ -231,37 +233,36 @@ class TestT5DarRastaye(unittest.TestCase):
 # T6: Promotional emptiness
 # =========================================================================
 class TestT6PromotionalEmptiness(unittest.TestCase):
-    def test_bi_nazir_removed(self) -> None:
-        result = PersianHumanizer.humanize("خدمات بی‌نظیر ما")
-        self.assertNotIn("بی‌نظیر", result)
+    """T6 is suggest-only: deleting adjectives broke words and meaning."""
 
-    def test_fogh_oladeh_removed(self) -> None:
-        result = PersianHumanizer.humanize("تجربه‌ای فوق‌العاده")
-        self.assertNotIn("فوق‌العاده", result)
+    def test_word_not_broken(self) -> None:
+        text = "هوا فوق‌العاده سرد بود و غذای فوق‌العاده‌ای خوردیم."
+        self.assertEqual(PersianHumanizer.humanize(text), text)
 
-    def test_mesal_zadani_removed(self) -> None:
-        result = PersianHumanizer.humanize("کیفیت مثال‌زدنی ارائه می‌دهیم.")
-        self.assertNotIn("مثال‌زدنی", result)
+    def test_promotional_detected(self) -> None:
+        for text in ("خدمات بی‌نظیر ما", "تجربه‌ای فوق‌العاده", "کیفیت مثال‌زدنی ارائه می‌دهیم."):
+            labels = [d[0] for d in PersianHumanizer.detect(text)]
+            self.assertTrue(any(l.startswith("T6") for l in labels), text)
 
 
 # =========================================================================
 # T9: Tacked-on analysis clauses
 # =========================================================================
 class TestT9AnalysisClauses(unittest.TestCase):
-    def test_neshan_dahandeye(self) -> None:
-        text = "فروش افزایش یافت، که نشان‌دهنده‌ی رشد بازار است."
-        result = PersianHumanizer.humanize(text)
-        self.assertNotIn("که نشان‌دهنده‌ی", result)
+    """T9 is suggest-only: deleting the clause deleted facts."""
 
-    def test_biangar(self) -> None:
-        text = "نتایج مثبت بود، که بیانگر موفقیت می‌باشد."
-        result = PersianHumanizer.humanize(text)
-        self.assertNotIn("که بیانگر", result)
+    def test_content_kept(self) -> None:
+        text = "قیمت‌ها ده درصد بالا رفت که نشان‌دهنده‌ی تورم شدید است."
+        self.assertIn("تورم شدید", PersianHumanizer.humanize(text))
 
-    def test_haki_az(self) -> None:
-        text = "آمار بالا رفت، که حاکی از بهبود است."
-        result = PersianHumanizer.humanize(text)
-        self.assertNotIn("که حاکی از", result)
+    def test_detected(self) -> None:
+        for text in (
+            "فروش افزایش یافت، که نشان‌دهنده‌ی رشد بازار است.",
+            "نتایج مثبت بود، که بیانگر موفقیت است.",
+            "آمار بالا رفت، که حاکی از بهبود است.",
+        ):
+            labels = [d[0] for d in PersianHumanizer.detect(text)]
+            self.assertTrue(any(l.startswith("T9") for l in labels), text)
 
 
 # =========================================================================
@@ -282,10 +283,10 @@ class TestT12EmDashes(unittest.TestCase):
 # T13: Calque phrases
 # =========================================================================
 class TestT13Calques(unittest.TestCase):
-    def test_dar_payane_ruz(self) -> None:
-        result = PersianHumanizer.humanize("در پایان روز باید تصمیم بگیریم.")
-        self.assertNotIn("در پایان روز", result)
-        self.assertIn("در نهایت", result)
+    def test_dar_payane_ruz_literal_kept(self) -> None:
+        text = "در پایان روز به خانه برگشتیم."
+        self.assertEqual(PersianHumanizer.humanize(text), text)
+        self.assertTrue(PersianHumanizer.detect(text))
 
     def test_negahi_biandazim(self) -> None:
         result = PersianHumanizer.humanize("نگاهی بیندازیم به نتایج.")
@@ -491,13 +492,14 @@ class TestVersion(unittest.TestCase):
         self.assertEqual(tarjoman.__version__, "2.3.0")
 
     def test_pyproject_version(self) -> None:
-        import tomllib
-        with open(
-            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pyproject.toml"),
-            "rb",
-        ) as f:
-            data = tomllib.load(f)
-        self.assertEqual(data["project"]["version"], "2.3.0")
+        # tomllib is stdlib only from Python 3.11; the package supports 3.10.
+        path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pyproject.toml"
+        )
+        with open(path, encoding="utf-8") as f:
+            match = re.search(r'^version\s*=\s*"([^"]+)"', f.read(), re.MULTILINE)
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group(1), "2.3.0")
 
 
 # =========================================================================

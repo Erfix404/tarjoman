@@ -39,6 +39,7 @@ from tarjoman.stages.anti_calque import (
     LINT_STRAIGHT_QUOTE_RES,
     LINT_ZWNJ_RES,
 )
+from tarjoman.stages.humanizer import LINT_AI_TELL_PATTERNS
 
 
 # ---------------------------------------------------------------------------
@@ -74,26 +75,31 @@ _FA_B_L_LINT = r"(?<![؀-ۿ‌])"
 _FA_B_R_LINT = r"(?![؀-ۿً-ّ‌])"
 
 
+#: Common words ending in «ه» that are never a misspelled ezafe (function
+#: words, adverbs, verbal nouns). Kept out of hekasre detection.
+_HE_NON_EZAFE = set("""همه توجه اینکه آنکه چگونه بلکه گرچه اگرچه هرچه آنچه چنانچه وگرنه
+همیشه ویژه نه چه که به البته اتفاقیه روزانه ماهانه سالانه هفتگانه جداگانه آگاهانه""".split())
+
+
 def find_hekasre(text: str) -> List[Tuple[str, str, str]]:
     """Return [(matched_text, suggestion, tier)] for probable hekasre errors.
 
-    Tier A (high confidence): the suffixed form with he is not a known
-    noun while the stem is, and it sits before another word.
-    Tier B (medium): both forms exist but a pronoun follows.
+    Hekasre is the colloquial habit of writing the ezafe kasre as «ـه»
+    («کتابه من» instead of «کتابِ من»). Only a word ending in «ه» directly
+    followed by a personal/demonstrative pronoun is flagged: any other
+    following word produced constant false positives («باید توجه داشت»،
+    «شده است»). Known nouns, function words, past participles (stem ending
+    in «د»/«ت»: شده، رفته، گفته) and «ـانه» adverbs are skipped.
     """
     out: List[Tuple[str, str, str]] = []
-    for m in re.finditer(r'(?<![‌آ-ی])([آ-ی]{2,})ه\s+([آ-ی]{2,})', text):
-        stem, nxt = m.group(1), m.group(2)
-        whole = stem + "ه"
-        if whole in _HE_NOUNS:
-            continue
-        out.append((m.group(0), f'{stem}ِ {nxt}', 'A'))
     for m in re.finditer(r'(?<![‌آ-ی])([آ-ی]{2,})ه\s+(' + _PRON + r')(?![آ-ی])', text):
         stem, nxt = m.group(1), m.group(2)
         whole = stem + "ه"
-        if whole in _HE_NOUNS:
+        if whole in _HE_NOUNS or whole in _HE_NON_EZAFE:
             continue
-        out.append((m.group(0), f'{stem}ِ {nxt}', 'B'))
+        if stem.endswith(("د", "ت", "ان")):
+            continue
+        out.append((m.group(0), f'{stem}ِ {nxt}', 'A'))
     return out
 
 # ANSI Color Codes
@@ -232,9 +238,9 @@ def lint_text(
                     LintIssue(
                         line_number=idx,
                         category="calque",
-                        message=f"Banned calque detected: '{calque_name}'.",
+                        message=f"Possible calque: '{calque_name}'. Check the context before changing it.",
                         snippet=line.strip(),
-                        suggestion="Run AntiCalqueEngine.eliminate_calques().",
+                        suggestion="Rewrite by meaning if it is a calque; keep it if the literal sense is meant.",
                     )
                 )
 
@@ -334,6 +340,20 @@ def lint_text(
                     suggestion="Drop «یک» for generic class subjects.",
                 )
             )
+
+        # 9b. Suggest-only AI tells (never auto-fixed; meaning decides).
+        for tell_label, tell_re, tell_advice in LINT_AI_TELL_PATTERNS:
+            tell_match = re.search(tell_re, line)
+            if tell_match:
+                issues.append(
+                    LintIssue(
+                        line_number=idx,
+                        category="ai-tell",
+                        message=f"AI-style phrasing ({tell_label}): «{tell_match.group(0)}».",
+                        snippet=line.strip(),
+                        suggestion=tell_advice,
+                    )
+                )
 
         # 10. Hekasre detection (v2.3.0)
         for hit, fix, tier in find_hekasre(line):
