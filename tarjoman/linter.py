@@ -163,6 +163,18 @@ _GENERIC_ARTICLE_RE: Pattern = re.compile(
 )
 
 
+#: Spacing around punctuation (suggest-only): no space before «،؛؟.!» and
+#: no space just inside «» or (). Idea adapted from the Persian orthography
+#: skill in hermes-literary-translation-mastery (Matin Beigi).
+_FA_LETTER = "[\u0621-\u064A\u067E\u0686\u0698\u06A9\u06AF\u06CC\u06F0-\u06F9]"
+_PUNCT_SPACE_PATTERNS: List[Pattern] = [
+    re.compile(_FA_LETTER + r"\s+[،؛؟]"),
+    re.compile(_FA_LETTER + r"\s+[.!](?![.!])(?=\s|$)"),
+    re.compile(r"«\s+" + _FA_LETTER + "|" + _FA_LETTER + r"[.!؟]?\s+»"),
+    re.compile(r"\(\s+" + _FA_LETTER + "|" + _FA_LETTER + r"\s+\)"),
+]
+
+
 def lint_text(
     content: str, skip_code_blocks: bool = True, enforce_bidi_isolation: bool = False
 ) -> List[LintIssue]:
@@ -340,6 +352,22 @@ def lint_text(
                     suggestion="Drop «یک» for generic class subjects.",
                 )
             )
+
+        # Spacing around punctuation (suggest-only, never auto-fixed).
+        _ps_line = re.sub(r"`[^`\n]+`", "", line)
+        for _ps in _PUNCT_SPACE_PATTERNS:
+            _ps_match = _ps.search(_ps_line)
+            if _ps_match:
+                issues.append(
+                    LintIssue(
+                        line_number=idx,
+                        category="punct-space",
+                        message=f"Space before punctuation or inside «» / (): «{_ps_match.group(0)}».",
+                        snippet=line.strip(),
+                        suggestion="Punctuation sticks to the word before it: «کرد، اما»، «(متن)»، «سلام».",
+                    )
+                )
+                break
 
         # 9b. Suggest-only AI tells (never auto-fixed; meaning decides).
         for tell_label, tell_re, tell_advice in LINT_AI_TELL_PATTERNS:

@@ -335,6 +335,44 @@ LINT_AI_TELL_PATTERNS: List[Tuple[str, str, str]] = [
         r"(?:^|[.؟!]\s+)(?:به طور خلاصه|به‌طور خلاصه|در جمع‌بندی|در مجموع)[،,]",
         "Usually cut: the reader just read it.",
     ),
+    # T19-T24: patterns adapted from «لحن من» (lahne-man, MIT,
+    # https://github.com/RezaEsmailGol/lahne-man), itself based on
+    # Peter Yang's No AI Slop. Detection only: each can be a real statement.
+    (
+        "T19 warm-up before the point",
+        r"(?:^|[.؟!]\s+|«)(?:حقیقت|واقعیت) این است که|بیایید صادق باشیم|بگذارید (?:رک|واضح|صادقانه) بگویم",
+        "Delete the warm-up if the sentence is complete without it.",
+    ),
+    (
+        "T20 secret-reveal pose",
+        r"(?:نکته|چیزی)(?:‌ای)? که (?:اغلب|معمولاً|بیشتر (?:افراد|مردم)|کمتر کسی)[^.\n]{0,25}?(?:نادیده|توجه|نمی‌دانند|اشتباه)|راز (?:اصلی|موفقیت) (?:اینجاست|این است)",
+        "State the claim directly and give the reason.",
+    ),
+    (
+        "T10 vague authority",
+        r"(?:کارشناسان|متخصصان|بسیاری) (?:معتقدند|بر این باورند)|(?:تحقیقات|مطالعات|پژوهش‌ها) (?:نشان (?:می‌دهد|می‌دهند|داده‌اند)|ثابت کرده‌اند)",
+        "Name the source if the original names one; never invent one. Otherwise soften or flag.",
+    ),
+    (
+        "T21 rhetorical question + instant answer",
+        r"(?:اما|ولی) (?:سؤال|سوال) (?:اصلی|مهم) (?:چیست|این است)|(?:پاسخ|جواب) (?:ساده|روشن) است[:.]",
+        "Say the point directly unless the reader really has to stop and think.",
+    ),
+    (
+        "T22 grand philosophical closer",
+        r"(?:این|آینده) (?:فقط|تنها|تازه) (?:آغاز|شروع) (?:راه|ماجرا|یک مسیر|یک تحول)|آینده همین (?:حالا|امروز) (?:اینجاست|است)",
+        "Cut it and end on the last real point or next step.",
+    ),
+    (
+        "T23 generic call to action",
+        r"همین امروز (?:قدم اول را بردارید|شروع کنید)|فرصت را از دست ندهید|آماده‌اید (?:تا )?[^.؟\n]{0,25}?تجربه کنید",
+        "Make it concrete (what to do, where) or drop it.",
+    ),
+    (
+        "T24 reader steering",
+        r"همان‌طور که (?:مشاهده|ملاحظه) می‌کنید|نکته‌ی? کلیدی (?:اینجاست|این است)|این (?:بخش|نکته) بسیار مهم است",
+        "If the importance is obvious, cut; if not, give the reason.",
+    ),
 ]
 
 

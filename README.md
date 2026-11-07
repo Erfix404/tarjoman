@@ -283,6 +283,12 @@ tarjoman lint translated_text.txt
 
 # Run MQM quality audit
 tarjoman audit translated_text.txt
+
+# Completeness: dropped/summarized paragraphs, numbers, citation markers, URLs, code
+tarjoman verify source.md translated.md
+
+# Clean PDF-extracted text before translating (headers, page numbers, hyphen breaks, wrapped lines)
+tarjoman prep book.txt -o book.clean.txt
 ```
 
 ### Multi-Format Composing
@@ -447,6 +453,8 @@ tarjoman/
 Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding guidelines, and the pull request process.
 
 **License**: [MIT](LICENSE)
+
+**Acknowledgements**: some ideas were adapted from Kaman AI Translator, «لحن من» (lahne-man) and hermes-literary-translation-mastery. See [docs/CREDITS.md](docs/CREDITS.md).
 
 ---
 
