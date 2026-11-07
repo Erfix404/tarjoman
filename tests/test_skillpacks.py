@@ -84,6 +84,9 @@ class TestSkillpacks(unittest.TestCase):
             "transcreation.md",
             "anti-calque.md",
             "mqm-taxonomy.md",
+            "genre-fiction.md",
+            "subtitles.md",
+            "terminology-sources.md",
         ]
 
         for filename in expected_files:
