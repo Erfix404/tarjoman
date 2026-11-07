@@ -1,78 +1,77 @@
-# Medical & Pharmacology Translation Reference Guide (راهنمای ترجمه پزشکی و داروسازی)
+# راهنمای ترجمه‌ی پزشکی و دارویی
 
-## Overview
-The Medical domain profile is built for clinical trial protocols, pharmacology monographs, patient information leaflets (PILs), medical research papers, and diagnostic reports. In medical translation, mistakes can lead to patient harm or invalid clinical assessments. A zero-tolerance policy for ambiguity, mistranslation of dosages, or altered contraindications is strictly enforced.
+## اول بپرس: خواننده کیست؟
 
----
+اشتباه در متن پزشکی به بیمار آسیب می‌زند. ولی اشتباه رایج‌تر ایجنت‌ها، **اشتباه در سطح زبان** است: بروشور بیمار را با زبان مقاله‌ی بالینی ترجمه می‌کنند. پیش از ترجمه یکی از این دو را انتخاب کن:
 
-## 1. Zero Tolerance for Ambiguity & Dosages
+| | بیمار و عموم | پزشک و پژوهشگر |
+|---|---|---|
+| نمونه | بروشور دارو، برچسب «طرز مصرف»، آموزش بیمار، سایت سلامت | مقاله، پروتکل کارآزمایی، گزارش بالینی، مونوگراف دارو |
+| زبان | ساده، مستقیم، فعل امر («بخورید»، «قطع کنید») | اصطلاح تخصصی، جمله‌ی رسمی |
+| اصطلاح | «فشار خون بالا»، «دل‌درد»، «تب» | «پرفشاری خون»، «درد اپی‌گاستر»، «هایپرترمی» |
+| فعل | «بخورید»، «مصرف نکنید» | «تجویز شد»، «دریافت کردند» |
 
-Any inaccuracy in numerical quantities, metric units, or administration routes can have life-threatening consequences:
-- **Dosage Units**: Retain metric units verbatim with Western Latin digits (`50 mg/kg`, `250 mcg`, `10 mL/hr`, `0.5 mg BID`).
-- **Administration Routes**: Use precise, standardized medical terminology:
-  - *Oral (PO)* -> خوراکی
-  - *Intravenous (IV)* -> داخل وریدی / تزریق وریدی
-  - *Intramuscular (IM)* -> داخل عضلانی
-  - *Subcutaneous (SC)* -> زیرجلدی
-  - *Sublingual (SL)* -> زیرزبانی
-  - *Topical* -> موضعی
-- **Frequency Abbreviations**:
-  - *q.d. (once daily)* -> روزی یک‌بار
-  - *b.i.d. (twice daily)* -> روزی دو بار / هر ۱۲ ساعت
-  - *t.i.d. (three times daily)* -> روزی سه بار / هر ۸ ساعت
-  - *p.r.n. (as needed)* -> در صورت نیاز / برحسب ضرورت
+در متن بیمار، اصطلاح تخصصی را فقط وقتی بیاور که بیمار باید آن را بشناسد (مثلاً روی جعبه‌ی دارو)، و کنارش توضیح ساده بده.
 
 ---
 
-## 2. INN Generic Drug Names & Anatomical Terminology
+## ۱. عدد، دوز و واحد: صفر خطا
 
-1. **International Nonproprietary Names (INN)**:
-   - Always retain the official INN generic name in English in parentheses alongside standard Persian phonetic transliteration:
-     - *Example*: «استامینوفن (Acetaminophen)», «آتورواستاتین (Atorvastatin)», «امپرازول (Omeprazole)».
-   - Trade names (Brand names) must be capitalized and marked:
-     - *Example*: «لیپیتور (Lipitor®) تجارتی برای آتورواستاتین است.»
-2. **Anatomical and Pathological Standard Terms**:
-   Follow official Iranian Academy of Persian Language and Literature (فرهنگستان زبان و ادب فارسی) and standard Iranian medical curricula:
-   - *Myocardial Infarction* -> انفارکتوس حاد میوکارد / سکته قلبی
-   - *Hypertension* -> پرفشاری خون (avoid colloquial *فشار خون بالا*)
-   - *Hypotension* -> افت فشار خون
-   - *Erythema* -> اریتم / قرمزی پوست
-   - *Pruritus* -> خارش پوستی
-   - *Adverse Drug Reaction (ADR)* -> واکنش ناخواسته دارویی
+- **هیچ عدد، واحد یا بازه‌ای را عوض نکن.** «۴ تا ۶ ساعت»، «۲۰۰ میلی‌گرم»، «بیش از ۳ روز». پس از ترجمه، `tarjoman verify` را اجرا کن.
+- **واحدها:** `mg`، `mL`، `mcg` را یا به همان شکل لاتین نگه دار یا کامل بنویس («میلی‌گرم»). در یک متن یکدست بمان. `mcg` و `mg` را هرگز با هم اشتباه نگیر.
+- **ارقام:** در متن بیمار ارقام فارسی (۱۲ سال، ۶ قرص) رایج و خواناست. در متن بالینی، جدول دوز و فرمول، ارقام لاتین متن اصلی را نگه دار. در هر حال در یک متن یکدست.
+- **قیدهای محدودکننده** حیاتی‌اند: "unless directed by a doctor" ← «مگر به دستور پزشک»؛ "do not exceed" ← «بیشتر از … نخورید». جاانداختن یکی از این‌ها یعنی دستور مصرف خطرناک.
+- **روش مصرف:** خوراکی (PO)، تزریق وریدی (IV)، عضلانی (IM)، زیرجلدی (SC)، زیرزبانی (SL)، موضعی.
+- **دفعات:** q.d. ← روزی یک بار؛ b.i.d. ← روزی دو بار؛ t.i.d. ← روزی سه بار؛ p.r.n. ← در صورت نیاز.
 
 ---
 
-## 3. Clinical Trial Protocols & Statistical Rigor
+## ۲. نام دارو و اصطلاح‌ها
 
-In Phase I–IV clinical study reports:
-- *Double-blind randomized controlled trial* -> کارآزمایی بالینی تصادفی دو سو کور
-- *Placebo-controlled* -> کنترل‌شده با دارونما
-- *Inclusion / Exclusion criteria* -> معیارهای ورود و خروج به مطالعه
-- *Primary / Secondary endpoints* -> متغیرهای پیامد اولیه / ثانویه
-- *Adverse events (AEs)* -> عوارض جانبی ناخواسته
-- *Serious Adverse Event (SAE)* -> عارضه جانبی شدید و تهدیدکننده حیات
-- *Confidence interval (95% CI)* -> فاصله اطمینان ۹۵٪
-- *Hazard ratio (HR)* -> نسبت خطر (HR)
+- **نام ژنریک** را آوانویسی کن و بار اول نام لاتین را در پرانتز بیاور: «ایبوپروفن (Ibuprofen)». در متن بیمار، بعد از بار اول فقط فارسی.
+- **نام تجاری** همان‌طور که روی بسته است می‌ماند: «ادویل (Advil)».
+- اصطلاح‌های جاافتاده‌ی ایران را به کار ببر (منبع‌ها: `terminology-sources.md`).
+
+| انگلیسی | متن بیمار | متن تخصصی |
+|---|---|---|
+| hypertension | فشار خون بالا | پرفشاری خون |
+| myocardial infarction | سکته‌ی قلبی | انفارکتوس میوکارد |
+| adverse drug reaction | عارضه‌ی دارو | واکنش ناخواسته‌ی دارویی |
+| adverse event (AE) | عارضه | رویداد ناخواسته |
+| serious adverse event (SAE) | عارضه‌ی جدی | رویداد ناخواسته‌ی جدی (نه لزوماً «تهدیدکننده‌ی حیات») |
+| placebo | دارونما | دارونما |
+| double-blind randomized controlled trial | | کارآزمایی بالینی تصادفی‌شده‌ی دوسوکور |
+| inclusion / exclusion criteria | | معیارهای ورود و خروج |
+| primary / secondary endpoint | | پیامد اولیه / ثانویه |
+| confidence interval (95% CI) | | فاصله‌ی اطمینان ۹۵٪ |
+
+**دوست‌های دروغین پزشکی:**
+- "feel faint" یعنی «احساس غش» یا «از حال رفتن»، نه «احساس ضعف» (ضعف خیلی خفیف‌تر است و بیمار هشدار را جدی نمی‌گیرد).
+- "stomach pain" در متن بیمار «دل‌درد» یا «معده‌درد» است، نه «درد معده‌ای».
+- "ask a doctor" یعنی «با پزشک مشورت کنید» یا «به پزشک مراجعه کنید»، نه «از پزشک بپرسید» (در برچسب دارو).
+- "directed" در برچسب دارو یعنی «طبق دستور» (برچسب یا پزشک)، نه لزوماً «تجویزشده».
+- "presented with" ← «با … مراجعه کرد»، نه «ارائه شد».
 
 ---
 
-## 4. Register: Patient-Facing vs. Healthcare Professional (HCP)
-- **HCP Materials**: Use formal, technical Greco-Latin/Persian medical nomenclature.
-- **Patient Leaflets (PIL)**: Translate into empathetic, transparent, plain-language Persian:
-  - *HCP*: مصرف همزمان با مهارکننده‌های MAO منع مصرف قطعی دارد.
-  - *Patient*: در صورت مصرف داروهای ضدافسردگی، از مصرف این دارو اکیداً خودداری فرمایید و با پزشک خود مشورت کنید.
+## ۳. برچسب و بروشور دارو (Drug Facts)
+
+برچسب‌های انگلیسی جمله‌های بی‌فاعل و فهرست‌وار دارند ("Stop use and ask a doctor if"). در فارسی:
+- عنوان‌ها کوتاه و فارسی: Directions ← «طرز مصرف»؛ Warnings ← «هشدارها»؛ Stop use and ask a doctor if ← «در این موارد مصرف را قطع کنید و به پزشک مراجعه کنید:».
+- «اگر» را آخر عنوان نگذار («… از پزشک بپرسید اگر»). یا عنوان را با دونقطه ببند و فهرست را با «اگر» شروع کن، یا هر مورد را جمله‌ی کامل بنویس.
+- مجهول را به فعل امر برگردان: "the smallest effective dose should be used" ← «کمترین مقداری را مصرف کنید که اثر می‌کند».
+- "may be used" درباره‌ی دوز یعنی اجازه: «می‌توانید ۲ قرص بخورید»، نه «۲ قرص ممکن است استفاده شود».
 
 ---
 
-## نمونه‌های بد ← خوب (فارسی)
-
-این نمونه‌ها مهم‌تر از قاعده‌های بالا هستند: پیش از ترجمه، چند بار بخوانشان. الگو در همه یکی است: ساختار انگلیسی را رها کن، معنا را با فعل فارسی بگو، «توسط» و «یک» و ضمیرهای اضافه را حذف کن، و اصطلاح جاافتاده‌ی همان رشته را به کار ببر.
+## نمونه‌های بد ← خوب
 
 | انگلیسی | ترجمه‌ی ماشینی | فارسی خوب |
 |---|---|---|
 | Take one tablet twice daily with food. | یک قرص را دو بار در روز با غذا بگیرید. | روزی دو بار، هر بار یک قرص همراه غذا بخورید. |
 | Patients were randomized to receive either drug A or placebo. | بیماران به صورت تصادفی به دریافت یا داروی A یا دارونما تخصیص داده شدند. | بیماران به‌طور تصادفی دو گروه شدند: یک گروه داروی A گرفت و گروه دیگر دارونما. |
 | Seek medical attention if symptoms persist. | اگر علائم ادامه پیدا کردند، به دنبال توجه پزشکی باشید. | اگر علائم ادامه پیدا کرد، به پزشک مراجعه کنید. |
-| The patient presented with chest pain. | بیمار با درد قفسه‌ی سینه ارائه شد. | بیمار با درد قفسه‌ی سینه مراجعه کرده بود. |
-| Do not exceed the recommended dose. | از دوز توصیه‌شده تجاوز نکنید. | بیش از مقدار توصیه‌شده مصرف نکنید. |
+| Do not exceed 6 tablets in 24 hours, unless directed by a doctor. | از ۶ قرص در ۲۴ ساعت تجاوز نکنید، مگر اینکه توسط پزشک دستور داده شود. | در ۲۴ ساعت بیشتر از ۶ قرص نخورید، مگر به دستور پزشک. |
+| If you experience any of the following: feel faint, vomit blood | اگر هر یک از موارد زیر را تجربه کردید: احساس ضعف، استفراغ خون | اگر یکی از این نشانه‌ها را دارید: حالت غش و از حال رفتن، استفراغ خونی |
 | Side effects may include nausea and dizziness. | عوارض جانبی ممکن است شامل حالت تهوع و سرگیجه باشند. | ممکن است تهوع و سرگیجه ایجاد کند. |
+| If you are taking an MAO inhibitor, do not use this product. (بیمار) | در صورت مصرف مهارکننده‌های MAO، از مصرف این دارو اکیداً خودداری فرمایید. | اگر داروی ضدافسردگی از نوع «مهارکننده‌ی MAO» مصرف می‌کنید، این دارو را نخورید. |
