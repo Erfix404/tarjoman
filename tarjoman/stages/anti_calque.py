@@ -1125,7 +1125,7 @@ LINT_CALQUE_PATTERNS: List[Tuple[str, str]] = [
         "به عنوان ... عمل کردن (act as calque)",
         r"به\s*عنوانِ?\s+[^\n،.]+?\s+عمل\s+(?:کردن|کرد|می‌کند|کردند)",
     ),
-    ("در پایان روز (at the end of the day calque)", r"در پایان روز"),
+    ("در پایان روز (at the end of the day calque)", r"در پایان روز(?!\s*(?:کاری|اول|دوم|سوم|بعد|قبل|جمعه|شنبه))"),
     ("حس ایجاد کردن (makes sense calque)", r"حس ایجاد\s+(?:می‌کند|می‌کرد|کرد|کردن)"),
     (
         "یک تصمیم گرفتن (make a decision calque)",
@@ -1136,7 +1136,7 @@ LINT_CALQUE_PATTERNS: List[Tuple[str, str]] = [
     ("نقطه نظر (point of view calque)", r"نقطه[‌\s\-]?(?:نظر|نظرات|نظرها)"),
     (
         "چراغ سبز نشان دادن (give green light calque)",
-        r"چراغ\s+سبز\s+نشان\s+(?:دادن|داد|دادند|می‌دهد)",
+        r"چراغ\s+سبز\s+(?:[^.،\n]{0,30}?\s+)?نشان\s+(?:دادن|داد|دادند|می‌دهد)",
     ),
     (
         "به پایان خط رسیدن (reach end of the line calque)",
@@ -1163,7 +1163,8 @@ LINT_CALQUE_PATTERNS: List[Tuple[str, str]] = [
     ("می‌باشد (copula calque)", r"\bن?می‌باش(?:م|ی|یم|ید|ند)?\b"),
     (
         "گردید (archaic passive calque)",
-        r"\bن?می‌گرد(?:د|ند)\b|\bگردید(?:ند)?\b|\bگردیده(?: است|‌اند)?\b|\bب?گردد\b|\bگردیدن\b",
+        # Present «می‌گردد/بگردد» is left out: it is also «گشتن» (to search).
+        r"\bگردید(?:ند)?\b|\bگردیده(?: است|‌اند)?\b|\bگردیدن\b",
     ),
     (
         "در رابطه با/در ارتباط با/در خصوص (regarding calque)",
@@ -1171,7 +1172,8 @@ LINT_CALQUE_PATTERNS: List[Tuple[str, str]] = [
     ),
     (
         "جهت به‌معنای برای (purpose calque)",
-        r"(?<!از جهت)(?<!بدین جهت)(?<!همین جهت)(?<!این جهت)(?<!آن جهت)(?<!چه جهت)\bجهت\b",
+        # Only the «برای» sense before typical purpose nouns; «جهت باد» is a noun.
+        r"\bجهت\s+(?:اطلاع|استفاده|دریافت|ثبت|انجام|بررسی|تهیه|ارسال|رفاه|حفظ|کسب|ورود|خرید|پرداخت)\b",
     ),
     ("در حالی که جدا نوشته شده (orthography)", r"\bدر\s+حالی\s+که\b"),
     ("از آنجایی که (orthography)", r"از\s+آنجایی\s+که"),

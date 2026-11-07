@@ -205,7 +205,8 @@ _T17_PATTERNS = [
 LINT_AI_TELL_PATTERNS: List[Tuple[str, str, str]] = [
     (
         "T6 promotional adjective",
-        r"بی‌نظیر|فوق‌العاده|مثال‌زدنی|منحصربه‌فرد|بی‌رقیب",
+        # «فوق‌العاده» is left out: it is an everyday intensifier.
+        r"بی‌نظیر|مثال‌زدنی|منحصربه‌فرد|بی‌رقیب",
         "Keep only if the source really says it; otherwise cut or make concrete.",
     ),
     (
@@ -228,11 +229,7 @@ LINT_AI_TELL_PATTERNS: List[Tuple[str, str, str]] = [
         r"به بررسی\s+[^.،\n]{1,40}?\s+(?:می‌پردازیم|خواهیم پرداخت|پرداخته شده)|در نتیجه[،,]?\s*می‌توان گفت",
         "Start with the content itself: «در این مقاله ... را بررسی می‌کنیم» or drop it.",
     ),
-    (
-        "T13 calque: at the end of the day",
-        r"در پایان روز",
-        "Idiom → «در نهایت/آخرش»; keep if literally the end of a day.",
-    ),
+    # «در پایان روز» is reported once, by the calque table (anti_calque.py).
     (
         "T13 calque: help you to",
         r"کمک می‌کند تا",
@@ -250,7 +247,7 @@ LINT_AI_TELL_PATTERNS: List[Tuple[str, str, str]] = [
     ),
     (
         "T3 role inflation",
-        r"نقش (?:کلیدی|حیاتی|بسزایی|محوری|اساسی) (?:را )?ایفا",
+        r"نقش (?:کلیدی|حیاتی|بسزایی|محوری|اساسی)[^.،\n]{0,40}? ایفا",
         "Say what it actually does: «X باعث Y می‌شود».",
     ),
     (
@@ -270,7 +267,7 @@ LINT_AI_TELL_PATTERNS: List[Tuple[str, str, str]] = [
     ),
     (
         "T13 calque: provide/enable",
-        r"(?:امکان|زمینه)[^.،\n]{0,30}? را فراهم (?:می‌کند|می‌آورد|کرده|ساخته)",
+        r"(?:امکان|زمینه)[^.،\n]{0,30}? را (?:[^.،\n]{0,15} )?فراهم (?:می‌کند|می‌آورد|کرده|ساخته)",
         "Usually «با X می‌شود ...» or «X به شما اجازه می‌دهد» → «با X می‌توانید ...».",
     ),
     (
@@ -327,6 +324,11 @@ LINT_AI_TELL_PATTERNS: List[Tuple[str, str, str]] = [
         "T14 connective pileup",
         r"(?:^|[.؟!]\s+)(?:علاوه بر این|همچنین|به علاوه|از سوی دیگر)،",
         "Vary or drop sentence-initial connectives; Persian chains with «و» or nothing.",
+    ),
+    (
+        "T13 calque: chat idioms",
+        r"هیچ نگرانی(?:‌ای)? (?:نیست|وجود ندارد)|احساس راحتی کنید|(?:به|پیش) (?:شما|تو) برمی‌گرد(?:م|یم)|نتوانست کمکی کند|یک نفس عمیق (?:گرفت|کشید)|راهش را [^.،\n]{0,20}?(?:ساخت|پیدا کرد)",
+        "Literal English idiom: «اشکالی نداره»، «راحت بپرسید»، «خبرتان می‌کنم»، «نتوانست جلوی ... را بگیرد»، «نفس عمیقی کشید»، «رفت».",
     ),
     (
         "T4 summary closer",

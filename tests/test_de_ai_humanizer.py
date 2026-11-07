@@ -240,7 +240,7 @@ class TestT6PromotionalEmptiness(unittest.TestCase):
         self.assertEqual(PersianHumanizer.humanize(text), text)
 
     def test_promotional_detected(self) -> None:
-        for text in ("خدمات بی‌نظیر ما", "تجربه‌ای فوق‌العاده", "کیفیت مثال‌زدنی ارائه می‌دهیم."):
+        for text in ("خدمات بی‌نظیر ما", "طراحی منحصربه‌فرد", "کیفیت مثال‌زدنی ارائه می‌دهیم."):
             labels = [d[0] for d in PersianHumanizer.detect(text)]
             self.assertTrue(any(l.startswith("T6") for l in labels), text)
 
@@ -286,7 +286,9 @@ class TestT13Calques(unittest.TestCase):
     def test_dar_payane_ruz_literal_kept(self) -> None:
         text = "در پایان روز به خانه برگشتیم."
         self.assertEqual(PersianHumanizer.humanize(text), text)
-        self.assertTrue(PersianHumanizer.detect(text))
+        # Reported (once) by the calque lint table, not rewritten.
+        cats = [i.category for i in linter.lint_text(text)]
+        self.assertIn("calque", cats)
 
     def test_negahi_biandazim(self) -> None:
         result = PersianHumanizer.humanize("نگاهی بیندازیم به نتایج.")
