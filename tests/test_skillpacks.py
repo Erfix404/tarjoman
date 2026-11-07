@@ -72,6 +72,7 @@ class TestSkillpacks(unittest.TestCase):
             "literary.md",
             "colloquial.md",
             "editor.md",
+            "book.md",
             "scientific.md",
             "philosophy.md",
             "legal.md",

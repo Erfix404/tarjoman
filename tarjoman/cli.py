@@ -289,6 +289,28 @@ def book_group() -> None:
     pass
 
 
+STYLE_SHEET_TEMPLATE = """# شیوه‌نامه‌ی ترجمه: {title}
+
+این فایل را پیش از ترجمه‌ی فصل اول پر کن و پیش از هر فصل دوباره بخوان.
+
+## سبک و سطح زبان
+- سبک: (رمان / فنی / علمی / …)
+- روایت: (فارسی معیارِ روان / رسمی / …)
+- دیالوگ: (محاوره‌ی مؤدب / خودمانی / معیار)
+
+## شخصیت‌ها
+(برای هر شخصیت: اسم فارسی، شکسته یا کتابی، «تو» یا «شما» با چه کسانی)
+
+## تصمیم‌های ثابت
+- ارقام: (فارسی / لاتین)
+- واحدها: (اصلی / تبدیل‌شده)
+- آوانویسی اسم‌ها: (مثلاً Siobhan ← سیوبان)
+- اصطلاح‌های تکرارشونده: در terms.db با `tarjoman book terms` ثبت کن.
+
+## یادداشت‌های فصل‌به‌فصل
+"""
+
+
 @book_group.command("init")
 @click.argument("title", type=str)
 @click.option("-o", "--out-dir", "out_dir", default=None, type=click.Path(path_type=Path), help="Output directory for book project")
@@ -321,9 +343,14 @@ def book_init_cmd(title: str, out_dir: Optional[Path]) -> None:
         tsv_header = "english_term\tpersian_term\tdomain\tnotes\n"
         terms_path.write_text(tsv_header, encoding="utf-8")
 
+    style_path = target_dir / "style.md"
+    if not style_path.exists():
+        style_path.write_text(STYLE_SHEET_TEMPLATE.format(title=title), encoding="utf-8")
+
     click.echo(f"Book project initialized at: {target_dir.resolve()}")
     click.echo(f"  - Manifest: {manifest_path}")
     click.echo(f"  - Termbase: {terms_path}")
+    click.echo(f"  - Style sheet: {style_path}")
 
 
 @book_group.command("status")
@@ -466,8 +493,16 @@ def book_terms_cmd(
         if not left.strip() or not fa.strip():
             click.echo("Error: both EN and FA are required.", err=True)
             sys.exit(1)
-        termbase.record_term(left.strip(), fa.strip(), domain=domain.strip())
-        click.echo(f"Term recorded: {left.strip()} -> {fa.strip()}")
+        previous = termbase.resolve_term(left.strip(), domain.strip() or None)
+        if previous and previous != fa.strip():
+            termbase.update_term(left.strip(), fa.strip(), domain=domain.strip())
+            click.echo(
+                f"Term updated: {left.strip()} -> {fa.strip()} (was: {previous}). "
+                f"Search earlier chapters for «{previous}» and replace it."
+            )
+        else:
+            termbase.record_term(left.strip(), fa.strip(), domain=domain.strip())
+            click.echo(f"Term recorded: {left.strip()} -> {fa.strip()}")
         termbase.close()
         return
 
@@ -496,6 +531,38 @@ def book_terms_cmd(
     total = termbase.count()
     termbase.close()
     click.echo(f"Termbase: {project.name} ({total} terms)")
+
+
+@book_group.command("check")
+@click.argument("project_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
+@click.argument("source_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.argument("target_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+def book_check_cmd(project_dir: Path, source_file: Path, target_file: Path) -> None:
+    """Check a translated chapter against the termbase, character bible and register."""
+    from tarjoman.memory.consistency import check_chapter
+
+    project = Path(project_dir)
+    source = source_file.read_text(encoding="utf-8")
+    target = target_file.read_text(encoding="utf-8")
+
+    termbase = Termbase(db_path=project / "terms.db")
+    terms = termbase.get_all_terms()
+    termbase.close()
+
+    bible_path = project / "characters.json"
+    characters = []
+    if bible_path.exists():
+        bible = CharacterBible(bible_path=bible_path)
+        characters = [(c.name, c.persian_name) for c in bible.list_characters()]
+
+    findings = check_chapter(source, target, terms, characters)
+    if not findings:
+        click.echo("Consistency check passed: terms, names and dialogue register are consistent.")
+        return
+    click.echo(f"Consistency check: {len(findings)} finding(s)")
+    for f in findings:
+        click.echo(f"- [{f.category}] {f.message}")
+    sys.exit(1)
 
 
 # -----------------------------------------------------------------------------
