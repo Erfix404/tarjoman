@@ -74,21 +74,31 @@ _FA_B_L_LINT = r"(?<![؀-ۿ‌])"
 _FA_B_R_LINT = r"(?![؀-ۿً-ّ‌])"
 
 
+#: Common words ending in «ه» that are never a misspelled ezafe (function
+#: words, adverbs, verbal nouns). Kept out of hekasre detection.
+_HE_NON_EZAFE = set("""همه توجه اینکه آنکه چگونه بلکه گرچه اگرچه هرچه آنچه چنانچه وگرنه
+همیشه ویژه نه چه که به البته اتفاقیه روزانه ماهانه سالانه هفتگانه جداگانه آگاهانه""".split())
+
+
 def find_hekasre(text: str) -> List[Tuple[str, str, str]]:
-    """Return [(matched_text, suggestion, tier)] for probable hekasre errors."""
+    """Return [(matched_text, suggestion, tier)] for probable hekasre errors.
+
+    Hekasre is the colloquial habit of writing the ezafe kasre as «ـه»
+    («کتابه من» instead of «کتابِ من»). Only a word ending in «ه» directly
+    followed by a personal/demonstrative pronoun is flagged: any other
+    following word produced constant false positives («باید توجه داشت»،
+    «شده است»). Known nouns, function words, past participles (stem ending
+    in «د»/«ت»: شده، رفته، گفته) and «ـانه» adverbs are skipped.
+    """
     out: List[Tuple[str, str, str]] = []
-    for m in re.finditer(r'(?<![‌آ-ی])([آ-ی]{2,})ه\s+([آ-ی]{2,})', text):
-        stem, nxt = m.group(1), m.group(2)
-        whole = stem + "ه"
-        if whole in _HE_NOUNS:
-            continue
-        out.append((m.group(0), f'{stem}ِ {nxt}', 'A'))
     for m in re.finditer(r'(?<![‌آ-ی])([آ-ی]{2,})ه\s+(' + _PRON + r')(?![آ-ی])', text):
         stem, nxt = m.group(1), m.group(2)
         whole = stem + "ه"
-        if whole in _HE_NOUNS:
+        if whole in _HE_NOUNS or whole in _HE_NON_EZAFE:
             continue
-        out.append((m.group(0), f'{stem}ِ {nxt}', 'B'))
+        if stem.endswith(("د", "ت", "ان")):
+            continue
+        out.append((m.group(0), f'{stem}ِ {nxt}', 'A'))
     return out
 
 
@@ -133,6 +143,19 @@ def _load_shared_tables() -> Tuple[
 
 
 _SHARED = _load_shared_tables()
+
+
+def _load_ai_tells() -> List[Tuple[str, str, str]]:
+    """Suggest-only AI-tell table from tarjoman.stages.humanizer (if importable)."""
+    try:
+        from tarjoman.stages.humanizer import LINT_AI_TELL_PATTERNS
+
+        return list(LINT_AI_TELL_PATTERNS)
+    except Exception:
+        return []
+
+
+_AI_TELLS = _load_ai_tells()
 
 # Vendored fallback (mirrors tarjoman/stages/anti_calque.py tables).
 _FALLBACK_CALQUES: List[Tuple[str, str]] = [
@@ -326,9 +349,9 @@ def lint_text(content: str, skip_code_blocks: bool = True) -> List[LintIssue]:
                     LintIssue(
                         line_number=idx,
                         category="calque",
-                        message=f"Banned calque detected: '{calque_name}'.",
+                        message=f"Possible calque: '{calque_name}'. Check the context before changing it.",
                         snippet=line.strip(),
-                        suggestion="Rewrite with AntiCalqueEngine.eliminate_calques().",
+                        suggestion="Rewrite by meaning if it is a calque; keep it if the literal sense is meant.",
                     )
                 )
 
@@ -391,6 +414,20 @@ def lint_text(content: str, skip_code_blocks: bool = True) -> List[LintIssue]:
                     suggestion="Drop «یک» for generic class subjects.",
                 )
             )
+
+        # 8b. Suggest-only AI tells (never auto-fixed; meaning decides).
+        for tell_label, tell_re, tell_advice in _AI_TELLS:
+            tell_match = re.search(tell_re, line)
+            if tell_match:
+                issues.append(
+                    LintIssue(
+                        line_number=idx,
+                        category="ai-tell",
+                        message=f"AI-style phrasing ({tell_label}): «{tell_match.group(0)}».",
+                        snippet=line.strip(),
+                        suggestion=tell_advice,
+                    )
+                )
 
         # 9. Hekasre detection (v2.3.0)
         for hit, fix, tier in find_hekasre(line):

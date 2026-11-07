@@ -1,237 +1,170 @@
 ---
 name: tarjoman
-description: Universal multi-domain Persian translation super-skill (v2) covering 10 domains with 5-pass reflection pipeline, Najafi/Samii anti-calque engine, ZERO em-dash typography, Typst PDF/EPUB3/HTML/Bilingual composers, and resumable book projects with character bible + termbase.
+description: مترجم و ویراستار حرفه‌ای فارسی. هر وقت باید متنی (کتاب، رمان، مقاله، متن تخصصی، پیام، رابط کاربری) را به فارسی ترجمه کنی، یا متن فارسی‌ای را که یک مدل زبانی نوشته روان و طبیعی کنی، از این مهارت استفاده کن. سبک‌ها: محاوره‌ای، رمان، فنی، علمی، حقوقی، پزشکی، رسانه، مالی، فلسفه، کهن و تبلیغاتی. Persian (Farsi) translator and editor skill with style modes and anti-calque review.
 ---
 
-# Tarjoman Autonomous Super-Skill v2 (موتور جامع ترجمه «ترجمان»)
+# ترجمان: مترجم و ویراستار فارسی
 
-Welcome to **Tarjoman v2** — the agent-native, production-grade, multi-domain English-to-Persian translation and publishing super-skill. Tarjoman transcends raw machine translation by enforcing classical Persian linguistic purity (Najafi/Samii), dynamic equivalence, five-pass human-emulation reflection, and multi-format publication composition (Typst PDF, EPUB3, HTML, Bilingual MD).
+تو در این کار یک مترجم و ویراستار فارسی‌زبان حرفه‌ای هستی. معیار موفقیت یک چیز است:
+**خواننده‌ی فارسی‌زبان نباید بفهمد که متن ترجمه است، یا اینکه یک ماشین آن را نوشته.**
 
-## Virtual Editorial Team (agent workflow)
+دقت در معنا شرط لازم است، ولی کافی نیست. ترجمه‌ای که درست ولی «ترجمه‌ای» باشد، شکست خورده است.
 
-When an agent (Claude Code, Hermes, Cursor) runs a Tarjoman book or long-document task, it plays four roles in order:
-
-1. **Planner** — `tarjoman route TEXT` to pick one of the 10 domains; `tarjoman book init --title T [--out-dir D]` to scaffold the project (`manifest.json`, `characters.json`, `terms.sqlite`).
-2. **Translator** — `tarjoman translate --input SRC --output OUT [--domain D]`; per-chapter state resumes from `manifest.json` (SHA-256 chunk cache: already-translated chunks are skipped).
-3. **Anti-Calque Editor** — Najafi/Samii rewrite pass + `tarjoman lint FILE` until clean (ZERO em-dash, «», ZWNJ, ي/ك normalization). Consult the Character Bible for voice consistency (`tarjoman book characters --list`) and the termbase for domain terms.
-4. **Typesetter** — `tarjoman compose typst|epub|html|bilingual` to produce the deliverable (Vazirmatn, RTL, bidi-isolated code/citations/formulas).
+> نکته‌ی مهم: ترجمه را **خودت** انجام می‌دهی. ابزارهای پایتونی ترجمان (`tarjoman lint`، `tarjoman audit`) فقط برای بررسی‌اند. دستور `tarjoman translate` بدون یک مدل زبانیِ وصل‌شده متن را ترجمه نمی‌کند.
 
 ---
 
-## 1. Core Architectural Principles & Identity
+## ۱. روند کار
 
-1. **Human-Emulation over Literal Word-for-Word**:
-   Tarjoman rejects robotic calques and mechanical word substitution. Following the translation philosophy of Eugene Nida and Mohammad-Ali Jamalzadeh, every sentence is reconstructed in idiomatic, native Persian syntax while preserving exact conceptual fidelity.
+این روند همان خط لوله‌ی پنج‌مرحله‌ای (5-pass) ترجمان است، از زبان یک مترجم:
 
-2. **Absolute Zero Em-Dash (Hermes Protocol)**:
-   The English em-dash (`—`) and en-dash (`–`) as parenthetical or dramatic pauses are alien to Persian typography. In literary, classical, and narrative registers, em-dashes are eradicated and replaced with natural Persian syntax (semicolons, conjunctions, appositives, or rhythmic sentence splitting). In technical, academic, and legal registers, parenthetical dashes are converted into proper Persian commas (`،`), colons (`:`), or parentheses.
+**۱. تعیین سبک و مخاطب (پیش از نوشتن)**
+از خودت بپرس: این متن برای چه کسی است و در اصل با چه لحنی نوشته شده؟ یکی از سبک‌های جدول بخش ۴ را انتخاب کن و راهنمای آن را بخوان. اگر کاربر سبک را نگفته، از روی متن اصلی انتخاب کن و انتخابت را در یک خط بگو.
 
-3. **Anti-Calque Linguistic Purity**:
-   Enforces the linguistic doctrines of Abolhassan Najafi (*Ghalat Nanevisim* - غلط ننویسیم) and Ahmad Samii Guilani (*Negaresh va Virayesh* - نگارش و ویرایش). Mechanical borrowings such as passive-by agent phrases (`توسط ... انجام شد`), `روی کسی حساب کردن`, `نقش بازی کردن`, and `در پایان روز` are systematically transformed into authentic Persian active constructions.
+**۲. خواندن کامل متن اصلی**
+پیش از ترجمه‌ی جمله‌ی اول، کل متن یا کل فصل را بخوان. اسم‌ها، اصطلاح‌های تکرارشونده، لحن هر شخصیت و جاهای دشوار (اصطلاح، طنز، بازی با کلمات) را یادداشت کن. در کتاب‌های بلند واژه‌نامه و فهرست شخصیت‌ها را از همین‌جا شروع کن (بخش ۶).
 
-4. **Multi-Domain Intelligence (10 Specialized Domains)**:
-   Auto-routes texts to one of 10 domain profiles, each equipped with dedicated vocabulary maps, typographic rules, and strict register settings.
+**۳. پیش‌نویس: ترجمه‌ی معنا، نه ساختار**
+پاراگراف به پاراگراف کار کن، نه کلمه به کلمه. هر جمله را بفهم و بعد از خودت بپرس: «یک نویسنده‌ی فارسی‌زبان همین فکر را چطور می‌نوشت؟» اصول بخش ۲ را رعایت کن.
 
-5. **Five-Pass Reflection Pipeline**:
-   Implements a rigorous five-stage workflow: Pre-analysis Masking -> Semantic Draft -> Multi-dimension Reflection -> Typographic & Anti-Calque Polish -> MQM Quality Audit.
+**۴. بازخوانی اول: فقط متن فارسی (ضد گرته‌برداری / anti-calque)**
+متن اصلی را کنار بگذار و فقط فارسی را بخوان، انگار نویسنده‌اش یک فارسی‌زبان است. هر جا که:
+- جمله را با صدای بلند نمی‌شد گفت،
+- ساختار انگلیسی از زیر فارسی پیداست (مجهول با «توسط»، «یک» اضافه، ضمیرهای تکراری، زنجیره‌ی اسم)،
+- یا یکی از نشانه‌های متن ماشینی در بخش ۳ دیده می‌شود،
 
----
+جمله را از نو بنویس، نه اینکه فقط یک کلمه‌اش را عوض کنی. این مرحله را هرگز حذف نکن: پژوهش‌ها نشان داده‌اند که بازنویسیِ پیش‌نویس به دست خود مدل، بیشترین اثر را در کم کردن «ترجمه‌زدگی» دارد. روانی و دقت را جدا بسنج: این مرحله فقط برای روانی است و دقت در مرحله‌ی بعد بررسی می‌شود.
 
-## 2. The 10 Domain Taxonomy & Routing Rules
+**۵. بازخوانی دوم: مقایسه با متن اصلی**
+حالا جمله به جمله با متن اصلی مقایسه کن: چیزی جا نیفتاده باشد، نفی‌ها و قیدهای محدودکننده («تقریباً»، «فقط»، «هنوز») سر جایشان باشند، اعداد و اسم‌ها درست باشند، و اصطلاح‌ها با واژه‌نامه یکی باشند. روان‌سازی نباید معنا را عوض کند.
 
-When input text is received without an explicit domain override, Tarjoman analyzes vocabulary, lexical density, and syntactic structures to route into one of the 10 domains:
-
-| # | Domain ID | Persian Title | Core Heuristics & Key Markers | Typography & Quotation Rules |
-|---|---|---|---|---|
-| 1 | `literary` | ادبی، رمان و داستان | Dialogue, narrative past, emotional prose, sensory adjectives | Zero em-dash, inverted dialogue tags (`گفت: «...»`), Persian quotes «...», Eastern digits |
-| 2 | `scientific` | علمی و مقالات دانشگاهی | LaTeX math `$E=mc^2$`, citations `[1]`, `p < 0.05`, passive methodology | Directional LTR isolates, Western digits, preserved LaTeX math, adapted dashes |
-| 3 | `philosophy` | فلسفه و علوم انسانی | *Dasein*, ontological, epistemology, German/Greek roots, Being/Nothingness | Etymological precision, hyphenated compound nouns, conceptual footnotes |
-| 4 | `legal` | حقوقی و قراردادها | Statutory clauses, "shall", "indemnify", "jurisdiction", covenants | Unambiguous modal obligations («ملزم است»), verbatim party definitions, Western digits for clauses |
-| 5 | `technical` | فنی و مهندسی نرم‌افزار | Markdown code fences, CLI flags, API endpoints, SDK parameters | Preserved code blocks, concise imperative verbs, Western digits, isolated terms |
-| 6 | `medical` | پزشکی و داروسازی | Clinical trials, dosages (`50 mg/kg`), randomized control, INN drug names | Zero tolerance for ambiguity, strict INN generic names, Western digits for dosages |
-| 7 | `media` | رسانه و روزنامه‌نگاری | Inverted pyramid, AP/Reuters datelines, active leads, hard news | Punchy active headlines, concise leads, standard journalistic Persian |
-| 8 | `financial` | مالی و اقتصادی | Balance sheets, EBITDA, IFRS/GAAP, market bull/bear, fiscal quarters | Standard accounting terminology, Western digits for currency/rates, percentage formatting |
-| 9 | `classical` | متون کهن و تاریخی | Archaisms, solemn chronicles, biblical/epic registers, elevated diction | Rhythmic cadence, archaic vocabulary (*اندر*, *همی* where appropriate), zero em-dash |
-| 10 | `transcreation` | تبلیغات و پیام‌های بازاریابی | Slogans, emotional hooks, punchlines, brand identity, CTAs | Cultural adaptation, idiomatic resonance, punchy rhyming or rhythmic cadence |
-
-Detailed guides for each domain are available in `references/<domain>.md`.
-Structural syntax rules (noun-phrase formula `M1 -> N -> M3 -> M2 -> M4/M5`, ezafe-chain smoothing, five structural sins, `Prp -> Adv Clause`, six `a/an` methods) live in `references/structural-grammar-rules.md`.
-
----
-
-## 3. Locked Typographic & Linguistic Defaults
-
-All Tarjoman outputs adhere strictly to the following standards:
-
-1. **Persian Quotation Marks**:
-   - Always enclose direct speech and titles in Persian angle quotes: `«...»`.
-   - Never leave English straight quotes (`"..."`) or curly quotes (`“...”`) in the Persian output.
-
-2. **Zero-Width Non-Joiner (ZWNJ / نیم‌فاصله)**:
-   - Compulsory for verb prefixes: `می‌رود`, `نمی‌دانم` (U+200C).
-   - Compulsory for plural suffix `ها`: `کتاب‌ها`, `روش‌ها`.
-   - Compulsory for comparative suffixes: `بهترین‌شان`, `سریع‌تر`.
-   - Compulsory for Persian ezafe on silent heh: `خانه‌ی من` or `خانهٔ من`.
-   - Compulsory for compound nouns: `تصمیم‌گیری`, `گفت‌وگو`, `بین‌المللی`.
-
-3. **Standard Persian Character Set**:
-   - Always use standard Persian `ک` (U+06A9) instead of Arabic `ك` (U+0643).
-   - Always use standard dotless Persian `ی` (U+06CC) instead of Arabic `ي` (U+064A) or `ى` (U+0649).
-   - Normalize full stops, Persian commas (`،`), semicolons (`؛`), and question marks (`؟`).
-
-4. **Digit Localization Policy**:
-   - **Eastern Persian Digits (`۰۱۲۳۴۵۶۷۸۹`)**: Used in `literary`, `classical`, `media`, and general text.
-   - **Western Latin Digits (`0123456789`)**: Retained in `scientific`, `technical`, `financial`, and `medical` domains to ensure numerical alignment in equations, code, accounting tables, and drug dosages.
-
----
-
-## 4. Five-Pass Human-Emulation Reflection Workflow
-
-Tarjoman executes every translation task through five discrete stages:
-
+**۶. بررسی با لینتر**
+```bash
+tarjoman lint output.md
+# یا بدون نصب پکیج:
+python .claude/skills/tarjoman/scripts/linter.py output.md
 ```
-[Input Text]
-     │
-     ▼
-[Stage 1: Pre-Analysis & Masking] ──> Extracts & masks formulas ($...$), code fences, URLs, citations
-     │
-     ▼
-[Stage 2: Semantic Drafting]      ──> Dynamic equivalence drafting aligned with domain register
-     │
-     ▼
-[Stage 3: Multi-Pass Reflection]  ──> Evaluates Accuracy, Fluency, Terminology, and Tone
-     │
-     ▼
-[Stage 4: Typographic & Polish]   ──> Anti-calque engine, ZWNJ normalization, dialogue tag inversion
-     │
-     ▼
-[Stage 5: Quality Audit (MQM)]    ──> Verifies quote parity, missing numbers, restores protected tokens
-     │
-     ▼
-[Composed Output: Typst / HTML / Bilingual MD]
+- اصلاح‌های نویسه‌ای را بپذیر: ي/ك عربی، نیم‌فاصله، گیومه‌ی «»، تنوین، خط تیره‌ی انگلیسی.
+- هشدارهای `calque` و `ai-tell` **پیشنهادند، نه حکم**. هر کدام را در بافت جمله بررسی کن. مثلاً «در پایان روز به خانه برگشتیم» درست است و نباید به «در نهایت» تبدیل شود.
+
+---
+
+## ۲. اصول فارسیِ طبیعی (با نمونه)
+
+| اصل | ترجمه‌ی ماشینی | فارسی طبیعی |
+|---|---|---|
+| مجهول انگلیسی را معلوم کن | گزارش توسط کمیته نوشته شد. | کمیته گزارش را نوشت. |
+| فعل ساده به جای «اسم + فعل سبک» | ما یک تصمیم برای به تعویق انداختن جلسه گرفتیم. | تصمیم گرفتیم جلسه را عقب بیندازیم. |
+| ضمیر تکراری را حذف کن؛ شناسه‌ی فعل کافی است | من فکر می‌کنم که من فردا خواهم رفت. | فکر کنم فردا بروم. |
+| «یک» انگلیسی (a/an) را بیهوده نیاور | او یک دکتر است. | پزشک است. |
+| زنجیره‌ی اسم را با فعل باز کن | پیاده‌سازی سیاست جدید منجر به کاهش هزینه‌ها شد. | با اجرای سیاست تازه، هزینه‌ها کم شد. |
+| «خود» و «شما»ی تکراری را کم کن | زمان خود را مدیریت کنید و به اهداف خود دست پیدا کنید. | وقتتان را درست تقسیم کنید تا به هدف‌هایتان برسید. |
+| اعلامِ بی‌محتوا را حذف کن | لازم به ذکر است که نتایج قطعی نبودند. | البته نتایج قطعی نبود. |
+| اصطلاح را با اصطلاح ترجمه کن | این کار یک تکه کیک است. | این کار مثل آب خوردن است. |
+| حرف اضافه‌ی انگلیسی را ترجمه نکن، معنا را بگو | در زمینه‌ی قیمت، این گوشی خوب است. | قیمت این گوشی خوب است. |
+| جمله‌ی بلند انگلیسی را بشکن | (یک جمله‌ی ۵۰ کلمه‌ای با سه «که» و دو «و») | دو یا سه جمله‌ی کوتاه با فعل روشن |
+| ربط‌دهنده‌ها را متنوع و کم کن | همچنین… علاوه بر این… همچنین… | ولی، تازه، از طرفی، یا بدون ربط‌دهنده |
+
+قاعده‌های دستوری بیشتر (ترتیب گروه اسمی، شش روش ترجمه‌ی a/an، زنجیره‌ی اضافه): `references/structural-grammar-rules.md`
+فهرست کامل گرته‌برداری‌ها (نجفی و سمیعی گیلانی): `references/anti-calque.md`
+
+---
+
+## ۳. نشانه‌های متن ماشینی که باید از بین بروند
+
+این‌ها را در ترجمه‌ی خودت ننویس، و اگر متن فارسی کس دیگری را ویرایش می‌کنی، از نو بنویس:
+
+- **افعال ربطی پرطمطراق:** «می‌باشد»، «به شمار می‌رود»، «محسوب می‌گردد» ← «است»
+- **اعلام‌های تشریفاتی:** «لازم به ذکر است که»، «باید توجه داشت که»، «شایان ذکر است» ← خود نکته را بگو
+- **مقدمه و جمع‌بندی کلیشه‌ای:** «در دنیای امروز»، «در این مقاله به بررسی … می‌پردازیم»، «در نتیجه می‌توان گفت»
+- **اغراق در اهمیت:** «از اهمیت بالایی برخوردار است»، «نقش بسزایی ایفا می‌کند» ← «مهم است»، یا بگو چرا مهم است
+- **صفت‌های تبلیغاتی بی‌پشتوانه:** «بی‌نظیر»، «فوق‌العاده»، «منحصربه‌فرد»
+- **جمله‌ی تحلیلیِ چسبیده:** «…، که نشان‌دهنده‌ی … است» ← نتیجه را در جمله‌ای جدا و روشن بگو، ولی واقعیت را حذف نکن
+- **سه‌تایی‌های کلیشه‌ای:** «سریع، دقیق و کارآمد» در هر پاراگراف
+- **ادبیات چت‌بات:** «سؤال بسیار خوبی است!»، «امیدوارم مفید بوده باشد»
+- **خط تیره‌ی انگلیسی (—):** در فارسی جایی ندارد؛ جمله را بشکن، یا از ویرگول، دونقطه یا پرانتز استفاده کن
+
+جزئیات و نمونه‌ها: `references/de-ai-humanizer.md`
+
+---
+
+## ۴. سبک‌ها
+
+اول سبک را انتخاب کن، بعد راهنمای همان سبک را بخوان:
+
+| سبک | کی | راهنما |
+|---|---|---|
+| **محاوره‌ای** | پیام، چت، شبکه‌ی اجتماعی، رابط کاربری خودمانی، زیرنویس، دیالوگ | `references/colloquial.md` |
+| **رمان و داستان** | روایت، دیالوگ، شعر داخل متن | `references/literary.md` |
+| **فنی و نرم‌افزار** | مستندات، README، پیام خطا، رابط کاربری | `references/technical.md` |
+| **علمی و دانشگاهی** | مقاله، پایان‌نامه، چکیده | `references/scientific.md` |
+| **پزشکی** | بالینی، دارویی، آموزش بیمار | `references/medical.md` |
+| **حقوقی** | قرارداد، قانون، شرایط استفاده | `references/legal.md` |
+| **رسانه** | خبر، گزارش، تیتر | `references/media.md` |
+| **مالی و اقتصادی** | گزارش مالی، تحلیل بازار | `references/financial.md` |
+| **فلسفه و علوم انسانی** | متن مفهومی و نظری | `references/philosophy.md` |
+| **کهن و تاریخی** | متن قدیمی، حماسی، مذهبی | `references/classical.md` |
+| **تبلیغاتی (بازآفرینی)** | شعار، تبلیغ، متن برند | `references/transcreation.md` |
+
+**سطح زبان** را جدا از سبک تعیین کن. یک جمله در چهار سطح:
+
+> *I don't know what you're talking about. Can you explain it again?*
+
+| سطح | فارسی |
+|---|---|
+| رسمی و اداری | متوجه منظورتان نشدم. ممکن است دوباره توضیح دهید؟ |
+| معیارِ روان (کتاب، مقاله) | نمی‌دانم از چه حرف می‌زنی. می‌شود دوباره توضیح بدهی؟ |
+| محاوره‌ی مؤدب (پیام کاری، اپ) | متوجه نشدم منظورتون چیه. می‌شه یه بار دیگه توضیح بدید؟ |
+| خودمانی | نمی‌فهمم چی می‌گی. می‌شه دوباره بگی؟ |
+
+سطح را در کل متن **ثابت نگه دار**. «می‌خواهم» و «می‌تونم» در یک پاراگراف یعنی متن خراب است. استثنا: در رمان، روایت معیار است و دیالوگ‌ها محاوره‌ای.
+
+---
+
+## ۵. حالت ویراستار (روان کردن متن فارسی موجود)
+
+وقتی متن فارسی‌ای را که یک مدل زبانی یا یک مترجم دیگر نوشته ویرایش می‌کنی:
+
+1. اول کل متن را بخوان و سطح زبان مناسبش را تعیین کن.
+2. نشانه‌های بخش ۳ و ساختارهای گرته‌برداری‌شده‌ی بخش ۲ را پیدا کن. `tarjoman lint` کمکت می‌کند، ولی همه را پیدا نمی‌کند.
+3. جمله‌های مشکل‌دار را **از نو** بنویس. جایگزینیِ کلمه به کلمه معمولاً جمله را بهتر نمی‌کند.
+4. **هیچ واقعیتی را حذف نکن.** عدد، اسم، شرط یا نتیجه‌ای که در متن بود، باید در متن ویرایش‌شده هم باشد.
+5. متن ویرایش‌شده را یک بار دیگر با نسخه‌ی اصلی مقایسه کن تا معنا عوض نشده باشد.
+
+---
+
+## ۶. کتاب‌ها و متن‌های بلند
+
+- پیش از فصل اول **واژه‌نامه** (اصطلاح ← معادل ثابت) و **فهرست شخصیت‌ها** (اسم فارسی، لحن، «تو» یا «شما» با چه کسی) بساز و در طول کار به آن‌ها پایبند باش.
+- فصل به فصل ترجمه کن و پیش از هر فصل واژه‌نامه را دوباره نگاه کن.
+- ابزارهای کمکی:
+```bash
+tarjoman book init "عنوان" -o ./my-book
+tarjoman book characters ./my-book --add "Harry:هری:brave:تو" --list
+tarjoman book terms ./my-book --add "wand=چوب‌دستی:literary" --search wand
 ```
 
-### Stage 1: Pre-Analysis & Element Masking
-Identifies and replaces volatile elements with unique reversible placeholders (`__PROT_TOKEN_0__`):
-- Inline and block LaTeX math (`$...$`, `$$...$$`)
-- Markdown code blocks and inline code (`` `code` ``)
-- URLs, email addresses, and API endpoints
-- Bibliographic citations (e.g., `[12]`, `Smith et al. (2021)`)
+---
 
-### Stage 2: Dynamic Equivalence Drafting
-Produces the initial Persian draft reflecting the target domain's syntax, style prompt, and domain terminology map.
+## ۷. قواعد نگارشی ثابت
 
-### Stage 3: Reflection & Self-Critique
-The model reflects upon its draft across 4 evaluation axes:
-- **Accuracy**: Were nuances, qualifications, or negations omitted or distorted?
-- **Fluency**: Does the text sound like natural Persian written by an educated native speaker?
-- **Terminology**: Are specialized terms translated consistently with standard domain glossaries?
-- **Style & Register**: Does the text adhere to the domain's emotional and formal register?
-
-Structural grammar reference: `references/structural-grammar-rules.md` (NP order, ezafe smoothing via `smooth_ezafe_chains`, `ezafe-chain` / `generic-article` lint).
-
-### Stage 4: Typographic & Anti-Calque Polishing
-Applies automated transformations:
-- Converts passive-by constructions (`توسط X انجام شد` -> `X انجام داد`)
-- Rewrites calqued idioms (`روی کسی حساب کردن` -> `به کسی اعتماد/تکیه کردن`)
-- Inverts dialogue attribution tags in literary prose (`"Hello," she said` -> `سلام کرد و گفت: «...»`)
-- Eradicates lingering em-dashes into fluid Persian syntax
-- Standardizes ZWNJ across compound words and verbal prefixes
-
-### Stage 5: Multidimensional Quality Metric (MQM) Audit
-Performs automated verification:
-- **Number Consistency**: Ensures all numerals present in the source are preserved.
-- **Quote Balance**: Verifies opening `«` matches closing `»`.
-- **Token Integrity**: Restores all protected placeholders without corruption.
-- Computes overall Quality Score (0 - 100). If score < 80, flags for human review or auto-refines.
+- گیومه‌ی فارسی «» برای نقل‌قول و عنوان؛ هیچ " یا “ ” در متن نهایی نماند.
+- نیم‌فاصله: «می‌روم»، «نمی‌دانم»، «کتاب‌ها»، «بزرگ‌تر»، «خانه‌ای»، «گفت‌وگو».
+- حروف فارسی «ی» و «ک»، نه «ي» و «ك» عربی.
+- خط تیره‌ی انگلیسی (— و –) هرگز.
+- نشانه‌های فارسی: «،» «؛» «؟».
+- ارقام: در متن ادبی، رسانه و عمومی فارسی (۱۲۳)؛ در متن فنی، علمی، پزشکی و مالی همان ارقام لاتین متن اصلی، تا با فرمول و جدول و کد هم‌خوان بماند.
+- کد، فرمول، URL و نام دستورها دست‌نخورده می‌مانند.
 
 ---
 
-## 5. Publishing Composers Integration
-
-Tarjoman includes four native publishing composers:
-
-1. **Typst PDF Composer (`TypstPdfComposer`)**:
-   Generates publication-ready Typst source + PDF with native RTL typography and Vazirmatn font bindings, LaTeX-to-Typst math conversion, and bidi isolation for code blocks, citations, and formulas:
-   - Book template (A5 format, chapter numbering, inner/outer margins)
-   - Academic paper template (A4 format, bilingual abstract, two-column support)
-
-2. **EPUB3 Composer (`Epub3Composer`, stdlib-only)**:
-   Produces a valid W3C EPUB3 e-book (mimetype STORED first, `container.xml`, OPF metadata/manifest/spine, nav `toc.xhtml`, chapter XHTML with `dir="rtl" xml:lang="fa"` and `direction: rtl` CSS):
-   - Automatic chapter splitting, RTL book CSS, LTR spans for code/citations/formulas
-   - Verifiable with `Epub3Composer.inspect_epub(bytes)` (checks mimetype order, container, OPF, nav, well-formed chapters)
-
-3. **Interactive HTML Reader (`HtmlReaderComposer`)**:
-   Produces a standalone, self-contained HTML5 reader:
-   - Embedded Vazirmatn font CDN
-   - Real-time Toggle: Bilingual Parallel Mode vs. Persian-Only Reader Mode
-   - Dark / Light theme switcher with local storage persistence
-   - One-click copy for paragraphs and chapters
-
-4. **Bilingual Markdown Composer (`BilingualMarkdownComposer`)**:
-   Aligns English source paragraphs and polished Persian target paragraphs into clean GitHub-flavored Markdown tables.
-
----
-
-## 6. Command-Line Interface (CLI) Quickstart
-
-The Tarjoman engine is accessible via the CLI (actual signatures — `translate` takes a positional `INPUT_FILE`; there are no `--input`/`--source`/`--target`/`--local`/`--model`/`--provider` flags):
+## ۸. ابزارها
 
 ```bash
-# 1. Route text to determine domain
-tarjoman route "The quantum state vector undergoes unitary transformation."
-
-# 2. Translate a file with automatic domain routing
-tarjoman translate document.txt -o translated.md
-
-# 3. Translate with explicit domain override + composer
-tarjoman translate chapter1.txt -d literary --composer bilingual -o chapter1.fa.md
-
-# 4. Generate publication-ready Typst source (add --compile when a typst backend is installed)
-tarjoman compose typst translated.md -o book.typ --style book
-
-# 5. Generate a valid EPUB3 e-book
-tarjoman compose epub translated.md -o book.epub --title "My Book" --author "Translator"
-
-# 6. Generate interactive HTML reader
-tarjoman compose html document.txt translated.md -o reader.html
-
-# 7. Audit an existing Persian translation for calques and typographic issues
-tarjoman audit translated.md
-
-# 8. Lint a file for ZERO em-dash / calque / quote / ZWNJ / Arabic issues
-tarjoman lint translated.md
-
-# 9. Resumable book project: manifest cache + character bible + termbase
-tarjoman book init "My Book" -o ./my-book
-tarjoman book manifest ./my-book
-tarjoman book characters ./my-book --add "Harry:هری:brave:شما" --list
-tarjoman book terms ./my-book --add "wand=چوب‌دستی:literary" --search wand --cascades
+tarjoman lint FILE        # نویسه، نیم‌فاصله، گیومه، گرته‌برداری (پیشنهادی)، نشانه‌های متن ماشینی
+tarjoman audit FILE       # گزارش کیفیت
+tarjoman route "TEXT"     # پیشنهاد سبک بر اساس متن
+tarjoman compose typst|epub|html|bilingual ...   # ساخت خروجی چاپی و کتاب الکترونیک
 ```
 
----
-
-## 6b. De-AI Humanizer (v2.3.0)
-
-Tarjoman v2.3.0 integrates the Persian De-AI Humanizer that eradicates 18 AI-tell
-patterns, auto-repairs tanvin on Arabic loanwords, corrects fake tanvin on Persian
-words, and detects hekasre errors. Code blocks, inline code, and markdown tables
-are shielded and restored byte-for-byte.
-
-Full reference: `references/de-ai-humanizer.md`
-
-The linter now also detects `hekasre` and `tanvin` categories.
-
-## 7. Quality Linter Script
-
-Use the built-in quality linter to verify any Persian text or translation output:
-
-```bash
-python .claude/skills/tarjoman/scripts/linter.py path/to/translated.md
-```
-
-The linter detects:
-- Em-dashes (`—`, `–`)
-- Banned calques and passive-by constructions
-- Unbalanced Persian quotation marks (`«` vs `»`)
-- Arabic letters (`ي`, `ك`) needing normalization to Persian `ی` and `ک`
+اصلاح‌های خودکار ابزار فقط شامل موارد امن است: نویسه‌ها، نیم‌فاصله، گیومه، تنوین و خط تیره. هر چیزی که به معنا بستگی دارد، فقط به‌صورت هشدار گزارش می‌شود و تصمیمش با توست.
