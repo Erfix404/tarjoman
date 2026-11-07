@@ -76,3 +76,11 @@ After editing Persian markdown or docs, run the linter to verify compliance:
 ```bash
 python .claude/skills/tarjoman/scripts/linter.py <path-to-file>
 ```
+
+## Translator workflow (v2.4)
+
+- Translate meaning, not structure. Drop the English «یک», repeated «او/شما/خود», and «توسط» passives.
+- After drafting, rewrite your own draft reading only the Persian; then compare with the source for accuracy.
+- Keep one register: narration in standard Persian, modern dialogue in consistent colloquial («می‌خوام»، «می‌شه»).
+- Treat `tarjoman lint` calque / ai-tell findings as suggestions, not commands.
+- Full guide: `.claude/skills/tarjoman/SKILL.md` and `references/colloquial.md`, `literary.md`, `technical.md`.

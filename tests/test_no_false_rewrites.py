@@ -59,3 +59,23 @@ class TestAiTellLint(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestEvalSetNegatives(unittest.TestCase):
+    """Negative cases in docs/research/eval-set must survive polishing unchanged."""
+
+    def test_eval_set_negatives_unchanged(self) -> None:
+        import json
+        import os
+
+        path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "docs", "research", "eval-set", "samples.jsonl",
+        )
+        with open(path, encoding="utf-8") as f:
+            samples = [json.loads(line) for line in f if line.strip()]
+        negatives = [s for s in samples if s.get("type") == "negative"]
+        self.assertTrue(negatives)
+        for sample in negatives:
+            text = sample["natural"]
+            self.assertEqual(StylisticPolishStage.polish(text), text, sample["id"])

@@ -52,3 +52,18 @@ Example:
    Retain Western digits (`30 روز`, `ماده 4.2`) for contractual timelines, penalty percentages, and article numbers to prevent dispute during litigation.
 4. **No Literary Embellishment**:
    Never introduce synonyms for the sake of variety. If the contract says `Services` 50 times, use `خدمات` 50 times.
+
+---
+
+## نمونه‌های بد ← خوب (فارسی)
+
+این نمونه‌ها مهم‌تر از قاعده‌های بالا هستند: پیش از ترجمه، چند بار بخوانشان. الگو در همه یکی است: ساختار انگلیسی را رها کن، معنا را با فعل فارسی بگو، «توسط» و «یک» و ضمیرهای اضافه را حذف کن، و اصطلاح جاافتاده‌ی همان رشته را به کار ببر.
+
+| انگلیسی | ترجمه‌ی ماشینی | فارسی خوب |
+|---|---|---|
+| The Tenant shall pay the rent on the first day of each month. | مستأجر باید اجاره را در روز اول هر ماه پرداخت کند. | مستأجر مکلف است اجاره‌بها را روز اول هر ماه بپردازد. |
+| Notwithstanding the foregoing, … | با وجود موارد پیشگفته، … | با وجود آنچه گذشت، … / به‌رغم مفاد فوق، … |
+| This Agreement shall be governed by the laws of … | این توافق‌نامه توسط قوانین … اداره خواهد شد. | این قرارداد تابع قوانین … است. |
+| Either party may terminate this Agreement upon thirty (30) days' written notice. | هر یک از طرفین می‌تواند این توافق را با اطلاعیه‌ی کتبی سی (۳۰) روزه خاتمه دهد. | هر یک از طرفین می‌تواند با اخطار کتبی سی (30) روزه قرارداد را فسخ کند. |
+| including but not limited to | شامل اما نه محدود به | از جمله و نه منحصراً |
+| The Company shall not be liable for any indirect damages. | شرکت مسئول هیچ گونه خسارات غیرمستقیم نخواهد بود. | شرکت مسئولیتی در قبال خسارت‌های غیرمستقیم ندارد. |

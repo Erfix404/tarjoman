@@ -51,3 +51,17 @@ Persian headlines must be concise, active, and rhythmically striking:
 - Avoid sensationalist exaggerations unless present in the source text.
 - Use Persian quotation marks `«...»` around quotes in headlines and text.
 - Use Persian digits (`۰۱۲۳۴۵۶۷۸۹`) for news dates, statistics, and percentages in general news copy.
+
+---
+
+## نمونه‌های بد ← خوب (فارسی)
+
+این نمونه‌ها مهم‌تر از قاعده‌های بالا هستند: پیش از ترجمه، چند بار بخوانشان. الگو در همه یکی است: ساختار انگلیسی را رها کن، معنا را با فعل فارسی بگو، «توسط» و «یک» و ضمیرهای اضافه را حذف کن، و اصطلاح جاافتاده‌ی همان رشته را به کار ببر.
+
+| انگلیسی | ترجمه‌ی ماشینی | فارسی خوب |
+|---|---|---|
+| The president said on Monday that the talks had failed. | رئیس‌جمهور در روز دوشنبه گفت که مذاکرات شکست خورده بودند. | رئیس‌جمهور دوشنبه گفت مذاکرات شکست خورده است. |
+| According to sources familiar with the matter, … | بر اساس منابع آشنا با موضوع، … | به گفته‌ی منابع آگاه، … |
+| The minister gave the green light to the project. | وزیر چراغ سبز را به پروژه نشان داد. | وزیر با این پروژه موافقت کرد. |
+| Thousands took to the streets to protest. | هزاران نفر به خیابان‌ها برای اعتراض رفتند. | هزاران نفر برای اعتراض به خیابان آمدند. |
+| The company declined to comment. | شرکت از نظر دادن امتناع کرد. | شرکت حاضر به اظهارنظر نشد. |
