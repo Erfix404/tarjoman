@@ -36,3 +36,7 @@ jobs:
       - name: Run benchmark suite
         run: |
           python benchmarks/run_benchmarks.py
+
+      - name: Run naturalness eval (negatives must stay unchanged)
+        run: |
+          python benchmarks/eval_naturalness.py
