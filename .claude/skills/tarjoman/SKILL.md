@@ -110,8 +110,10 @@ python .claude/skills/tarjoman/scripts/linter.py output.md
 
 | سبک | کی | راهنما |
 |---|---|---|
-| **محاوره‌ای** | پیام، چت، شبکه‌ی اجتماعی، رابط کاربری خودمانی، زیرنویس، دیالوگ | `references/colloquial.md` |
+| **محاوره‌ای** | پیام، چت، شبکه‌ی اجتماعی، رابط کاربری خودمانی، دیالوگ | `references/colloquial.md` |
 | **رمان و داستان** | روایت، دیالوگ، شعر داخل متن | `references/literary.md` |
+| **ژانرهای داستانی** | ترسناک، درام، عاشقانه، طنز، کودک و نوجوان، شعر | `references/genre-fiction.md` |
+| **زیرنویس** | زیرنویس فیلم و سریال، متن روی صفحه، دیالوگ تصویری | `references/subtitles.md` |
 | **فنی و نرم‌افزار** | مستندات، README، پیام خطا، رابط کاربری | `references/technical.md` |
 | **علمی و دانشگاهی** | مقاله، پایان‌نامه، چکیده | `references/scientific.md` |
 | **پزشکی** | بالینی، دارویی، آموزش بیمار | `references/medical.md` |
