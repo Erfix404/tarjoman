@@ -1112,6 +1112,19 @@ class AntiCalqueEngine:
 # -----------------------------------------------------------------------------
 LINT_CALQUE_PATTERNS: List[Tuple[str, str]] = [
     ("توسط (passive-by calque)", r"\bتوسط\b"),
+    # Found by translating real texts (docs/research/real-texts/).
+    ("با علم به اینکه (knowing that calque)", r"با\s+علم\s+به\s+(?:این|آن)\s*‌?که"),
+    ("نیاز داشتن که (need to calque; use «باید»)", r"نیاز\s+(?:دار\w*|داشت\w*|خواه\w*\s+داشت)\s+که"),
+    ("برای حدود (for about calque)", r"برای\s+حدود\b"),
+    (
+        "تجاوز از دوز (do not exceed calque; use «بیشتر از … نخورید»)",
+        r"از\s+[^.،\n]{0,30}(?:دوز|مقدار|قرص|کپسول)[^.،\n]{0,20}تجاوز\s+نکن\w*",
+    ),
+    (
+        "تجربه کردن علائم (experience symptoms calque)",
+        r"(?:علائم|علایم|نشانه‌های|عوارض)[^.\n]{0,40}تجربه\s+(?:کرد\w*|کنید|می‌کن\w*)",
+    ),
+    ("مخفف چت انگلیسی در متن فارسی (lol/lmao/idk)", r"(?<![A-Za-z])(?:lol|lmao|lmfao|idk|omg)(?![A-Za-z])"),
     ("به‌وسیله/از سوی (passive-by calque)", r"\bبه\s*وسیله[‌ی]?\b|\bاز\s+سوی\b"),
     (
         "نقش بازی کردن (play a role calque)",

@@ -11,6 +11,7 @@ Covers:
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -39,6 +40,16 @@ class TestSkillpacks(unittest.TestCase):
         # Content verification
         self.assertIn("5-pass", content.lower())
         self.assertIn("anti-calque", content.lower())
+
+    def test_claude_skill_stays_lean(self) -> None:
+        """SKILL.md is loaded for every text, so it stays short and routes to one guide."""
+        skill_path = os.path.join(PROJECT_ROOT, ".claude", "skills", "tarjoman", "SKILL.md")
+        with open(skill_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertLessEqual(len(content.splitlines()), 130)
+        refs_dir = os.path.join(PROJECT_ROOT, ".claude", "skills", "tarjoman", "references")
+        for name in re.findall(r"references/([a-z\-]+\.md)", content):
+            self.assertTrue(os.path.exists(os.path.join(refs_dir, name)), name)
 
     def test_hermes_skill_exists_and_configured(self) -> None:
         """Verify Hermes Agent SKILL.md exists and has runtime instructions."""

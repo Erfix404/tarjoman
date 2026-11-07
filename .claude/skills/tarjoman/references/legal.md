@@ -1,69 +1,104 @@
-# Legal Translation Reference Guide (راهنمای ترجمه حقوقی، اسناد و قراردادها)
+# راهنمای ترجمه‌ی حقوقی: قرارداد، قانون، مجوز و شرایط استفاده
 
-## Overview
-The Legal domain profile covers statutory law, international commercial contracts, service level agreements (SLAs), terms of service (ToS), non-disclosure agreements (NDAs), powers of attorney, and court decrees. In legal translation, semantic ambiguity carries severe contractual and liability risks. Statutory precision, definitive modal verbs, and standardized jurisprudence terminology are non-negotiable.
+## هدف
 
----
+در متن حقوقی، ابهام یعنی دعوا. ترجمه‌ی خوب سه ویژگی دارد:
+- تعهد هر طرف همان‌قدر الزام‌آور است که در متن اصلی بود، نه بیشتر و نه کمتر،
+- اصطلاح‌ها همان‌هایی‌اند که حقوق‌دان‌های فارسی‌زبان به کار می‌برند،
+- جمله‌ها رسمی‌اند، ولی «ترجمه‌ای» نیستند.
 
-## 1. Statutory Precision of Modal Verbs (افعال معین الزام‌آور)
-
-In Anglo-American legal drafting, modal verbs define distinct legal obligations and rights. They must **never** be translated loosely:
-
-| English Modal Verb | Contractual Meaning | Mandatory Persian Equivalent | Never Translate As |
-|---|---|---|---|
-| **shall** | Mandatory statutory obligation | **ملزم است / موظف است / مکلف است** | *خواهد بود / باید* (سست و غیرالزام‌آور) |
-| **shall not** | Express prohibition | **حق ندارد / مجاز نیست / ممنوع است** | *نباید* (توصیه‌ای تلقی می‌شود) |
-| **may** | Discretionary right / permission | **می‌تواند / مختار است / مجاز است** | *شاید / ممکن است* |
-| **must** | Absolute precondition | **باید الزماً / موظف است** | *بهتر است* |
-| **warrants / covenants** | Legal guarantee / contractual promise | **تضمین و تعهد می‌نماید** | *امیدوار است / قول می‌دهد* |
-
-Example:
-- *Source*: The Contractor shall submit the deliverables within 30 days of the Effective Date, failing which the Client may terminate this Agreement.
-- *Persian*: پیمانکار ملزم است ظرف ۳۰ روز از «تاریخ لازم‌الاجرا شدن»، اقلام تحویلی را ارائه دهد؛ در غیر این صورت، کارفرما مختار است این قرارداد را فسخ نماید.
+روانی در متن حقوقی یعنی خوانا بودن، نه خودمانی بودن. ساختار رسمی را خودمانی نکن.
 
 ---
 
-## 2. Standard Legal Terminology & Formulaic Boilerplate
+## ۱. «shall» همیشه «ملزم است» نیست
 
-| English Legal Formula | Canonical Persian Legal Equivalent |
+"shall" در انگلیسی حقوقی سه کار متفاوت می‌کند. اول ببین کدام است، بعد ترجمه کن:
+
+| کارکرد | نمونه | فارسی |
+|---|---|---|
+| **تعهد یک طرف** | The Tenant shall pay the rent on the first day of each month. | مستأجر مکلف است اجاره‌بها را روز اول هر ماه بپردازد. |
+| **حکم یا وصف** (تعهد هیچ‌کس نیست) | This Agreement shall be governed by the laws of Iran. | این قرارداد تابع قوانین ایران است. |
+| **نفیِ مسئولیت** | In no event shall the authors be liable for any claim. | پدیدآورندگان در هیچ حالتی مسئول هیچ ادعایی نیستند. |
+| **شرطی که باید رعایت شود** | The above notice shall be included in all copies. | اعلامیه‌ی بالا باید در همه‌ی نسخه‌ها درج شود. |
+
+- «باید» در فارسی حقوقی کاملاً الزام‌آور است و در قانون‌های ایران فراوان به کار رفته. نوشتن «باید» اشکالی ندارد؛ اشکال در «خواهد بود» و «انجام خواهد شد» است که تعهد را به پیش‌بینی تبدیل می‌کند.
+- "shall not" در تعهد: «حق ندارد» یا «نباید». ولی "In no event shall … be liable" منع نیست، نفی مسئولیت است. «حق ندارند مسئول باشند» یعنی معنا را خراب کرده‌ای.
+- "may": «می‌تواند» یا «مختار است». هرگز «ممکن است» (که یعنی احتمال، نه حق).
+- "must": «باید». "will" در تعهد: مثل "shall" بسنج.
+
+---
+
+## ۲. اصطلاح‌ها و فرمول‌های رایج
+
+| انگلیسی | فارسی |
 |---|---|
-| Parties hereto | طرفین این قرارداد / طرف‌های حاضر |
-| In witness whereof | با عنایت به مراتب فوق / بنا بر این مراتب |
-| Indemnify and hold harmless | جبران خسارت کرده و مبری از مسئولیت نگه دارد |
-| Governing Law and Jurisdiction | قانون حاکم و مرجع صالح قضایی |
-| Force Majeure | قوه قاهره / فورس‌ماژور |
-| Severability | تفکیک‌پذیری احکام و مفاد |
-| Breach of contract | نقض قرارداد / تخلف از شروط قرارداد |
-| Intellectual Property Rights | حقوق مالکیت معنوی و فکری |
-| Non-disclosure Agreement (NDA) | توافق‌نامه عدم افشای اطلاعات و محرمانگی |
-| Without prejudice to | بدون خدشه وارد آوردن به / با حفظ حقوق |
+| the parties hereto | طرفین این قرارداد |
+| hereby | بدین‌وسیله |
+| in witness whereof | در تأیید مراتب بالا، طرفین … امضا کردند |
+| notwithstanding the foregoing | با وجود آنچه گذشت / به‌رغم مفاد بالا |
+| including but not limited to / including without limitation | از جمله و نه منحصراً |
+| indemnify and hold harmless | جبران خسارت کند و … را از هر مسئولیتی مبرا بدارد |
+| governing law and jurisdiction | قانون حاکم و مرجع صالح |
+| force majeure | قوه‌ی قاهره (فورس ماژور) |
+| severability | استقلال مفاد / تفکیک‌پذیری مفاد |
+| breach of contract | نقض قرارداد |
+| tort | مسئولیت مدنی (قهری)؛ نه «شبه‌جرم» در معنای عام |
+| warranty / express or implied | ضمانت / صریح یا ضمنی |
+| merchantability | قابلیت عرضه به بازار (قابلیت فروش) |
+| fitness for a particular purpose | تناسب برای هدفی خاص |
+| non-infringement | عدم نقض حقوق دیگران |
+| sublicense | اعطای مجوز فرعی |
+| to deal in the Software | هر گونه تصرف در نرم‌افزار؛ **نه** «معامله کردن با نرم‌افزار» |
+| intellectual property rights | حقوق مالکیت فکری |
+| non-disclosure agreement (NDA) | توافق‌نامه‌ی عدم افشا (محرمانگی) |
+| without prejudice to | بدون اینکه به … خدشه‌ای وارد شود / با حفظ … |
+
+**دوست‌های دروغین حقوقی:** "deal" (تصرف، نه معامله)، "consideration" (عوض، نه ملاحظه)، "instrument" (سند، نه ابزار)، "execute" (امضا و تنظیم کردن سند، نه اجرا کردن)، "party" (طرف، نه مهمانی یا حزب)، "action" (دعوا، نه اقدام).
 
 ---
 
-## 3. Sentence Structure & Disambiguation Rules
+## ۳. قاعده‌های جمله‌سازی
 
-1. **Active Assignment of Responsibility**:
-   Clearly identify which party bears each obligation. Never use unanchored passive phrasing like «انجام خواهد شد» when the contract specifies «Party A shall perform».
-2. **Defined Terms**:
-   When contractual terms are capitalized in English (e.g., `Client`, `Effective Date`, `Deliverables`), treat them as defined entities in Persian:
-   - Always enclose defined parties or terms in Persian quotation marks upon definition: `«کارفرما»`, `«تاریخ لازم‌الاجرا»`.
-3. **Clauses and Numbering**:
-   Keep section and clause numbers intact (`ماده ۱-۲`, `بند (الف)`).
-   Retain Western digits (`30 روز`, `ماده 4.2`) for contractual timelines, penalty percentages, and article numbers to prevent dispute during litigation.
-4. **No Literary Embellishment**:
-   Never introduce synonyms for the sake of variety. If the contract says `Services` 50 times, use `خدمات` 50 times.
+1. **مسئولِ هر تعهد را معلوم نگه دار.** اگر متن اصلی می‌گوید "Party A shall deliver"، فارسی هم باید فاعل داشته باشد: «طرف الف مکلف است … تحویل دهد»، نه «… تحویل داده خواهد شد».
+2. **اصطلاح تعریف‌شده:** کلمه‌ای که در انگلیسی با حرف بزرگ تعریف شده (`Client`، `Effective Date`، `Software`) در فارسی بار اول در گیومه تعریف می‌شود: (از این پس «نرم‌افزار»). بعد از آن یا همیشه با گیومه بیاور یا هیچ‌وقت، ولی یکدست.
+3. **مترادف نساز.** اگر متن اصلی ۵۰ بار "Services" دارد، ۵۰ بار «خدمات» بنویس. تنوع در متن حقوقی یعنی ابهام.
+4. **شماره‌ی ماده و بند** دست نخورد: «ماده‌ی ۴-۲»، «بند (الف)». در یک سند، ارقام را یکدست نگه دار: یا همه فارسی یا همه مثل اصل.
+5. **جمله‌ی بلند را با نشانه‌گذاری قابل خواندن کن، نه با خلاصه کردن.** جمله‌ی حقوقیِ انگلیسی گاهی ۸۰ کلمه است. می‌توانی با «؛» و «خواه … خواه …» بخش‌بندی‌اش کنی، ولی هیچ قیدی را نینداز.
+6. **حروف بزرگِ انگلیسی** (THE SOFTWARE IS PROVIDED "AS IS") در فارسی معادلی ندارد. اگر تأکید لازم است، بند را پررنگ کن؛ گیومه‌ی «همان‌گونه که هست» را نگه دار.
+7. «نماید» و «گردد» در متن حقوقی رسمی پذیرفته‌اند، ولی لازم نیستند. «کند» و «شود» هم رسمی‌اند. در یک سند یکی را انتخاب کن.
 
 ---
 
-## نمونه‌های بد ← خوب (فارسی)
+## ۴. مجوزهای نرم‌افزار (MIT، Apache، GPL، …)
 
-این نمونه‌ها مهم‌تر از قاعده‌های بالا هستند: پیش از ترجمه، چند بار بخوانشان. الگو در همه یکی است: ساختار انگلیسی را رها کن، معنا را با فعل فارسی بگو، «توسط» و «یک» و ضمیرهای اضافه را حذف کن، و اصطلاح جاافتاده‌ی همان رشته را به کار ببر.
+- ترجمه‌ی مجوز رسمی نیست و جای متن اصلی را نمی‌گیرد. خود ترجمه را دست‌کاری نکن، ولی اگر کاربر ترجمه را برای انتشار می‌خواهد، در پیام جداگانه به او یادآوری کن که متن انگلیسی معتبر است.
+- نام مجوز و نام اصطلاح‌های فنی را ترجمه نکن: «مجوز MIT»، «GPL نسخه‌ی ۳».
+
+---
+
+## نمونه‌های بد ← خوب
 
 | انگلیسی | ترجمه‌ی ماشینی | فارسی خوب |
 |---|---|---|
-| The Tenant shall pay the rent on the first day of each month. | مستأجر باید اجاره را در روز اول هر ماه پرداخت کند. | مستأجر مکلف است اجاره‌بها را روز اول هر ماه بپردازد. |
-| Notwithstanding the foregoing, … | با وجود موارد پیشگفته، … | با وجود آنچه گذشت، … / به‌رغم مفاد فوق، … |
+| The Tenant shall pay the rent on the first day of each month. | مستأجر اجاره را در روز اول هر ماه پرداخت خواهد کرد. | مستأجر مکلف است اجاره‌بها را روز اول هر ماه بپردازد. |
 | This Agreement shall be governed by the laws of … | این توافق‌نامه توسط قوانین … اداره خواهد شد. | این قرارداد تابع قوانین … است. |
-| Either party may terminate this Agreement upon thirty (30) days' written notice. | هر یک از طرفین می‌تواند این توافق را با اطلاعیه‌ی کتبی سی (۳۰) روزه خاتمه دهد. | هر یک از طرفین می‌تواند با اخطار کتبی سی (30) روزه قرارداد را فسخ کند. |
-| including but not limited to | شامل اما نه محدود به | از جمله و نه منحصراً |
-| The Company shall not be liable for any indirect damages. | شرکت مسئول هیچ گونه خسارات غیرمستقیم نخواهد بود. | شرکت مسئولیتی در قبال خسارت‌های غیرمستقیم ندارد. |
+| Either party may terminate this Agreement upon thirty (30) days' written notice. | هر یک از طرفین ممکن است این توافق را با اطلاعیه‌ی کتبی سی (۳۰) روزه خاتمه دهد. | هر یک از طرفین می‌تواند با اخطار کتبی سی‌روزه این قرارداد را فسخ کند. |
+| The Company shall not be liable for any indirect damages. | شرکت حق ندارد مسئول خسارت‌های غیرمستقیم باشد. | شرکت در قبال خسارت‌های غیرمستقیم مسئولیتی ندارد. |
+| to deal in the Software without restriction | بدون محدودیت با نرم‌افزار معامله کند | بی‌هیچ محدودیتی در نرم‌افزار تصرف کند |
+| whether in an action of contract, tort or otherwise | چه در یک دعوای قراردادی، شبه‌جرم یا غیر آن | خواه دعوا قراردادی باشد، خواه مبتنی بر مسئولیت مدنی یا هر مبنای دیگر |
+
+---
+
+## نمونه‌ی کامل: یک بند از مجوز MIT
+
+**متن اصلی:**
+> The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+**ترجمه‌ی ماشینی:**
+> اعلامیه حق نشر فوق و این اعلامیه مجوز ملزم است در تمام نسخه‌ها یا بخش‌های قابل توجه نرم‌افزار گنجانده شود.
+
+**ترجمه‌ی خوب:**
+> اعلامیه‌ی حق نشر بالا و همین اعلامیه‌ی اجازه باید در همه‌ی نسخه‌ها یا بخش‌های عمده‌ی «نرم‌افزار» درج شود.
+
+چه شد: «اعلامیه» نمی‌تواند «ملزم» باشد (ملزم بودن مال شخص است)؛ «باید» درست است. «بخش‌های قابل توجه» ترجمه‌ی تحت‌اللفظی "substantial" است؛ در حقوق «عمده» یا «اساسی» می‌گویند.

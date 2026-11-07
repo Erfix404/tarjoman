@@ -99,6 +99,11 @@ def find_hekasre(text: str) -> List[Tuple[str, str, str]]:
             continue
         if stem.endswith(("د", "ت", "ان")):
             continue
+        # «ـاه» and «ـوه» are almost always a pronounced «ه» (راه، ماه، کوه،
+        # اندوه، گروه) or a silent one inside the noun (میوه، شیوه), never an
+        # appended ezafe: «اندوه خودش» must not become «اندوِ خودش».
+        if stem.endswith(("ا", "و")):
+            continue
         out.append((m.group(0), f'{stem}ِ {nxt}', 'A'))
     return out
 
@@ -177,8 +182,9 @@ _PUNCT_SPACE_PATTERNS: List[Pattern] = [
 
 #: Orthography checks adapted from Paknevis (afshin-ir/paknevis, GPL-3; ideas
 #: only, with an independently written word list). All suggest-only.
-_FA_WORD_L = "(?<![\u0600-\u06FF\u200c])"
-_FA_WORD_R = "(?![\u0600-\u06FF\u200c])"
+#: Letters only, so «،» «؛» «؟» after a word still count as a word boundary.
+_FA_WORD_L = "(?<![\u0621-\u06CC\u200c])"
+_FA_WORD_R = "(?![\u0621-\u06CC\u200c])"
 #: Common misspellings that are wrong in every context.
 _MISSPELLINGS = {
     "اثرگزار": "اثرگذار", "اثرگزاری": "اثرگذاری", "تأثیرگزار": "تأثیرگذار",
@@ -205,6 +211,34 @@ _FAKE_ZWNJ_RE: Pattern = re.compile("(?<=[\u0600-\u06FF])[\u00AD\u200B\u200D\uFE
 #: Latin , ; ? next to Persian words, and repeated ?/! marks.
 _LATIN_PUNCT_RE: Pattern = re.compile(
     r"[\u0621-\u06CC]\s*[,;?](?!\d)|[؟?!]{2,}"
+)
+#: «A:» or «Sarah:» at the start of a chat or script line.
+_SPEAKER_LABEL_RE: Pattern = re.compile(r"^\s*[A-Za-z][A-Za-z0-9 ._-]{0,20}:(?=\s)")
+#: Colloquial verbs whose «می»/«نمی» prefix is glued without a ZWNJ:
+#: «میدونم» → «می‌دونم». A closed list, so «میز»، «میوه»، «میمون» are safe.
+_COLLOQ_STEMS = (
+    "دونم دونی دونه دونیم دونید دونن دونستم دونستی دونست "
+    "خوام خوای خواد خوایم خواید خوان خواستم "
+    "تونم تونی تونه تونیم تونید تونن تونستم تونست "
+    "رم ری ره ریم رید رن "
+    "گم گی گه گیم گید گن "
+    "شه شم شی شن "
+    "کنم کنی کنه کنیم کنید کنن "
+    "دم دی ده دیم دید دن "
+    "یام یای یاد یایم یاید یان "
+    "بینم بینی بینه بینمت بینیم "
+    "مونم مونی مونیم "
+    "زنم زنی زنه زنیم "
+    "شینم شینی شینه "
+    "ذارم ذاری ذاره"
+).split()
+_GLUED_MI_RE: Pattern = re.compile(
+    _FA_WORD_L + "((?:ن)?می)(" + "|".join(sorted(_COLLOQ_STEMS, key=len, reverse=True)) + ")" + _FA_WORD_R
+)
+#: A count followed by a plural noun: «۳ فایل‌ها»، «{count} فایل‌ها». Persian
+#: uses the singular after a number. Years (4+ digits) are left alone.
+_COUNT_PLURAL_RE: Pattern = re.compile(
+    r"(?<![\d۰-۹])(?:[0-9۰-۹]{1,3}|\{[A-Za-z_]+\}|%d)\s+[\u0621-\u06CC]+\u200c?(?:ها|های)" + _FA_WORD_R
 )
 
 
@@ -337,6 +371,9 @@ def lint_text(
             )
         elif _PERSIAN_CHAR_RE.search(line):
             bare = _INLINE_CODE_SPAN_RE.sub("", _BIDI_ISOLATED_SPAN_RE.sub("", line))
+            # A speaker label at the start of a chat or script line («A:»،
+            # «Sarah:») stays at the line start; it cannot be reordered.
+            bare = _SPEAKER_LABEL_RE.sub("", bare)
             match = _BIDI_LATIN_TOKEN_RE.search(bare)
             if match and (
                 enforce_bidi_isolation or re.search(r"[0-9/.:_\-]", match.group(0))
@@ -413,6 +450,29 @@ def lint_text(
                     message=f"Common misspelling: «{_m.group(1)}» → «{_MISSPELLINGS[_m.group(1)]}».",
                     snippet=line.strip(),
                     suggestion=f"{_m.group(1)} → {_MISSPELLINGS[_m.group(1)]}",
+                )
+            )
+        _glued = list(_GLUED_MI_RE.finditer(_or_line))
+        if _glued:
+            _pairs = "، ".join(f"«{g.group(0)}» → «{g.group(1)}\u200c{g.group(2)}»" for g in _glued)
+            issues.append(
+                LintIssue(
+                    line_number=idx,
+                    category="zwnj",
+                    message=f"Missing ZWNJ after «می»/«نمی»: {_pairs}.",
+                    snippet=line.strip(),
+                    suggestion="Colloquial verbs keep the ZWNJ too: «می‌دونم»، «نمی‌شه».",
+                )
+            )
+        _cp = _COUNT_PLURAL_RE.search(_or_line)
+        if _cp:
+            issues.append(
+                LintIssue(
+                    line_number=idx,
+                    category="spelling",
+                    message=f"Plural noun after a number: «{_cp.group(0)}». Persian uses the singular: «۳ فایل»، «{{count}} فایل».",
+                    snippet=line.strip(),
+                    suggestion="Drop «ها» after a count.",
                 )
             )
         _ds = _DETACHED_SUFFIX_RE.search(_or_line)
