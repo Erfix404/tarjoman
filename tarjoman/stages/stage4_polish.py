@@ -99,7 +99,7 @@ class StylisticPolishStage(BaseStage):
     def enforce_strict_zwnj(cls, text: str) -> str:
         """
         Apply strict Zero-Width Non-Joiner (ZWNJ) rules to Persian affixes:
-        - Prefixes: می‌, نمی‌, ب‌, ن‌
+        - Prefixes: می‌, نمی‌
         - Plural suffixes: ‌ها, ‌های
         - Comparative suffixes: تر, ‌ترین
         - Pronominal clitics: ‌ام, ‌ات, ‌اش, ‌مان, ‌تان, ‌شان

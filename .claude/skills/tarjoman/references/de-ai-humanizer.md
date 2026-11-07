@@ -5,6 +5,8 @@
 
 ## Overview
 
+> **Safe vs. suggest-only.** `PersianHumanizer.humanize()` applies only rewrites that are safe regardless of context. Rules whose right answer depends on meaning are reported by `tarjoman lint` as `ai-tell` (via `PersianHumanizer.detect()`) and left to the translator's judgment.
+
 The `PersianHumanizer` class (`tarjoman.stages.humanizer`) applies automated
 de-AI transformations to Persian text produced by language models, making it
 read as natural, human-written Persian while preserving all technical content
@@ -33,7 +35,7 @@ After all transformations, shielded regions are restored byte-identical.
 | محسوب می‌شود | است |
 | به حساب می‌آید | است |
 | گردیده است | شده است |
-| می‌گردد | می‌شود |
+| می‌گردد | (not auto-rewritten: also «گشتن», «دنبال کلید می‌گردد») |
 
 ### T2: Ceremonial filler announcements (اطلاعیه‌های متکلفانه)
 
@@ -55,7 +57,8 @@ Removed entirely:
 ### T4: Generic openers/closers (مقدمه‌ها و مؤخره‌های کلیشه‌ای)
 
 Removed: در دنیای امروز، در عصر دیجیتال، امروزه با پیشرفت تکنولوژی،
-با گسترش روزافزون اینترنت، در نهایت می‌توان گفت، به طور کلی.
+با گسترش روزافزون اینترنت، در نهایت می‌توان گفت.
+«به طور کلی» is kept: it usually carries meaning.
 
 ### T5: «در راستای» abuse
 
@@ -67,7 +70,8 @@ Removed: در دنیای امروز، در عصر دیجیتال، امروزه 
 
 ### T6: Promotional emptiness (مبالغه‌های توخالی)
 
-Stripped: بی‌نظیر، فوق‌العاده، مثال‌زدنی، منحصربه‌فرد، با کیفیتی بی‌رقیب.
+Suggest-only (lint category `ai-tell`): بی‌نظیر، فوق‌العاده، مثال‌زدنی، منحصربه‌فرد.
+Never deleted automatically: «غذای فوق‌العاده‌ای» became «غذای‌ای», and «فوق‌العاده سرد» is a legitimate intensifier. Keep the adjective if the source really says it; otherwise cut it or make it concrete.
 
 ### T7: Rule of three (تثلیث‌های ماشینی)
 
@@ -79,7 +83,8 @@ Detection only — semantic rewrite needed.
 
 ### T9: Tacked-on analysis clauses
 
-Removed: که نشان‌دهنده‌ی ... است، که بیانگر ... می‌باشد، که حاکی از ... است.
+Suggest-only (lint category `ai-tell`): که نشان‌دهنده‌ی ... است، که بیانگر ...، که حاکی از ....
+Never deleted automatically, because the clause often holds a fact («که نشان‌دهنده‌ی تورم شدید است»). Rewrite it as a plain statement instead.
 
 ### T10: Vague authority (ارجاعات مجهول)
 
@@ -97,7 +102,7 @@ ZERO em-dash guarantee: all `—` and `–` converted to `، ` (Persian comma + 
 
 | Before | After |
 |---|---|
-| در پایان روز | در نهایت |
+| در پایان روز | در نهایت (suggest-only: often literal, «در پایان روز به خانه برگشتیم») |
 | نگاهی بیندازیم به | ببینیم |
 | حس ایجاد کردن | معنادار بودن |
 

@@ -47,9 +47,9 @@ class TestOriginalTwelveRulesPreserved(unittest.TestCase):
         self.assertIn("به او اعتماد کن", cleaned)
 
     def test_end_of_day(self) -> None:
-        cleaned = AntiCalqueEngine.eliminate_calques("در پایان روز باید تصمیم بگیریم.")
-        self.assertNotIn("در پایان روز", cleaned)
-        self.assertIn("در نهایت", cleaned)
+        # Ambiguous (literal vs idiom): left for the translator, never rewritten.
+        text = "در پایان روز باید تصمیم بگیریم."
+        self.assertEqual(AntiCalqueEngine.eliminate_calques(text), text)
 
     def test_makes_sense(self) -> None:
         cleaned = AntiCalqueEngine.eliminate_calques("این نظریه کاملاً حس ایجاد می‌کند.")
@@ -206,10 +206,10 @@ class TestLexicalCalquesV2(unittest.TestCase):
         self.assertNotIn("در رابطه با", cleaned)
         self.assertIn("درباره", cleaned)
 
-    def test_jahat_purpose(self) -> None:
-        cleaned = AntiCalqueEngine.eliminate_calques("جهت اطلاع شما می‌گویم.")
-        self.assertNotIn("جهت اطلاع", cleaned)
-        self.assertIn("برای اطلاع", cleaned)
+    def test_jahat_not_rewritten(self) -> None:
+        # «جهت» is very often the noun "direction": never rewritten blindly.
+        for text in ("جهت اطلاع شما می‌گویم.", "جهت باد عوض شد."):
+            self.assertEqual(AntiCalqueEngine.eliminate_calques(text), text)
 
     def test_jahat_guarded_compounds(self) -> None:
         # از جهت / بدین جهت / جهتِ+X (direction sense) must not change.
@@ -311,12 +311,10 @@ class TestStrictZwnj(unittest.TestCase):
             f"او می{zwnj}رود و نمی{zwnj}داند",
         )
 
-    def test_subjunctive_prefix(self) -> None:
-        zwnj = "‌"
-        self.assertEqual(
-            AntiCalqueEngine.normalize_zwnj("ب خوان و ن رو"),
-            f"ب{zwnj}خوان و ن{zwnj}رو",
-        )
+    def test_single_letters_not_joined(self) -> None:
+        # Standalone letters (list items, abbreviations) must stay apart.
+        text = "سه راه داریم: الف، ب و ج."
+        self.assertEqual(AntiCalqueEngine.normalize_zwnj(text), text)
 
     def test_plural_suffix(self) -> None:
         zwnj = "‌"
