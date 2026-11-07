@@ -137,6 +137,8 @@ python .claude/skills/tarjoman/scripts/linter.py output.md
 
 ## ۶. کتاب‌ها و متن‌های بلند
 
+راهنمای کامل: `references/book.md`
+
 - پیش از فصل اول **واژه‌نامه** (اصطلاح ← معادل ثابت) و **فهرست شخصیت‌ها** (اسم فارسی، لحن، «تو» یا «شما» با چه کسی) بساز و در طول کار به آن‌ها پایبند باش.
 - فصل به فصل ترجمه کن و پیش از هر فصل واژه‌نامه را دوباره نگاه کن.
 - ابزارهای کمکی:
@@ -144,6 +146,7 @@ python .claude/skills/tarjoman/scripts/linter.py output.md
 tarjoman book init "عنوان" -o ./my-book
 tarjoman book characters ./my-book --add "Harry:هری:brave:تو" --list
 tarjoman book terms ./my-book --add "wand=چوب‌دستی:literary" --search wand
+tarjoman book check ./my-book chapter.en.md chapter.fa.md   # یکدستی اصطلاح، اسم و لحن دیالوگ
 ```
 
 ---
