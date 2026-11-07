@@ -175,6 +175,39 @@ _PUNCT_SPACE_PATTERNS: List[Pattern] = [
 ]
 
 
+#: Orthography checks adapted from Paknevis (afshin-ir/paknevis, GPL-3; ideas
+#: only, with an independently written word list). All suggest-only.
+_FA_WORD_L = "(?<![\u0600-\u06FF\u200c])"
+_FA_WORD_R = "(?![\u0600-\u06FF\u200c])"
+#: Common misspellings that are wrong in every context.
+_MISSPELLINGS = {
+    "اثرگزار": "اثرگذار", "اثرگزاری": "اثرگذاری", "تأثیرگزار": "تأثیرگذار",
+    "تاثیرگزار": "تأثیرگذار", "سرمایه‌گزار": "سرمایه‌گذار", "سرمایه‌گزاری": "سرمایه‌گذاری",
+    "قانون‌گزار": "قانون‌گذار", "قانون‌گزاری": "قانون‌گذاری", "بنیان‌گزار": "بنیان‌گذار",
+    "پایه‌گزار": "پایه‌گذار", "ارزش‌گزاری": "ارزش‌گذاری", "هدف‌گزاری": "هدف‌گذاری",
+    "سیاست‌گزار": "سیاست‌گذار", "سیاست‌گزاری": "سیاست‌گذاری", "نام‌گزاری": "نام‌گذاری",
+    "قیمت‌گزاری": "قیمت‌گذاری", "گزاشت": "گذاشت", "گزاشتن": "گذاشتن", "گزاشته": "گذاشته",
+    "اتلاق": "اطلاق", "ظبط": "ضبط", "انظباط": "انضباط", "بلعکس": "بالعکس",
+    "حاظر": "حاضر", "اراعه": "ارائه", "طپش": "تپش", "توجیح": "توجیه",
+    "سئوال": "سؤال", "مسوول": "مسئول", "قائله": "غائله", "خواستگاه": "خاستگاه",
+    "برخواستن": "برخاستن", "برخواست": "برخاست", "امپراطور": "امپراتور",
+}
+_MISSPELLING_RE: Pattern = re.compile(
+    _FA_WORD_L + "(" + "|".join(sorted(map(re.escape, _MISSPELLINGS), key=len, reverse=True)) + ")" + _FA_WORD_R
+)
+#: Plural and superlative suffixes written detached: «کتاب ها»، «بزرگ ترین».
+_DETACHED_SUFFIX_RE: Pattern = re.compile(
+    r"(?<=[\u0621-\u064A\u067E\u0686\u0698\u06A9\u06AF\u06CC])\s"
+    "(ها|های|هایی|هایم|هایت|هایش|هایمان|هایتان|هایشان|ترین)" + _FA_WORD_R
+)
+#: Look-alike joiners (soft hyphen, zero-width space/joiner, BOM) between Persian letters.
+_FAKE_ZWNJ_RE: Pattern = re.compile("(?<=[\u0600-\u06FF])[\u00AD\u200B\u200D\uFEFF](?=[\u0600-\u06FF])")
+#: Latin , ; ? next to Persian words, and repeated ?/! marks.
+_LATIN_PUNCT_RE: Pattern = re.compile(
+    r"[\u0621-\u06CC]\s*[,;?](?!\d)|[؟?!]{2,}"
+)
+
+
 def lint_text(
     content: str, skip_code_blocks: bool = True, enforce_bidi_isolation: bool = False
 ) -> List[LintIssue]:
@@ -368,6 +401,52 @@ def lint_text(
                     )
                 )
                 break
+
+        # Orthography (suggest-only): misspellings, detached suffixes,
+        # look-alike joiners, Latin punctuation.
+        _or_line = re.sub(r"`[^`\n]+`", "", line)
+        for _m in _MISSPELLING_RE.finditer(_or_line):
+            issues.append(
+                LintIssue(
+                    line_number=idx,
+                    category="spelling",
+                    message=f"Common misspelling: «{_m.group(1)}» → «{_MISSPELLINGS[_m.group(1)]}».",
+                    snippet=line.strip(),
+                    suggestion=f"{_m.group(1)} → {_MISSPELLINGS[_m.group(1)]}",
+                )
+            )
+        _ds = _DETACHED_SUFFIX_RE.search(_or_line)
+        if _ds:
+            issues.append(
+                LintIssue(
+                    line_number=idx,
+                    category="zwnj",
+                    message=f"Detached suffix «{_ds.group(1)}»: join it with a ZWNJ (نیم‌فاصله), e.g. «کتاب‌ها»، «بزرگ‌ترین».",
+                    snippet=line.strip(),
+                    suggestion="Replace the space before the suffix with U+200C.",
+                )
+            )
+        if _FAKE_ZWNJ_RE.search(_or_line):
+            issues.append(
+                LintIssue(
+                    line_number=idx,
+                    category="fake-zwnj",
+                    message="Look-alike joiner (soft hyphen, zero-width space/joiner or BOM) between Persian letters.",
+                    snippet=line.strip(),
+                    suggestion="Replace it with a real ZWNJ (U+200C).",
+                )
+            )
+        _lp = _LATIN_PUNCT_RE.search(_or_line)
+        if _lp:
+            issues.append(
+                LintIssue(
+                    line_number=idx,
+                    category="punct",
+                    message=f"Latin or repeated punctuation in Persian text: «{_lp.group(0)}».",
+                    snippet=line.strip(),
+                    suggestion="Use «،» «؛» «؟» and a single «؟» or «!».",
+                )
+            )
 
         # 9b. Suggest-only AI tells (never auto-fixed; meaning decides).
         for tell_label, tell_re, tell_advice in LINT_AI_TELL_PATTERNS:
