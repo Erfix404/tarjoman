@@ -58,7 +58,7 @@ tarjoman lint output.md
 python .claude/skills/tarjoman/scripts/linter.py output.md
 ```
 - اصلاح‌های نویسه‌ای را بپذیر: ي/ك عربی، نیم‌فاصله، گیومه‌ی «»، تنوین، خط تیره‌ی انگلیسی.
-- هشدارهای `calque`، `ai-tell` و `punct-space` **پیشنهادند، نه حکم**. هر کدام را در بافت جمله بررسی کن. مثلاً «در پایان روز به خانه برگشتیم» درست است و نباید به «در نهایت» تبدیل شود.
+- هشدارهای `calque`، `ai-tell`، `punct-space`، `punct`، `spelling` و `zwnj` **پیشنهادند، نه حکم**. هر کدام را در بافت جمله بررسی کن. مثلاً «در پایان روز به خانه برگشتیم» درست است و نباید به «در نهایت» تبدیل شود.
 
 **۷. چک‌لیست پیش از تحویل**
 پیش از تحویل، `references/checklist.md` را مورد به مورد با «قبول/رد» بگذران. اگر موردی رد شد، اول درستش کن، بعد تحویل بده.
@@ -194,6 +194,7 @@ tarjoman lint FILE        # نویسه، نیم‌فاصله، گیومه، گر
 tarjoman lint FILE --only ai-tell --only calque   # فقط نشانه‌های سبکی، برای ویرایش
 tarjoman verify SOURCE TARGET   # کامل بودن: پاراگراف، عدد، ارجاع، نشانی، کد
 tarjoman prep FILE -o OUT       # تمیز کردن متن PDF: سرصفحه، شماره‌ی صفحه، خط تیره‌ی شکستن کلمه، سطرهای شکسته
+tarjoman srt check FA.srt --source EN.srt   # زیرنویس: تناظر زیرنویس‌ها، طول خط، سرعت خواندن، پیش‌درآمد چت‌بات
 tarjoman audit FILE       # گزارش کیفیت
 tarjoman route "TEXT"     # پیشنهاد سبک بر اساس متن
 tarjoman compose typst|epub|html|bilingual ...   # ساخت خروجی چاپی و کتاب الکترونیک

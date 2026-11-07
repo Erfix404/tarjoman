@@ -289,6 +289,9 @@ tarjoman verify source.md translated.md
 
 # Clean PDF-extracted text before translating (headers, page numbers, hyphen breaks, wrapped lines)
 tarjoman prep book.txt -o book.clean.txt
+
+# Subtitles: cue alignment, line length, reading speed, chatbot residue
+tarjoman srt check film.fa.srt --source film.en.srt
 ```
 
 ### Multi-Format Composing
@@ -454,7 +457,7 @@ Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for developmen
 
 **License**: [MIT](LICENSE)
 
-**Acknowledgements**: some ideas were adapted from Kaman AI Translator, «لحن من» (lahne-man) and hermes-literary-translation-mastery. See [docs/CREDITS.md](docs/CREDITS.md).
+**Acknowledgements**: some ideas were adapted from Kaman AI Translator, «لحن من» (lahne-man), hermes-literary-translation-mastery, Paknevis and SubFarsiPro. See [docs/CREDITS.md](docs/CREDITS.md).
 
 ---
 
