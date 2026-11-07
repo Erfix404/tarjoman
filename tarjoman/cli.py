@@ -281,6 +281,53 @@ def lint_cmd(file: Path, only: tuple) -> None:
 
 
 # -----------------------------------------------------------------------------
+# verify subcommand (completeness / fidelity)
+# -----------------------------------------------------------------------------
+@cli.command("verify")
+@click.argument("source_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.argument("target_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+def verify_cmd(source_file: Path, target_file: Path) -> None:
+    """Check that a translation kept everything: paragraphs, numbers, citations, URLs, code.
+
+    Findings are hints, not verdicts: a number written out as a word or a
+    paragraph deliberately merged is fine once you have checked it.
+    """
+    from tarjoman.memory.fidelity import check_fidelity
+
+    findings = check_fidelity(
+        source_file.read_text(encoding="utf-8"), target_file.read_text(encoding="utf-8")
+    )
+    if not findings:
+        click.echo("Fidelity check passed: paragraphs, numbers, citations, URLs and code all match.")
+        return
+    click.echo(f"Fidelity check: {len(findings)} finding(s)")
+    for f in findings:
+        click.echo(f"- [{f.category}] {f.message}")
+    sys.exit(1)
+
+
+# -----------------------------------------------------------------------------
+# prep subcommand (clean PDF-extracted text before translating)
+# -----------------------------------------------------------------------------
+@cli.command("prep")
+@click.argument("file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("-o", "--output", "output", default=None, type=click.Path(dir_okay=False, path_type=Path), help="Write the clean text here (default: stdout)")
+@click.option("--keep-lines", is_flag=True, default=False, help="Do not join hard-wrapped lines into paragraphs")
+def prep_cmd(file: Path, output: Optional[Path], keep_lines: bool) -> None:
+    """Clean PDF-extracted text: running headers/footers, page numbers, hyphen breaks, wrapped lines."""
+    from tarjoman.parsers.text_prep import prepare_text
+
+    clean, report = prepare_text(file.read_text(encoding="utf-8"), unwrap=not keep_lines)
+    if output:
+        output.write_text(clean, encoding="utf-8")
+        click.echo(f"Clean text written to: {output}")
+        click.echo(report.summary())
+    else:
+        click.echo(clean, nl=False)
+        click.echo(report.summary(), err=True)
+
+
+# -----------------------------------------------------------------------------
 # book command group
 # -----------------------------------------------------------------------------
 @cli.group("book")
@@ -298,14 +345,25 @@ STYLE_SHEET_TEMPLATE = """# شیوه‌نامه‌ی ترجمه: {title}
 - روایت: (فارسی معیارِ روان / رسمی / …)
 - دیالوگ: (محاوره‌ی مؤدب / خودمانی / معیار)
 
-## شخصیت‌ها
-(برای هر شخصیت: اسم فارسی، شکسته یا کتابی، «تو» یا «شما» با چه کسانی)
+## شخصیت‌ها و صدایشان
+(برای هر شخصیت اصلی: اسم فارسی، شکسته یا کتابی، «تو» یا «شما» با چه کسانی،
+واژگان و شکل جمله، تکیه‌کلام، و یک جمله‌ی نمونه به فارسی)
+
+## برچسب‌های تکرارشونده
+(عنوان‌هایی که در هر فصل تکرار می‌شوند و باید همه‌جا یک‌جور ترجمه شوند)
+- Key takeaways ← نکته‌های اصلی
 
 ## تصمیم‌های ثابت
 - ارقام: (فارسی / لاتین)
 - واحدها: (اصلی / تبدیل‌شده)
 - آوانویسی اسم‌ها: (مثلاً Siobhan ← سیوبان)
 - اصطلاح‌های تکرارشونده: در terms.db با `tarjoman book terms` ثبت کن.
+
+## دفتر تصمیم‌ها
+(بازی با کلمات، اسم‌های معنادار، واژه‌های ساختگی، شعر و معما)
+
+| متن اصلی | معنای پنهان | تصمیم | دلیل | پانویس؟ |
+|---|---|---|---|---|
 
 ## یادداشت‌های فصل‌به‌فصل
 """
@@ -555,9 +613,14 @@ def book_check_cmd(project_dir: Path, source_file: Path, target_file: Path) -> N
         bible = CharacterBible(bible_path=bible_path)
         characters = [(c.name, c.persian_name) for c in bible.list_characters()]
 
-    findings = check_chapter(source, target, terms, characters)
+    from tarjoman.memory.fidelity import check_fidelity
+
+    findings = check_chapter(source, target, terms, characters) + check_fidelity(source, target)
     if not findings:
-        click.echo("Consistency check passed: terms, names and dialogue register are consistent.")
+        click.echo(
+            "Consistency check passed: terms, names and dialogue register are consistent, "
+            "and nothing looks dropped."
+        )
         return
     click.echo(f"Consistency check: {len(findings)} finding(s)")
     for f in findings:
