@@ -1,77 +1,129 @@
-# Literary Translation Reference Guide (راهنمای ترجمه ادبی، رمان و داستان)
+# راهنمای ترجمه‌ی رمان و داستان
 
-## Overview
-The Literary domain profile is engineered for fiction, novels, short stories, narrative memoirs, and creative prose. Literary Persian translation demands melodic rhythm (وزن و آهنگ درونی نثر), authentic syntax, rich sensory vocabulary, and complete elimination of bureaucratic or mechanical translation artifacts.
+## هدف
 
----
+خواننده باید داستان را بخواند، نه ترجمه را. یعنی:
+- لحن نویسنده حفظ شود: اگر ساده و خشک می‌نویسد، ترجمه هم ساده و خشک باشد. اگر شاعرانه می‌نویسد، ترجمه هم شاعرانه باشد.
+- هر شخصیت صدای خودش را داشته باشد.
+- نثر فارسی روان باشد، بی‌آنکه چیزی به متن اضافه شود.
 
-## 1. The Hermes Zero Em-Dash Protocol (قانون حذف قطعی خط تیره)
-
-### The Problem
-In contemporary English creative writing, the em-dash (`—`) is ubiquitous. Writers use it for interruptions, afterthoughts, dramatic pauses, appositives, and dialogue attributions:
-> *She opened the door—hesitating only for a second—and walked into the dark.*
-
-Persian has never possessed an em-dash in its classical or modern literary tradition. Machine translations that preserve `—` produce an ugly, halting, foreign cadence.
-
-### The Hermes Solutions
-Transform every em-dash into authentic Persian syntax using one of four techniques:
-
-1. **Rhythmic Sentence Splitting (شکستن جمله)**:
-   - *Source*: She opened the door—hesitating only for a second—and walked into the dark.
-   - *Translation*: در را باز کرد. تنها یک لحظه درنگ کرد و سپس پا به درون تاریکی گذاشت.
-
-2. **Syntactic Conjunctions & Subordination (پیوند نحوی)**:
-   - *Source*: The house—abandoned since the war—smelled of dust and rot.
-   - *Translation*: خانه که از زمان جنگ به حال خود رها شده بود، بوی خاک و تباهی می‌داد.
-
-3. **Natural Persian Punctuation (ویرگول و سجاوندی اصیل)**:
-   - *Source*: There was one thing left to do—run.
-   - *Translation*: تنها یک کار باقی مانده بود: فرار.
-
-4. **Adverbial Integration (ادغام قیدی)**:
-   - *Source*: He stared at me—his eyes burning with silent fury.
-   - *Translation*: در حالی که چشمانش از خشمی خاموش شعله می‌کشید، به من خیره شد.
+**مترجم نویسنده‌ی دوم نیست.** آرایه، صفت یا استعاره‌ای که در متن اصلی نیست، اضافه نکن. «cold» یعنی «سرد»، نه «سرمای استخوان‌سوز». مگر اینکه «سرد» در آن جمله واقعاً ضعیف‌تر از اصل باشد.
 
 ---
 
-## 2. Dialogue Attribution Inversion (جابه‌جایی و وارونگی افعال گفتار)
+## ۱. روایت و دیالوگ: دو سطح زبان
 
-### The Problem
-In English, speech tags almost always follow the dialogue:
-> *"I can't do this anymore," Sarah said quietly.*
-> *"Where did you go?" asked the detective.*
+| بخش | سطح زبان | نمونه |
+|---|---|---|
+| روایت | فارسی معیارِ روان (نه اداری، نه کهنه) | در را باز کرد و بی‌صدا وارد شد. |
+| دیالوگ امروزی | محاوره‌ی نوشتاری، مطابق شخصیت (`colloquial.md`) | «کجا بودی تا حالا؟» |
+| دیالوگ داستان تاریخی یا رسمی | معیار یا کمی کهن | «کجا بودی تا این وقت شب؟» |
+| تک‌گویی درونی | نزدیک به گفتار شخصیت | لعنتی، باز دیر کرده بود. |
 
-Translating this mechanically as `«دیگر نمی‌توانم این کار را بکنم»، سارا آرام گفت` sounds clumsy and calqued.
-
-### The Rule
-In literary Persian, speech verbs belong either **before** the dialogue or woven organically with an action:
-- *Natural Persian*: سارا با صدایی آهسته گفت: «دیگر از پس این کار برنمی‌آیم.»
-- *Action + Speech*: کارآگاه رو به او کرد و پرسید: «کجا رفته بودی؟»
-
-### Speech Verb Variations
-Avoid repeating `گفت` mechanically. Use nuanced Persian dialogue verbs matching context:
-- `زمزمه کرد` (whispered)
-- `فریاد زد / بانگ برآورد` (shouted)
-- `پاسخ داد / بازگفت` (replied)
-- `زیر لب غرید` (muttered / growled)
-- `طعنه زد` (sneered / mocked)
+- پیش از ترجمه، برای هر شخصیت مهم تصمیم بگیر: شکسته حرف می‌زند یا کتابی؟ به چه کسانی «تو» می‌گوید و به چه کسانی «شما»؟ این تصمیم‌ها را در فهرست شخصیت‌ها ثبت کن و تا آخر کتاب نگه دار.
+- اگر در متن اصلی شخصیتی عامیانه، با لهجه یا با غلط دستوری حرف می‌زند، معادلش را با محاوره‌ی عامیانه‌تر بساز، نه با آوانویسی یک لهجه‌ی خاص فارسی (مثلاً لهجه‌ی جنوبی آمریکایی را به اصفهانی تبدیل نکن).
 
 ---
 
-## 3. Rhythmic Cadence and Prose Music (موسیقی و وزن درونی نثر)
+## ۲. دیالوگ و فعل گفتن
 
-Literary Persian is phonetic and musical. Pay close attention to:
-1. **Verb Placement**: Verbs in Persian naturally close the clause, but in rhythmic literary prose, short compound sentences create momentum:
-   - *Weak*: او در حالی که به شدت می‌ترسید به طرف در دوید و آن را باز کرد.
-   - *Strong*: وحشت‌زده به سوی در دوید، چنگ انداخت و در را گشود.
-2. **Sensory Diction**: Prefer evocative, tactile Persian adjectives and nouns:
-   - `cold` -> `سرمای استخوان‌سوز` or `کرختی گزنده` instead of simply `سرد`.
-   - `darkness` -> `ظلمات`, `تیرگی`, `سیاهی غلیظ`.
+**جای فعل گفتن.** در انگلیسی، فعل گفتن معمولاً بعد از نقل‌قول یا وسط آن می‌آید. در فارسی معمولاً پیش از نقل‌قول می‌آید، یا با یک کنش ترکیب می‌شود. ولی این قانون مطلق نیست. اگر نقل‌قول کوتاه است و ریتم صحنه تند، آوردن آن بعد از نقل‌قول هم طبیعی است.
+
+| انگلیسی | ترجمه‌ی ماشینی | فارسی طبیعی |
+|---|---|---|
+| "I can't do this anymore," Sarah said quietly. | «من دیگر نمی‌توانم این کار را انجام دهم»، سارا به آرامی گفت. | سارا آهسته گفت: «دیگه نمی‌تونم.» |
+| "Where were you?" he asked, closing the door. | «کجا بودی؟» او پرسید، در حالی که در را می‌بست. | در را بست و پرسید: «کجا بودی؟» |
+| "Fine," she said. "Go." | «خوب»، او گفت. «برو.» | گفت: «باشه. برو.» |
+
+**«گفت» را بی‌دلیل عوض نکن.** نویسنده‌های انگلیسی "said" را عمداً تکرار می‌کنند، چون به چشم نمی‌آید. اگر به جایش «اظهار داشت»، «بیان کرد»، «خاطرنشان ساخت» یا «لب به سخن گشود» بنویسی، متن تصنعی می‌شود. فقط وقتی فعل اصلی خاص است، فعل خاص بیاور: "whispered" ← «آهسته گفت» یا «زیر لب گفت»، "shouted" ← «داد زد».
+
+**نقل‌قول بی‌فعل.** اگر در متن اصلی گوینده از بافت معلوم است و فعل گفتن ندارد، در ترجمه هم اضافه نکن.
 
 ---
 
-## 4. Typography & Punctuation Rules
-- **Quotes**: Exclusively Persian quotation marks: `«...»`.
-- **Digits**: Persian Eastern numerals: `۰، ۱، ۲، ۳، ۴، ۵، ۶، ۷، ۸، ۹`.
-- **ZWNJ (نیم‌فاصله)**: Absolute enforcement on verbal prefixes (`می‌گفت`, `نمی‌خواست`) and plural markers (`دردها`, `خاطره‌ها`).
-- **Passive Voice**: Eliminate passive voice unless the agent is truly unknown or intentionally obscured.
+## ۳. اشتباه‌های رایج ترجمه‌ی ماشینی در داستان
+
+| انگلیسی | ترجمه‌ی ماشینی | فارسی طبیعی |
+|---|---|---|
+| He was killed by the soldiers at dawn. | او توسط سربازان در سپیده‌دم کشته شد. | سحرگاه سربازها او را کشتند. |
+| She couldn't help but smile. | او نتوانست کمکی کند جز اینکه لبخند بزند. | نتوانست جلوی لبخندش را بگیرد. |
+| His heart sank. | قلبش غرق شد. | دلش فرو ریخت. / وا رفت. |
+| She rolled her eyes. | او چشمانش را چرخاند. | چشم‌هایش را با بی‌حوصلگی چرخاند. / پشت چشمی نازک کرد. |
+| He shrugged. | او شانه‌هایش را بالا انداخت. | شانه بالا انداخت. |
+| A smile spread across her face. | یک لبخند در سراسر صورتش پخش شد. | لبخند روی لبش نشست. |
+| He made his way to the kitchen. | او راهش را به سمت آشپزخانه ساخت. | به آشپزخانه رفت. |
+| It was a cold, dark night. | آن یک شب سرد و تاریک بود. | شبی سرد و تاریک بود. |
+| There was something about him that scared her. | چیزی در مورد او وجود داشت که او را می‌ترساند. | چیزی در او بود که می‌ترساندش. |
+| She found herself crying. | او خودش را در حال گریه کردن پیدا کرد. | دید دارد گریه می‌کند. / بی‌اختیار گریه‌اش گرفت. |
+| He took a deep breath. | او یک نفس عمیق گرفت. | نفس عمیقی کشید. |
+| I'm going to kill you! | من قصد دارم تو را بکشم! | می‌کشمت! |
+| Her eyes widened. | چشمانش گشاد شدند. | چشم‌هایش گرد شد. |
+| The silence was deafening. | سکوت کرکننده بود. | سکوتی سنگین همه‌جا را گرفته بود. |
+| He nodded. | او سرش را تکان داد. | سر تکان داد. |
+
+قاعده‌های پشت این نمونه‌ها:
+1. **ضمیر فاعلی «او» را تکرار نکن.** فعل فارسی شناسه دارد. «او» فقط برای رفع ابهام یا تأکید لازم است.
+2. **مجهول را معلوم کن،** مگر عامل عمداً پنهان مانده باشد.
+3. **حرکت‌های بدن را با تعبیر فارسی بگو:** «سر تکان داد»، «شانه بالا انداخت»، «اخم کرد»، نه ترجمه‌ی کلمه به کلمه.
+4. **فعل‌های حرکتی انگلیسی** (made his way, headed to, found herself) معمولاً یک فعل ساده‌ی فارسی‌اند.
+5. **«یک» را حذف کن** وقتی انگلیسی "a" فقط نشانه‌ی نکره است.
+
+---
+
+## ۴. خط تیره، نقطه‌گذاری و ریتم
+
+خط تیره‌ی انگلیسی (—) در نثر فارسی جایی ندارد. به جایش:
+
+| انگلیسی | فارسی |
+|---|---|
+| She opened the door—hesitating only for a second—and walked into the dark. | در را باز کرد. لحظه‌ای مکث کرد و پا به تاریکی گذاشت. |
+| The house—abandoned since the war—smelled of dust. | خانه که از زمان جنگ خالی مانده بود، بوی خاک می‌داد. |
+| There was one thing left to do—run. | فقط یک کار مانده بود: فرار. |
+| "I just—I don't know." | «فقط... نمی‌دونم.» |
+
+برای حرف قطع‌شده سه‌نقطه (...) بگذار. جمله‌های بلند انگلیسی را با «و»های پشت‌سرهم ترجمه نکن. اگر ریتم صحنه تند است، جمله‌ها را کوتاه کن.
+
+---
+
+## ۵. اصطلاح، طنز و ارجاع فرهنگی
+
+- **اصطلاح را با اصطلاح ترجمه کن:** "It's raining cats and dogs" ← «باران سیل‌آسا می‌بارید» یا در دیالوگ «داره شُرشُر می‌باره». "Break a leg!" ← «موفق باشی!»
+- **اصطلاح فارسیِ خیلی بومی نگذار** اگر با فضای داستان نمی‌خواند. شخصیت لندنی نباید بگوید «کشکت را بساب».
+- **بازی با کلمات:** اگر معادل فارسی‌ای پیدا می‌شود که همان کار را بکند، بنویس. اگر نه، معنا را حفظ کن و در صورت لزوم پانویس کوتاه بگذار.
+- **اسم‌های خاص:** آوانویسی کن («جیمز»، «سیوبان»)، و آوانویسی را در واژه‌نامه‌ی کتاب ثبت کن تا یکدست بماند.
+- **واحدها:** در دیالوگ واحد اصلی را نگه دار ("six feet" ← «یک متر و هشتاد»، فقط اگر عدد دقیق مهم نیست).
+
+---
+
+## ۶. نمونه‌ی کامل
+
+**متن اصلی:**
+> The rain hadn't stopped for three days. Marcus stood at the window, watching the street below. "She's not coming," he said finally.
+> Elena didn't look up from her book. "Give it time."
+> "I've given it time. I've given it years."
+
+**ترجمه‌ی ماشینی:**
+> باران برای سه روز متوقف نشده بود. مارکوس در کنار پنجره ایستاده بود، در حال تماشای خیابان در پایین. «او نمی‌آید»، او بالاخره گفت.
+> النا از کتابش به بالا نگاه نکرد. «به آن زمان بده.»
+> «من به آن زمان داده‌ام. من به آن سال‌ها داده‌ام.»
+
+**ترجمه‌ی خوب:**
+> سه روز بود که باران بند نیامده بود. مارکوس کنار پنجره ایستاده بود و خیابان را تماشا می‌کرد. آخر سر گفت: «نمیاد.»
+> النا سرش را از روی کتاب بلند نکرد. «صبر کن.»
+> «صبر کردم. سال‌هاست دارم صبر می‌کنم.»
+
+چه شد:
+- «برای سه روز متوقف نشده بود» ← «سه روز بود که بند نیامده بود»: ساختار زمانی فارسی.
+- «در حال تماشای» ← «تماشا می‌کرد»: فعل به جای اسم.
+- «او… او… گفت» ← «گفت»: ضمیرهای تکراری حذف شدند.
+- «به آن زمان بده» ← «صبر کن»: اصطلاح ترجمه شد، نه کلمه‌ها.
+- تکرار "given it" در اصل یک بازی است. در فارسی با تکرار «صبر» حفظ شد.
+
+---
+
+## ۷. نگارش
+
+- گیومه‌ی «» برای دیالوگ. نقطه‌ی پایان جمله داخل گیومه می‌آید: «برو.»
+- ارقام فارسی (۱۲۳).
+- نیم‌فاصله در «می‌گفت»، «نمی‌خواست»، «خاطره‌ها».
+- خط تیره‌ی انگلیسی هرگز.

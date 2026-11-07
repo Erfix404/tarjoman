@@ -1,53 +1,120 @@
-# Technical & Engineering Translation Reference Guide (راهنمای ترجمه فنی، مهندسی و نرم‌افزار)
+# راهنمای ترجمه‌ی فنی و نرم‌افزار
 
-## Overview
-The Technical domain profile is optimized for software engineering documentation, API references, architecture decision records (ADRs), developer guides, deployment manuals, and cloud infrastructure tutorials. Technical Persian translation demands concise imperative verbs, uncorrupted code blocks, exact command-line arguments, and clear developer ergonomics.
+## هدف
 
----
-
-## 1. Code Fences & Inline Code Protection
-
-Code blocks and terminal commands must remain 100% verbatim:
-- **Code Fences**: All ` ```bash `, ` ```python `, ` ```json ` blocks must pass through translation without a single character or indentation change.
-- **Inline Code**: Inline tokens like `` `npm install` ``, `` `--config` ``, `` `const user_id = 42;` ``, and environment variables like `` `DATABASE_URL` `` must be preserved within backticks.
-- **Do not translate code identifiers**: Variable names, function names (`getUserById`), class names, or JSON keys (`"timeout_ms"`) must never be localized.
+مستند فنی را برنامه‌نویس می‌خواند تا کاری را انجام دهد. ترجمه‌ی خوب یعنی:
+- خواننده بدون نگاه کردن به متن انگلیسی کار را درست انجام دهد،
+- اصطلاح‌ها همان‌هایی باشند که برنامه‌نویس‌های فارسی‌زبان واقعاً به کار می‌برند،
+- جمله‌ها کوتاه، مستقیم و بدون تعارف اداری باشند.
 
 ---
 
-## 2. Concise Imperative Instructions (افعال امری و گام‌های اجرایی)
+## ۱. چه چیزی ترجمه نمی‌شود
 
-Technical documentation is procedural. English steps typically begin with imperatives (*Click*, *Configure*, *Run*, *Verify*).
-In Persian technical writing, express procedural steps using clear, direct imperatives:
+- **بلوک کد و کد درون‌خطی:** حتی یک نویسه یا فاصله تغییر نکند. کامنت‌های داخل کد را فقط وقتی ترجمه کن که کاربر خواسته باشد.
+- **شناسه‌ها:** نام تابع، کلاس، متغیر، کلید JSON، متغیر محیطی (`DATABASE_URL`)، فلگ (`--force`)، مسیر فایل و URL.
+- **نام محصول و فناوری:** Docker، Kubernetes، React، PostgreSQL. آوانویسی نکن («داکر» فقط در متن غیرفنی و عمومی).
+- **پیام‌های خطایی که کاربر باید در لاگ جست‌وجو کند:** متن اصلی را در کد درون‌خطی نگه دار و توضیحش را فارسی بنویس.
 
-| English Step | Strong Technical Persian | Avoid (Verbose/Passive) |
+---
+
+## ۲. اصطلاح‌ها: چیزی که برنامه‌نویس می‌گوید
+
+قاعده: **اصطلاحی را بنویس که یک برنامه‌نویس فارسی‌زبان در جلسه‌ی کاری به زبان می‌آورد.** معادل فرهنگستان را فقط وقتی بنویس که جا افتاده است.
+
+| انگلیسی | پیشنهاد | توضیح |
 |---|---|---|
-| Run the migration script | اسکریپت مایگریشن را اجرا کنید. | عملیات اجرای اسکریپت باید صورت پذیرد. |
-| Set the environment variable | متغیر محیطی را مقداردهی کنید. | اقدام به تنظیم متغیر محیطی نمایید. |
-| Restart the daemon | سرویس پس‌زمینه (Daemon) را بازراه‌اندازی کنید. | دیمون باید مجدداً استارت شود. |
-| Verify the endpoint response | پاسخ نقطه پایانی (Endpoint) را بررسی نمایید. | درستی پاسخ مورد سنجش قرار گیرد. |
+| file, folder, server, cache | فایل، پوشه، سرور، کش | جاافتاده |
+| repository | مخزن (ریپو در متن خودمانی) | |
+| branch / commit / merge | شاخه / کامیت / ادغام (یا مرج) | «متعهد شدن» هرگز |
+| deploy | استقرار، دیپلوی | «گسیل داشتن» هرگز |
+| framework / library | فریم‌ورک / کتابخانه | |
+| pipeline | پایپ‌لاین (یا خط لوله) | یکی را انتخاب کن و ثابت بمان |
+| endpoint | اندپوینت (در اولین بار: نقطه‌ی پایانی، endpoint) | |
+| request / response | درخواست / پاسخ | |
+| latency | تأخیر | |
+| token | توکن | |
+| bug / debug | باگ / اشکال‌زدایی (دیباگ) | |
+| default | پیش‌فرض | |
+| install / configure | نصب کردن / پیکربندی کردن (تنظیم کردن) | |
+
+- **بار اول، اصطلاح انگلیسی را در پرانتز بیاور** اگر احتمال دارد خواننده دنبالش بگردد: «متغیر محیطی (environment variable)». بعد از آن فقط فارسی.
+- **یکدست بمان:** اگر یک بار «استقرار» نوشتی، در همان متن «دیپلوی» ننویس.
 
 ---
 
-## 3. Developer Terminology & Loanwords vs Persian Equivalents
+## ۳. فعل امر: مستقیم، بی‌تعارف
 
-In software documentation, striking the right balance between standard Academy-approved Persian terms and industry loanwords is critical for clarity:
+| انگلیسی | ترجمه‌ی ماشینی یا اداری | فارسی خوب |
+|---|---|---|
+| Run the migration script. | عملیات اجرای اسکریپت مایگریشن باید صورت پذیرد. | اسکریپت مایگریشن را اجرا کنید. |
+| Set the environment variable. | اقدام به تنظیم متغیر محیطی نمایید. | متغیر محیطی را تنظیم کنید. |
+| Make sure Docker is running. | اطمینان حاصل نمایید که Docker در حال اجرا می‌باشد. | مطمئن شوید Docker در حال اجراست. |
+| Click Save. | بر روی دکمه‌ی Save کلیک نمایید. | روی «ذخیره» کلیک کنید. |
+| You can now log in. | شما اکنون قادر به ورود هستید. | حالا می‌توانید وارد شوید. |
 
-| Technical Concept | Recommended Persian | Acceptable Industry Variant | Never Use (Confusing/Obsolete) |
-|---|---|---|---|
-| Framework | فریم‌ورک / چارچوب کاری | چارچوب | استخوان‌بندی |
-| Repository | مخزن / ریپازیتوری | ریپو | انبارگاه داده |
-| Deploy | دیپلوی کردن / مستقر ساختن | استقرار | گسیل داشتن |
-| Pipeline | خط لوله | پایپ‌لاین | لوله‌کشی |
-| Endpoint | نقطه پایانی | اندپوینت | تهِ خط |
-| Latency | تأخیر زمان پاسخ‌دهی | لتنسی | درنگ |
-| Cache | حافظه موقت / کَش | کَشینگ | انبار پنهان |
-| Branch | شاخه | برنچ | انشعاب |
-| Commit | ثبت تغییرات / کامیت | کامیت | متعهد شدن |
+- «کنید»، نه «نمایید». «است»، نه «می‌باشد». «روی»، نه «بر روی».
+- در مستندات، «شما» را تا جای ممکن حذف کن. شناسه‌ی فعل کافی است.
 
 ---
 
-## 4. UI Strings & System Messages
-- For UI actions: Button labels and menu actions should be enclosed in Persian quotation marks:
-  - *Example*: روی دکمه «تأیید و ارسال» (Submit) کلیک کنید.
-- Retain Western Latin digits (`0123456789`) in error codes (`HTTP 404`, `500 Internal Server Error`), IP addresses (`127.0.0.1`), and port numbers (`:8080`).
-- Directional safety: When writing file paths (`/etc/nginx/nginx.conf`) inside Persian text, ensure they are placed within backticks or isolated so slashes do not transpose.
+## ۴. الگوهای جمله‌ی رایج
+
+| انگلیسی | ترجمه‌ی ماشینی | فارسی خوب |
+|---|---|---|
+| The function returns null if the key is not found. | این تابع در صورتی که کلید یافت نشود، مقدار null را بازمی‌گرداند. | اگر کلید پیدا نشود، تابع `null` برمی‌گرداند. |
+| This allows you to cache responses. | این به شما اجازه می‌دهد تا پاسخ‌ها را کش کنید. | با این کار می‌توانید پاسخ‌ها را کش کنید. |
+| It is recommended to use HTTPS. | توصیه می‌شود که از HTTPS استفاده شود. | بهتر است از HTTPS استفاده کنید. |
+| Note that this feature is experimental. | لازم به ذکر است که این ویژگی آزمایشی می‌باشد. | این ویژگی هنوز آزمایشی است. |
+| The request is processed by the worker. | درخواست توسط ورکر پردازش می‌شود. | ورکر درخواست را پردازش می‌کند. |
+| In order to install the package, run… | به منظور نصب پکیج، اجرا کنید… | برای نصب پکیج، این را اجرا کنید: |
+| This is useful when you need to… | این زمانی مفید است که شما نیاز دارید که… | وقتی لازم است…، این کار به درد می‌خورد. |
+| Each user has a unique ID. | هر کاربر یک شناسه‌ی منحصربه‌فرد دارد. | هر کاربر شناسه‌ی یکتایی دارد. |
+| By default, logging is disabled. | به صورت پیش‌فرض، لاگ کردن غیرفعال است. | لاگ به‌طور پیش‌فرض خاموش است. |
+| Make sure to back up your data before upgrading. | مطمئن شوید که از داده‌های خود قبل از ارتقا نسخه‌ی پشتیبان تهیه کنید. | پیش از ارتقا، از داده‌ها نسخه‌ی پشتیبان بگیرید. |
+| The following example shows how to… | مثال زیر نشان می‌دهد که چگونه… | در این مثال می‌بینید چطور… |
+
+---
+
+## ۵. رابط کاربری و پیام‌های سیستم
+
+- **برچسب دکمه کوتاه باشد:** Save ← «ذخیره»، Cancel ← «لغو»، Sign in ← «ورود»، Learn more ← «بیشتر بدانید».
+- **پیام خطا:** بگو چه شد و کاربر چه کند. "Something went wrong. Please try again later." ← «مشکلی پیش آمد. کمی بعد دوباره امتحان کنید.» (نه «خطایی رخ داده است. لطفاً در زمان دیگری مجدداً تلاش نمایید.»)
+- **لحن را با محصول هماهنگ کن:** برای اپ خودمانی از `colloquial.md` استفاده کن («ذخیره شد!»). برای نرم‌افزار سازمانی از فارسی معیار.
+- **جای متغیر را در جمله‌ی فارسی درست بگذار:** "Deleted {count} files" ← «{count} فایل حذف شد»، نه «حذف شد {count} فایل».
+- **جمع با عدد:** در فارسی پس از عدد اسم مفرد می‌آید: «۳ فایل»، نه «۳ فایل‌ها».
+
+---
+
+## ۶. نگارش
+
+- ارقام لاتین در کد، نسخه، پورت، کد خطا و مسیر (`HTTP 404`، `:8080`، `v2.3.0`).
+- مسیر فایل، دستور و URL را در کد درون‌خطی بگذار تا جهت متن به‌هم نریزد.
+- نام دکمه‌ها و منوها در «» بیاید: روی «تنظیمات» بزنید.
+- بعد از کلمه‌ی انگلیسی، پسوند فارسی را با فاصله بنویس یا جمله را بازنویسی کن: «فایل‌های JSON»، نه «JSONها».
+
+---
+
+## ۷. نمونه‌ی کامل
+
+**متن اصلی:**
+> ## Installation
+> To get started, make sure you have Node.js 18 or later installed. Then, install the package using npm:
+> ```bash
+> npm install tarjoman
+> ```
+> Once installed, you can import it into your project. Note that the CLI is not included by default and must be installed separately.
+
+**ترجمه‌ی ماشینی:**
+> ## نصب
+> برای شروع کار، اطمینان حاصل کنید که Node.js نسخه‌ی 18 یا بالاتر را نصب شده دارید. سپس، پکیج را با استفاده از npm نصب نمایید:
+> …
+> زمانی که نصب شد، شما می‌توانید آن را به پروژه‌ی خود ایمپورت کنید. لازم به ذکر است که CLI به صورت پیش‌فرض شامل نمی‌شود و باید به صورت جداگانه نصب گردد.
+
+**ترجمه‌ی خوب:**
+> ## نصب
+> اول مطمئن شوید Node.js نسخه‌ی 18 یا بالاتر نصب است. بعد پکیج را با npm نصب کنید:
+> ```bash
+> npm install tarjoman
+> ```
+> بعد از نصب می‌توانید آن را در پروژه import کنید. CLI همراه پکیج نصب نمی‌شود و باید جداگانه نصبش کنید.
