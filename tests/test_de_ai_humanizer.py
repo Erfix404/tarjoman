@@ -492,13 +492,14 @@ class TestVersion(unittest.TestCase):
         self.assertEqual(tarjoman.__version__, "2.3.0")
 
     def test_pyproject_version(self) -> None:
-        import tomllib
-        with open(
-            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pyproject.toml"),
-            "rb",
-        ) as f:
-            data = tomllib.load(f)
-        self.assertEqual(data["project"]["version"], "2.3.0")
+        # tomllib is stdlib only from Python 3.11; the package supports 3.10.
+        path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pyproject.toml"
+        )
+        with open(path, encoding="utf-8") as f:
+            match = re.search(r'^version\s*=\s*"([^"]+)"', f.read(), re.MULTILINE)
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group(1), "2.3.0")
 
 
 # =========================================================================
