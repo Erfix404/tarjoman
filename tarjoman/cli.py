@@ -307,6 +307,36 @@ def verify_cmd(source_file: Path, target_file: Path) -> None:
 
 
 # -----------------------------------------------------------------------------
+# srt command group (subtitles)
+# -----------------------------------------------------------------------------
+@cli.group("srt")
+def srt_group() -> None:
+    """Subtitle (SRT) checks."""
+    pass
+
+
+@srt_group.command("check")
+@click.argument("target_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--source", "source_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path), help="Source SRT to compare cue count and timings against")
+@click.option("--max-chars", default=42, show_default=True, help="Max characters per line")
+@click.option("--max-lines", default=2, show_default=True, help="Max lines per cue")
+@click.option("--max-cps", default=17.0, show_default=True, help="Max reading speed (characters per second)")
+def srt_check_cmd(target_file: Path, source_file: Optional[Path], max_chars: int, max_lines: int, max_cps: float) -> None:
+    """Check a translated SRT: cue alignment, line length, reading speed, leftover residue."""
+    from tarjoman.parsers.srt import check_srt
+
+    source = source_file.read_text(encoding="utf-8-sig") if source_file else None
+    findings = check_srt(source, target_file.read_text(encoding="utf-8-sig"), max_chars, max_lines, max_cps)
+    if not findings:
+        click.echo("Subtitle check passed.")
+        return
+    click.echo(f"Subtitle check: {len(findings)} finding(s)")
+    for f in findings:
+        click.echo(f"- cue {f.cue} [{f.category}] {f.message}")
+    sys.exit(1)
+
+
+# -----------------------------------------------------------------------------
 # prep subcommand (clean PDF-extracted text before translating)
 # -----------------------------------------------------------------------------
 @cli.command("prep")
