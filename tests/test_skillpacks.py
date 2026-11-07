@@ -71,6 +71,7 @@ class TestSkillpacks(unittest.TestCase):
         expected_files = [
             "literary.md",
             "colloquial.md",
+            "editor.md",
             "scientific.md",
             "philosophy.md",
             "legal.md",

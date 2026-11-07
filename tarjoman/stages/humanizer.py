@@ -243,6 +243,96 @@ LINT_AI_TELL_PATTERNS: List[Tuple[str, str, str]] = [
         r"دست\s+پیدا\s+(?:کرد|کن|می‌کن)",
         "Prefer «رسیدن به» / «به دست آوردن».",
     ),
+    (
+        "T4 cliché opener",
+        r"در دنیای (?:پرشتاب |پرسرعت )?امروز|در عصر حاضر|در دنیای مدرن",
+        "Cut it and start with the real point.",
+    ),
+    (
+        "T3 role inflation",
+        r"نقش (?:کلیدی|حیاتی|بسزایی|محوری|اساسی) (?:را )?ایفا",
+        "Say what it actually does: «X باعث Y می‌شود».",
+    ),
+    (
+        "T3 one-of-the-most",
+        r"یکی از (?:مهم‌ترین|بهترین|بزرگ‌ترین|کلیدی‌ترین) [^.،\n]{1,30}? (?:است|به شمار می‌رود)",
+        "Often filler; state the specific claim or drop the ranking.",
+    ),
+    (
+        "T13 calque: lead to",
+        r"منجر به [^.،\n]{1,30}? (?:می‌شود|شد|شده|خواهد شد|می‌گردد)",
+        "Usually «باعث ... می‌شود» or a direct verb: «هزینه‌ها کم شد».",
+    ),
+    (
+        "T13 calque: significantly",
+        r"به (?:طور|طرز|شکل) (?:قابل توجهی|چشمگیری)",
+        "Prefer «خیلی/بسیار» or the actual number.",
+    ),
+    (
+        "T13 calque: provide/enable",
+        r"(?:امکان|زمینه)[^.،\n]{0,30}? را فراهم (?:می‌کند|می‌آورد|کرده|ساخته)",
+        "Usually «با X می‌شود ...» or «X به شما اجازه می‌دهد» → «با X می‌توانید ...».",
+    ),
+    (
+        "T13 calque: ensure",
+        r"اطمینان حاصل (?:کنید|نمایید|کن|شود)",
+        "«مطمئن شوید» / «حواستان باشد».",
+    ),
+    (
+        "T13 calque: keep in mind",
+        r"در نظر داشته باشید که",
+        "Usually cut, or «یادتان باشد».",
+    ),
+    (
+        "T13 calque: as a",
+        r"به(?:‌| )عنوان یک ",
+        "Drop «یک»: «به‌عنوان مدیر», or rephrase: «من که مدیرم ...».",
+    ),
+    (
+        "T13 calque: let's",
+        r"بیایید (?:نگاهی|با هم|به|شروع)",
+        "«حالا ... را ببینیم» / «شروع کنیم».",
+    ),
+    (
+        "T13 calque: deep dive",
+        r"نگاهی عمیق(?:‌تر)?|غوطه‌ور (?:شویم|می‌شویم)|شیرجه (?:بزنیم|می‌زنیم)",
+        "«دقیق‌تر بررسی کنیم».",
+    ),
+    (
+        "T18 journey/world metaphor",
+        r"سفر (?:یادگیری|موفقیت|توسعه|برنامه‌نویسی)|سفر (?:شما|خود) به سوی|دنیای (?:شگفت‌انگیز|جذاب|هیجان‌انگیز)",
+        "Drop the metaphor and say it plainly.",
+    ),
+    (
+        "T18 unlock potential",
+        r"پتانسیل (?:کامل|واقعی)|کلید (?:موفقیت|طلایی)",
+        "Marketing cliché; say the concrete benefit.",
+    ),
+    (
+        "T18 whether-you-are",
+        r"چه (?:یک )?[^.،\n]{1,25}? باشید(?: و)? چه",
+        "Often an English template; usually cut or «برای ... و ... فرقی نمی‌کند».",
+    ),
+    (
+        "T8 negative parallelism",
+        r"نه تنها [^.\n]{1,60}? بلکه|این (?:فقط|تنها) [^.\n]{1,40}? نیست[،,]? بلکه",
+        "One «نه تنها ... بلکه» per text at most; often plain «و» is enough.",
+    ),
+    (
+        "T17 chatbot closer",
+        r"امیدوارم (?:این [^.\n]{1,20}? )?(?:مفید|کمک‌کننده) (?:باشد|بوده باشد)|اگر سؤال(?:ی)? (?:دیگری )?داشتید[^.\n]{0,20}?(?:بپرسید|در خدمتم)",
+        "Delete unless the source really ends this way.",
+    ),
+    (
+        "T14 connective pileup",
+        r"(?:^|[.؟!]\s+)(?:علاوه بر این|همچنین|به علاوه|از سوی دیگر)،",
+        "Vary or drop sentence-initial connectives; Persian chains with «و» or nothing.",
+    ),
+    (
+        "T4 summary closer",
+        r"(?:^|[.؟!]\s+)(?:به طور خلاصه|به‌طور خلاصه|در جمع‌بندی|در مجموع)[،,]",
+        "Usually cut: the reader just read it.",
+    ),
 ]
 
 

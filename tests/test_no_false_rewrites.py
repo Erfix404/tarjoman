@@ -79,3 +79,34 @@ class TestEvalSetNegatives(unittest.TestCase):
         for sample in negatives:
             text = sample["natural"]
             self.assertEqual(StylisticPolishStage.polish(text), text, sample["id"])
+
+
+class TestAiTellCatalog(unittest.TestCase):
+    """The expanded suggest-only catalog catches typical agent prose but not plain Persian."""
+
+    AGENT_TEXT = (
+        "در دنیای پرشتاب امروز، هوش مصنوعی نقش کلیدی ایفا می‌کند. این ابزار نه تنها سریع است "
+        "بلکه دقیق هم هست. علاوه بر این، استفاده از آن به طور قابل توجهی منجر به کاهش "
+        "هزینه‌ها می‌شود. بیایید نگاهی عمیق‌تر به آن بیندازیم. امیدوارم این مطلب مفید باشد."
+    )
+
+    PLAIN_TEXT = [
+        "علی دنبال کلیدش می‌گردد.",
+        "سفر ما به شیراز خیلی خوب بود.",
+        "چه خبر؟ دیروز رفتم سینما.",
+        "به عنوان معلم در روستا کار می‌کند.",
+        "قیمت‌ها بالا رفت و مردم کمتر خرید کردند.",
+    ]
+
+    def test_agent_text_flagged(self) -> None:
+        labels = {d[0] for d in PersianHumanizer.detect(self.AGENT_TEXT)}
+        self.assertGreaterEqual(len(labels), 8, labels)
+
+    def test_plain_text_not_flagged(self) -> None:
+        for text in self.PLAIN_TEXT:
+            self.assertEqual(PersianHumanizer.detect(text), [], text)
+
+    def test_detect_never_rewrites(self) -> None:
+        # detect() is read-only; humanize() must not touch these meaning-bearing tells.
+        out = PersianHumanizer.humanize("این تغییر منجر به کاهش هزینه‌ها شد.")
+        self.assertIn("منجر به کاهش هزینه‌ها شد", out)
