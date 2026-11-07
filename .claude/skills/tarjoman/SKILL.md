@@ -84,7 +84,7 @@ python .claude/skills/tarjoman/scripts/linter.py output.md
 - **ادبیات چت‌بات:** «سؤال بسیار خوبی است!»، «امیدوارم مفید بوده باشد»
 - **خط تیره‌ی انگلیسی (—):** در فارسی جایی ندارد؛ جمله را بشکن، یا از ویرگول، دونقطه یا پرانتز استفاده کن
 
-جزئیات و نمونه‌ها: `references/de-ai-humanizer.md`
+فهرست کامل با بازنویسی هر نشانه: `references/editor.md` (جزئیات فنی ابزار: `references/de-ai-humanizer.md`)
 
 ---
 
@@ -122,6 +122,8 @@ python .claude/skills/tarjoman/scripts/linter.py output.md
 ---
 
 ## ۵. حالت ویراستار (روان کردن متن فارسی موجود)
+
+راهنمای کامل: `references/editor.md`
 
 وقتی متن فارسی‌ای را که یک مدل زبانی یا یک مترجم دیگر نوشته ویرایش می‌کنی:
 
@@ -162,6 +164,7 @@ tarjoman book terms ./my-book --add "wand=چوب‌دستی:literary" --search w
 
 ```bash
 tarjoman lint FILE        # نویسه، نیم‌فاصله، گیومه، گرته‌برداری (پیشنهادی)، نشانه‌های متن ماشینی
+tarjoman lint FILE --only ai-tell --only calque   # فقط نشانه‌های سبکی، برای ویرایش
 tarjoman audit FILE       # گزارش کیفیت
 tarjoman route "TEXT"     # پیشنهاد سبک بر اساس متن
 tarjoman compose typst|epub|html|bilingual ...   # ساخت خروجی چاپی و کتاب الکترونیک

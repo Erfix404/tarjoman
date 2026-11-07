@@ -261,10 +261,19 @@ def audit_cmd(file: Path, domain: Optional[str], src_file: Optional[Path]) -> No
 # -----------------------------------------------------------------------------
 @cli.command("lint")
 @click.argument("file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
-def lint_cmd(file: Path) -> None:
+@click.option(
+    "--only",
+    "only",
+    multiple=True,
+    help="Report only these categories (repeatable), e.g. --only ai-tell --only calque",
+)
+def lint_cmd(file: Path, only: tuple) -> None:
     """Run Persian linguistic & typography linter on a file."""
     content = file.read_text(encoding="utf-8")
     issues = lint_text(content)
+    if only:
+        wanted = {c.lower() for c in only}
+        issues = [i for i in issues if i.category.lower() in wanted]
     report = format_report(str(file), issues)
     click.echo(report)
     if issues:
