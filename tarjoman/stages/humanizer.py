@@ -221,8 +221,20 @@ LINT_AI_TELL_PATTERNS: List[Tuple[str, str, str]] = [
     ),
     (
         "T2 throat-clearing",
-        r"باید توجه داشت که|لازم است اشاره شود|ذکر این نکته ضروری است",
+        r"باید توجه داشت که|لازم است اشاره شود|ذکر این نکته ضروری است"
+        r"|(?:لازم|شایان|قابل) به (?:ذکر|توضیح) است|شایان ذکر است|همان‌طور که می‌دانید",
         "Delete the announcement and state the point.",
+    ),
+    (
+        "T2 bureaucratic verb",
+        # «نمودن» forms only; «می‌نماید» meaning «seems» is rare in modern prose.
+        r"(?<![\u0600-\u06FF])(?:می‌|ن)?(?:نماید|نمایند|نمایید|نموده|نمود|نمودند)(?![\u0600-\u06FF])",
+        "Use «کند/کنید/کرد»; «نمودن» is office Persian.",
+    ),
+    (
+        "T4 filler connector",
+        r"در این راستا|در همین راستا|در نهایت[،,]?\s*می‌توان (?:گفت|نتیجه گرفت)",
+        "Drop it or use a real link: «برای همین»، «پس»، «خلاصه».",
     ),
     (
         "T4 essay opener/closer",

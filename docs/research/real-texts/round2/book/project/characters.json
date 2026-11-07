@@ -1,0 +1,32 @@
+{
+  "bible_version": "2.0",
+  "characters": [
+    {
+      "name": "Alice",
+      "persian_name": "آلیس",
+      "gender": "",
+      "tone": "formal",
+      "default_address": "تو",
+      "speech_quirks": [],
+      "notes": ""
+    },
+    {
+      "name": "Dodo",
+      "persian_name": "دودو",
+      "gender": "",
+      "tone": "formal",
+      "default_address": "شما",
+      "speech_quirks": [],
+      "notes": ""
+    },
+    {
+      "name": "White Rabbit",
+      "persian_name": "خرگوش سفید",
+      "gender": "",
+      "tone": "formal",
+      "default_address": "شما",
+      "speech_quirks": [],
+      "notes": ""
+    }
+  ]
+}

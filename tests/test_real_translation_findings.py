@@ -55,3 +55,51 @@ class TestSpeakerLabels(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestRoundTwoFindings(unittest.TestCase):
+    """Round 2: genres, news, editor mode and the book workflow."""
+
+    def test_announcements_and_office_verbs_flagged(self) -> None:
+        for text in (
+            "لازم به ذکر است که این روش هزینه‌بر است.",
+            "شایان ذکر است که نتایج قطعی نیست.",
+            "این ابزار نقش مهمی ایفا می‌نماید.",
+            "در این راستا، ابزار مفید است.",
+            "در نهایت، می‌توان گفت که این خوب است.",
+        ):
+            self.assertIn("ai-tell", cats(text), text)
+
+    def test_plain_verbs_untouched(self) -> None:
+        for text in ("این کار را نمی‌کند.", "نمایش فیلم شروع شد.", "نماینده آمد.", "در نهایت به خانه رفت."):
+            self.assertNotIn("ai-tell", cats(text), text)
+
+    def test_latin_decimal_between_persian_digits(self) -> None:
+        self.assertIn("punct", cats("نرخ به ۹.۵ درصد رسید."))
+        self.assertNotIn("punct", cats("نرخ به ۹٫۵ درصد رسید."))
+
+
+class TestBookTermsTsv(unittest.TestCase):
+    def test_terms_added_by_cli_reach_tsv_and_check_reads_tsv(self) -> None:
+        import tempfile
+        from pathlib import Path
+
+        from click.testing import CliRunner
+
+        from tarjoman.cli import cli
+
+        runner = CliRunner()
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "book"
+            self.assertEqual(runner.invoke(cli, ["book", "init", "کتاب", "-o", str(project)]).exit_code, 0)
+            runner.invoke(cli, ["book", "terms", str(project), "--add", "Duchess=دوشس"])
+            self.assertIn("Duchess\tدوشس", (project / "terms.tsv").read_text(encoding="utf-8"))
+            # A term added by hand to the TSV is checked too.
+            with (project / "terms.tsv").open("a", encoding="utf-8") as f:
+                f.write("Oh dear\tوای خدا\t\t\n")
+            src = Path(tmp) / "en.md"
+            tgt = Path(tmp) / "fa.md"
+            src.write_text("'Oh dear!' said the Duchess.\n", encoding="utf-8")
+            tgt.write_text("دوشس گفت: «ای وای!»\n", encoding="utf-8")
+            result = runner.invoke(cli, ["book", "check", str(project), str(src), str(tgt)])
+            self.assertIn("Oh dear", result.output)

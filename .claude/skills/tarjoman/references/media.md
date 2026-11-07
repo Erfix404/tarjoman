@@ -1,62 +1,61 @@
-# Media & Journalistic Translation Reference Guide (راهنمای ترجمه رسانه و روزنامه‌نگاری)
+# راهنمای ترجمه‌ی خبر و متن رسانه‌ای
 
-## Overview
-The Media domain profile covers hard news, breaking news dispatches, investigative journalism, op-eds, press releases, and editorial features. Journalism operates under strict constraints of brevity, high impact, active voice, and the classic inverted pyramid structure.
+## هدف
 
----
-
-## 1. Inverted Pyramid & Lead Sentences (ساختار هرم وارونه و لید خبر)
-
-In news reporting, the most vital information (Who, What, Where, When, Why, How - عناصر ۶ گانه خبر) is concentrated in the opening sentence (the **Lead / لید**).
-- **No Introductory Fluff**: Dive straight into the core event. Avoid clunky transitions like `شایان ذکر است که` or `لازم به ذکر است`.
-- **Punchy and Informative**: A Persian news lead should rarely exceed 35-40 words while delivering the essential breaking fact.
-
-Example:
-- *English Lead*:
-  > **GENEVA (Reuters)** — World health officials warned on Tuesday that global vaccination rates have dropped to their lowest level in three decades, leaving millions of children vulnerable to preventable diseases.
-- *Persian News Lead*:
-  > **ژنو (رویترز)** — مقامات سازمان‌های بین‌المللی بهداشت روز سه‌شنبه هشدار دادند که نرخ جهانی واکسیناسیون به پایین‌ترین سطح خود در سه دهه اخیر رسیده است؛ وضعیتی که میلیون‌ها کودک را در معرض بیماری‌های قابل‌پیشگیری قرار می‌دهد.
+خبر را باید بشود در یک نگاه خواند. ترجمه‌ی خوب خبر:
+- مهم‌ترین واقعیت را در جمله‌ی اول (لید) می‌گوید، مثل اصل،
+- فعل معلوم و روشن دارد و نسبت دادن هر حرف به گوینده‌اش دقیق است،
+- عددها، درصدها و تاریخ‌ها را بی‌کم‌وکاست و با نگارش فارسی می‌آورد،
+- به زبان خبرگزاری‌های فارسی نزدیک است، نه به زبان اداری.
 
 ---
 
-## 2. Standard News Datelines & Wire Attribution
+## ۱. لید و ساختار هرم وارونه
 
-Preserve international wire service dateline conventions:
-- `WASHINGTON (AP)` -> `واشنگتن (اسوشیتدپرس)`
-- `LONDON (Reuters)` -> `لندن (رویترز)`
-- `PARIS (AFP)` -> `پاریس (خبرگزاری فرانسه)`
-- Format with bold location and wire service in parentheses, followed by an em-space or spaced dash in headlines, or Persian quotation in text.
+- ترتیب اطلاعات را عوض نکن: چه کسی، چه کرد، کجا، کی، و چرا، همان‌طور که در اصل آمده.
+- جمله‌ی بلند انگلیسی را که سه خبر را با «،» به هم چسبانده بشکن: «… کاهش داد و به ۹٫۵ درصد رساند. این سومین کاهش در سال جاری است.»
+- مقدمه‌چینی نکن: «شایان ذکر است»، «لازم به ذکر است»، «در همین راستا» در خبر جایی ندارند.
 
 ---
 
-## 3. Active Voice & Direct Attribution
+## ۲. سرخبر (dateline) و نام خبرگزاری
 
-Journalistic English frequently relies on anonymous attributions or passive structures. Translate with vigor and clarity:
-- Prefer active attribution verbs:
-  - `افزود` (added)
-  - `خاطرنشان کرد` (noted / pointed out)
-  - `تأکید کرد` (emphasized)
-  - `تصریح کرد` (clarified / specified)
-  - `مدعی شد` (claimed / alleged — use strictly when the fact is unverified)
-- **Calque Alert**: Avoid `به گفتهٔ منابع آگاه اعلام گردید` (calqued passive). Instead write: `منابع آگاه اعلام کردند که...`.
+- خط تیره‌ی انگلیسی را نگذار. شکل‌های رایج فارسی:
+  - «نایروبی: بانک مرکزی کنیا …»
+  - «به گزارش رویترز از نایروبی، بانک مرکزی کنیا …»
+- نام خبرگزاری‌ها: AP ← «آسوشیتدپرس»، Reuters ← «رویترز»، AFP ← «خبرگزاری فرانسه»، BBC ← «بی‌بی‌سی».
+- نام خبرگزاری را فقط وقتی بیاور که در اصل هست. خبرگزاری نساز.
 
 ---
 
-## 4. Headline Economy & Impact (تیترهای خبری)
+## ۳. نسبت دادن و فعل گفتن
 
-Persian headlines must be concise, active, and rhythmically striking:
-- Eliminate auxiliary verbs and redundant prepositions in headlines where possible:
-  - *Weak*: توافق هسته‌ای توسط وزرای امور خارجه امضا شد.
-  - *Strong & Journalistic*: امضای توافق هسته‌ای میان وزرای امور خارجه
-- Avoid sensationalist exaggerations unless present in the source text.
-- Use Persian quotation marks `«...»` around quotes in headlines and text.
-- Use Persian digits (`۰۱۲۳۴۵۶۷۸۹`) for news dates, statistics, and percentages in general news copy.
+- "said" معمولاً «گفت» است. «اظهار داشت»، «بیان کرد» و «عنوان کرد» را برای تنوع نیاور.
+- فعل‌های خاص فقط وقتی که اصل خاص است: added ← «افزود»، stressed ← «تأکید کرد»، claimed ← «مدعی شد» (فقط برای ادعای تأییدنشده)، denied ← «تکذیب کرد».
+- "according to" ← «به گزارش …» یا «به گفته‌ی …»، نه «بر اساس» برای گوینده‌ی انسانی.
+- قطعیت را عوض نکن: "may"، "reportedly"، "is expected to" ← «ممکن است»، «گزارش شده»، «انتظار می‌رود». خبر احتمالی را قطعی نکن.
+- نقل‌قول مستقیم در «»، و فعل گفتن پیش از آن: رئیس کل بانک به خبرنگاران گفت: «…»
 
 ---
 
-## نمونه‌های بد ← خوب (فارسی)
+## ۴. عدد، درصد و اصطلاح اقتصادی
 
-این نمونه‌ها مهم‌تر از قاعده‌های بالا هستند: پیش از ترجمه، چند بار بخوانشان. الگو در همه یکی است: ساختار انگلیسی را رها کن، معنا را با فعل فارسی بگو، «توسط» و «یک» و ضمیرهای اضافه را حذف کن، و اصطلاح جاافتاده‌ی همان رشته را به کار ببر.
+- ارقام فارسی، با ممیز فارسی: «۹٫۵ درصد»، نه «۹.۵٪» (لینتر «۹.۵» را می‌گیرد). در متن خبر «درصد» خواناتر از «٪» است.
+- "25 basis points" ← «۲۵ واحد پایه» (یا «یک‌چهارم واحد درصد»). معادل جاافتاده را عوض نکن.
+- "cut rates / easing" ← «کاهش نرخ بهره»؛ "tightening" ← «افزایش نرخ بهره» یا «سیاست انقباضی»؛ نه «تسهیل» و «سفت کردن».
+- "benchmark rate" ← «نرخ بهره‌ی پایه»؛ "inflation slowed/eased" ← «تورم کند شد» یا «نرخ تورم کاهش یافت».
+- واحد پول: «دلار»، «یورو»، «شیلینگ کنیا»؛ عدد بزرگ: «۲٫۳ میلیارد دلار».
+
+---
+
+## ۵. تیتر
+
+- کوتاه، با فعل یا بدون فعل، ولی بی‌«توسط»: «بانک مرکزی کنیا نرخ بهره را کاهش داد» یا «کاهش دوباره‌ی نرخ بهره در کنیا».
+- اغراقی که در اصل نیست اضافه نکن («سقوط آزاد»، «شوک»).
+
+---
+
+## نمونه‌های بد ← خوب
 
 | انگلیسی | ترجمه‌ی ماشینی | فارسی خوب |
 |---|---|---|
@@ -65,3 +64,6 @@ Persian headlines must be concise, active, and rhythmically striking:
 | The minister gave the green light to the project. | وزیر چراغ سبز را به پروژه نشان داد. | وزیر با این پروژه موافقت کرد. |
 | Thousands took to the streets to protest. | هزاران نفر به خیابان‌ها برای اعتراض رفتند. | هزاران نفر برای اعتراض به خیابان آمدند. |
 | The company declined to comment. | شرکت از نظر دادن امتناع کرد. | شرکت حاضر به اظهارنظر نشد. |
+| NAIROBI - Kenya's central bank cut its benchmark interest rate by 25 basis points to 9.5% on Tuesday, its third cut this year. | نایروبی - بانک مرکزی کنیا روز سه‌شنبه نرخ بهره‌ی معیار خود را ۲۵ واحد پایه کاهش داد و به ۹.۵٪ رساند، که سومین کاهش آن در سال جاری است. | نایروبی: بانک مرکزی کنیا روز سه‌شنبه نرخ بهره‌ی پایه را ۲۵ واحد پایه کم کرد و به ۹٫۵ درصد رساند. این سومین کاهش نرخ بهره در سال جاری است. |
+| The decision was widely anticipated by analysts. | این تصمیم به طور گسترده توسط تحلیلگران پیش‌بینی شده بود. | بیشتر تحلیلگران همین تصمیم را پیش‌بینی می‌کردند. |
+| "We see room for further easing," the governor said. | رئیس گفت: «ما جا برای تسهیل بیشتر می‌بینیم.» | رئیس کل بانک مرکزی گفت: «جا برای کاهش بیشتر نرخ بهره هست.» |
