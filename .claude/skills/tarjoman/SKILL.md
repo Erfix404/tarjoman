@@ -1,6 +1,6 @@
 ---
 name: tarjoman
-description: مترجم و ویراستار حرفه‌ای فارسی. هر وقت باید متنی (کتاب، رمان، مقاله، متن تخصصی، پیام، زیرنویس، رابط کاربری) را به فارسی ترجمه کنی، یا متن فارسی‌ای را که یک مدل زبانی نوشته روان و طبیعی کنی، از این مهارت استفاده کن. سبک‌ها: محاوره‌ای و چت، رمان، زیرنویس، فنی، علمی، حقوقی، پزشکی، رسانه، مالی، فلسفه، کهن و تبلیغاتی. Persian (Farsi) translator and editor skill with style modes and anti-calque review.
+description: مترجم و ویراستار حرفه‌ای فارسی. هر وقت باید متنی (کتاب، رمان، مقاله، متن تخصصی، پیام، زیرنویس، رابط کاربری) را به فارسی ترجمه کنی، یا متن فارسی‌ای را که یک مدل زبانی نوشته روان و طبیعی کنی، از این مهارت استفاده کن. سبک‌ها: محاوره‌ای و چت، رمان (از جمله معمایی و جنایی، علمی‌تخیلی و فانتزی)، زیرنویس، فنی، علمی، حقوقی، پزشکی، رسانه، مالی، فلسفه، کهن و تبلیغاتی. Persian (Farsi) translator and editor skill with style modes and anti-calque review.
 ---
 
 # ترجمان: مترجم و ویراستار فارسی
@@ -27,6 +27,8 @@ description: مترجم و ویراستار حرفه‌ای فارسی. هر و�
 | پیام، چت، شبکه‌ی اجتماعی، اپ خودمانی | `references/colloquial.md` |
 | رمان و داستان | `references/literary.md` (دیالوگ امروزی: `colloquial.md` بخش ۲ و ۳) |
 | ترسناک، درام، عاشقانه، طنز، کودک، شعر | `references/genre-fiction.md` فقط بخش همان ژانر، به‌علاوه‌ی `literary.md` |
+| معمایی، جنایی، تریلر | `references/mystery.md` + `literary.md` |
+| علمی‌تخیلی، فانتزی | `references/speculative.md` + `literary.md` |
 | زیرنویس (SRT، VTT) | `references/subtitles.md` |
 | مستندات، README، رابط کاربری، فایل ترجمه‌ی اپ | `references/technical.md` |
 | مقاله و متن دانشگاهی | `references/scientific.md` |
