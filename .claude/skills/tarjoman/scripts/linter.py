@@ -125,9 +125,8 @@ def _load_shared_tables() -> Tuple[
 ]:
     """Load shared patterns from tarjoman.stages.anti_calque when available."""
     try:
-        repo_root = os.path.dirname(
-            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        )
+        # scripts/ -> tarjoman/ -> skills/ -> .claude/ -> repository root
+        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), *[".."] * 4))
         if repo_root not in sys.path:
             sys.path.insert(0, repo_root)
         from tarjoman.stages import anti_calque as ac
@@ -653,9 +652,21 @@ def main() -> int:
         print(f"{RED}Error reading file {args.file}: {exc}{RESET}", file=sys.stderr)
         return 2
 
-    issues = lint_text(content, skip_code_blocks=args.skip_code_blocks)
-    report = format_report(args.file, issues)
-    print(report)
+    # Prefer the full package linter (spelling, ZWNJ, punctuation and AI-tell
+    # checks live there). This vendored copy is only a fallback.
+    try:
+        from tarjoman import linter as full_linter
+
+        issues = full_linter.lint_text(content, skip_code_blocks=args.skip_code_blocks)
+        print(full_linter.format_report(args.file, issues))
+    except Exception:
+        issues = lint_text(content, skip_code_blocks=args.skip_code_blocks)
+        print(format_report(args.file, issues))
+        print(
+            f"{YELLOW}Limited mode: the tarjoman package is not installed, so spelling, "
+            f"ZWNJ, punctuation and AI-tell checks were skipped. For the full check run: "
+            f"pip install git+https://github.com/Erfix404/tarjoman.git{RESET}"
+        )
 
     return 0 if not issues else 1
 

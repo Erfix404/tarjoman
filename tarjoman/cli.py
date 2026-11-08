@@ -8,7 +8,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -560,6 +560,30 @@ def book_characters_cmd(project_dir: Path, add_spec: Optional[str], list_only: b
         click.echo(f"- {char.name}" + (f" — {extra}" if extra else ""))
 
 
+def _read_terms_tsv(project: Path) -> Dict[str, str]:
+    """Read terms.tsv (the human-editable copy of the termbase)."""
+    path = project / "terms.tsv"
+    terms: Dict[str, str] = {}
+    if not path.exists():
+        return terms
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip() or line.startswith(("english_term\t", "#")):
+            continue
+        cols = line.split("\t")
+        if len(cols) >= 2 and cols[0].strip() and cols[1].strip():
+            terms[cols[0].strip()] = cols[1].strip()
+    return terms
+
+
+def _write_terms_tsv(project: Path, termbase: "Termbase") -> None:
+    """Keep terms.tsv in step with terms.db so `book status` and people see every term."""
+    terms = dict(_read_terms_tsv(project))
+    terms.update(termbase.get_all_terms())
+    rows = ["english_term\tpersian_term\tdomain\tnotes"]
+    rows += [f"{en}\t{fa}\t\t" for en, fa in sorted(terms.items())]
+    (project / "terms.tsv").write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+
 @book_group.command("terms")
 @click.argument("project_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
 @click.option("--add", "add_spec", default=None, help="Add term: EN=FA[:DOMAIN]")
@@ -591,6 +615,7 @@ def book_terms_cmd(
         else:
             termbase.record_term(left.strip(), fa.strip(), domain=domain.strip())
             click.echo(f"Term recorded: {left.strip()} -> {fa.strip()}")
+        _write_terms_tsv(project, termbase)
         termbase.close()
         return
 
@@ -634,7 +659,8 @@ def book_check_cmd(project_dir: Path, source_file: Path, target_file: Path) -> N
     target = target_file.read_text(encoding="utf-8")
 
     termbase = Termbase(db_path=project / "terms.db")
-    terms = termbase.get_all_terms()
+    # Terms added by hand to terms.tsv count too; the database wins on conflict.
+    terms = {**_read_terms_tsv(project), **termbase.get_all_terms()}
     termbase.close()
 
     bible_path = project / "characters.json"

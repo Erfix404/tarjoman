@@ -210,7 +210,7 @@ _DETACHED_SUFFIX_RE: Pattern = re.compile(
 _FAKE_ZWNJ_RE: Pattern = re.compile("(?<=[\u0600-\u06FF])[\u00AD\u200B\u200D\uFEFF](?=[\u0600-\u06FF])")
 #: Latin , ; ? next to Persian words, and repeated ?/! marks.
 _LATIN_PUNCT_RE: Pattern = re.compile(
-    r"[\u0621-\u06CC]\s*[,;?](?!\d)|[؟?!]{2,}"
+    r"[\u0621-\u06CC]\s*[,;?](?!\d)|[؟?!]{2,}|[۰-۹]\.[۰-۹]"
 )
 #: «A:» or «Sarah:» at the start of a chat or script line.
 _SPEAKER_LABEL_RE: Pattern = re.compile(r"^\s*[A-Za-z][A-Za-z0-9 ._-]{0,20}:(?=\s)")
@@ -504,7 +504,7 @@ def lint_text(
                     category="punct",
                     message=f"Latin or repeated punctuation in Persian text: «{_lp.group(0)}».",
                     snippet=line.strip(),
-                    suggestion="Use «،» «؛» «؟» and a single «؟» or «!».",
+                    suggestion="Use «،» «؛» «؟», a single «؟» or «!», and «٫» as the decimal mark between Persian digits (۹٫۵).",
                 )
             )
 

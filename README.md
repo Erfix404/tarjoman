@@ -20,7 +20,7 @@ Tarjoman transforms AI agents into a **full-fledged professional Persian publish
 
 ترجمان، عامل‌های هوش مصنوعی را به یک **انتشارات حرفه‌ای فارسی تمام‌عیار** تبدیل می‌کند. خط لوله‌ی پنج‌مرحله‌ای ترجمه، موتور خالص‌سازی ضد گرته‌برداری، انسانی‌ساز متن فارسی و ابزارهای نشر چندقالبی، همگی در قالب یک مهارت واحد گردآمده‌اند که هر عامل هوشمند برنامه‌نویسی می‌تواند آن را فراخوانی کند.
 
-[Core Architecture](#8-core-architectural-pillars) · [Quick Start](#quickstart--cli-guide) · [Python API](#python-api) · [Benchmarks](#benchmarks--quality-evidence) · [Agent Integration](#multi-agent-super-skill-integration) · [Contributing](#contributing--license)
+**[راهنمای فارسی: نصب و شروع سریع](README.fa.md)** · [Core Architecture](#8-core-architectural-pillars) · [Quick Start](#quickstart--cli-guide) · [Python API](#python-api) · [Benchmarks](#benchmarks--quality-evidence) · [Agent Integration](#multi-agent-super-skill-integration) · [Contributing](#contributing--license)
 
 </div>
 
@@ -190,15 +190,16 @@ Tarjoman is designed as a **skill** that AI coding agents load and invoke autono
 
 ### Claude Code CLI
 
-Add the skill directory to your Claude Code skills:
+Copy the skill folder into your Claude Code skills, then install the checking tools:
 
 ```bash
-# Symlink or copy the skill pack
-cp -r agent-packs/cursor/ ~/.claude/skills/tarjoman
-
-# Invoke directly
-/tarjoman translate my_article.txt --domain technical
+git clone https://github.com/Erfix404/tarjoman.git
+mkdir -p ~/.claude/skills
+cp -r tarjoman/.claude/skills/tarjoman ~/.claude/skills/   # or <project>/.claude/skills/
+pip install git+https://github.com/Erfix404/tarjoman.git    # tarjoman lint / verify / srt check
 ```
+
+Then just ask Claude Code: "Translate chapter1.md into Persian with tarjoman." The agent does the translation itself; the CLI only checks it. Full Persian guide: [README.fa.md](README.fa.md).
 
 ### Hermes Agent
 
