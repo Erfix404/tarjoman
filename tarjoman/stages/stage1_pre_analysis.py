@@ -3,7 +3,9 @@ Stage 1: Pre-Analysis and Token Protection Stage for Tarjoman Universal Translat
 
 Masks:
 - Fenced code blocks (```...```)
-- LaTeX display math ($$...$$)
+- LaTeX display math ($$...$$, \\[...\\])
+- LaTeX math and verbatim environments (equation, align, tikzpicture, lstlisting...)
+- LaTeX commands whose argument is a key or path, not prose (\\cite, \\ref, \\label, \\url...)
 - Inline code (`...`)
 - LaTeX inline math ($...$)
 - URLs (http://... / https://...)
@@ -36,6 +38,25 @@ class PreAnalysisStage(BaseStage):
         ("fenced_code", re.compile(r"```[\s\S]*?```")),
         # 2. LaTeX display math ($$...$$)
         ("display_math", re.compile(r"\$\$[\s\S]*?\$\$")),
+        # 2b. LaTeX math/verbatim/figure environments. Prose inside them is not translated.
+        (
+            "latex_environment",
+            re.compile(
+                r"\\begin\{(equation|align|alignat|gather|multline|flalign|eqnarray|displaymath|math|"
+                r"verbatim|lstlisting|minted|tikzpicture|algorithmic)(\*?)\}[\s\S]*?\\end\{\1\2\}"
+            ),
+        ),
+        # 2c. LaTeX bracket math: \[ ... \] and \( ... \)
+        ("latex_bracket_math", re.compile(r"\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)")),
+        # 2d. LaTeX commands whose argument is a citation key, label, path or URL.
+        (
+            "latex_command",
+            re.compile(
+                r"\\(?:cite[a-zA-Z]*|ref|eqref|autoref|cref|Cref|pageref|label|url|nocite|"
+                r"bibliography|bibliographystyle|includegraphics|input|include|usepackage|href)\*?"
+                r"(?:\[[^\]\n]*\])*\{[^{}\n]*\}"
+            ),
+        ),
         # 3. Inline code (`...`)
         ("inline_code", re.compile(r"`[^`\n]+`")),
         # 4. LaTeX inline math ($...$) - not preceded or followed by other dollar signs or digits, avoiding currency like $50

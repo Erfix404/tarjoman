@@ -10,6 +10,7 @@ The Scientific domain profile is tailored for peer-reviewed journal papers, acad
 Mathematical expressions, formulas, and symbols must remain completely uncorrupted:
 - **Inline Formulas**: Retain `$E=mc^2$`, `$p < 0.05$`, `$\alpha = 0.01$` verbatim within dollar signs.
 - **Display Equations**: Retain `$$...$$` blocks verbatim.
+- **LaTeX Sources**: In a `.tex` source, also retain `\[...\]`, `\(...\)`, math environments (`equation`, `align`, `gather`...), `verbatim`/`lstlisting`/`tikzpicture` blocks, and the arguments of `\cite`, `\ref`, `\eqref`, `\label`, `\url`, `\includegraphics` and `\href` (only the link text of `\href` is translated). The pipeline's stage 1 masks all of these; when translating by hand, copy them unchanged.
 - **Directional Isolation**: When an inline formula appears inside Persian RTL text, ensure it is directionally isolated so that minus signs, inequality operators, and subscripts do not flip across RTL/LTR boundary.
 
 Example:

@@ -52,3 +52,8 @@ rockbenben · https://github.com/rockbenben/subtitle-translator · مجوز MIT
 GasyCoder · https://github.com/GasyCoder/TranslateBooksWithLLMs · مجوز AGPL-3.0
 
 - **پیشنهاد واژه‌نامه از متن منبع** (`tarjoman book candidates`، `tarjoman/parsers/term_candidates.py`): ایده‌ی استخراج خودکار اسم‌ها و اصطلاح‌های تکرارشونده برای واژه‌نامه‌ی کتاب. از این مخزن هیچ کدی کپی نشده و کد از نو نوشته شده است.
+
+## PDFMathTranslate / LaTeXTrans
+https://github.com/PDFMathTranslate/PDFMathTranslate (AGPL-3.0) · https://github.com/NiuTrans/LaTeXTrans
+
+- **حفظ فرمول و ارجاع در متن علمی** (`tarjoman/stages/stage1_pre_analysis.py`): ایده‌ی کنار گذاشتن فرمول‌ها و ساختارهای غیرمتنی پیش از ترجمه. الگوهای LaTeX (محیط‌های ریاضی، `\cite`، `\ref` و مانند آن) از نو نوشته شده‌اند و هیچ کدی از این پروژه‌ها کپی نشده است.
