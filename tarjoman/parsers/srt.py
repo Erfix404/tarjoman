@@ -162,3 +162,85 @@ def check_srt(
         src = source[i] if source is not None and i < len(source) else None
         findings.extend(check_cue(cue, src, max_chars, max_lines, max_cps))
     return findings
+
+
+# -----------------------------------------------------------------------------
+# Text-only workflow: translate the dialogue, keep the timeline untouched.
+#
+# ``extract_for_translation`` turns an SRT into a plain file the agent can read
+# in one piece: every cue is a numbered marker followed by its text. The agent
+# translates the text under the markers and keeps the markers as they are.
+# ``merge_translation`` rebuilds a valid SRT from the source timings and that
+# file, and refuses the merge when a marker is missing, repeated or out of order.
+# -----------------------------------------------------------------------------
+_MARKER_RE = re.compile(r"^\[#(\d+)\]\s*$")
+
+
+def extract_for_translation(srt_text: str) -> str:
+    """Return a marker-delimited text file holding only the cue text."""
+    cues = parse_srt(srt_text)
+    blocks = []
+    for i, cue in enumerate(cues, start=1):
+        body = "\n".join(cue.lines)
+        blocks.append(f"[#{i}]\n{body}")
+    return "\n\n".join(blocks) + "\n"
+
+
+def merge_translation(source_srt_text: str, translated_text: str) -> str:
+    """Rebuild an SRT: source timings and indices, translated text.
+
+    Raises ``ValueError`` listing every problem when the markers do not match
+    the source cues one to one, so a broken merge never reaches a video player.
+    """
+    source = parse_srt(source_srt_text)
+    translated: dict[int, List[str]] = {}
+    order: List[int] = []
+    problems: List[str] = []
+    current: Optional[int] = None
+    text = translated_text.lstrip("﻿").replace("\r\n", "\n").replace("\r", "\n")
+    for line in text.split("\n"):
+        m = _MARKER_RE.match(line.strip())
+        if m:
+            current = int(m.group(1))
+            if current in translated:
+                problems.append(f"marker [#{current}] appears more than once")
+            translated[current] = []
+            order.append(current)
+            continue
+        if current is None:
+            if line.strip():
+                problems.append(f"text before the first marker: «{line.strip()[:40]}»")
+            continue
+        if line.strip():
+            translated[current].append(line.strip())
+
+    expected = list(range(1, len(source) + 1))
+    missing = [n for n in expected if n not in translated]
+    extra = [n for n in translated if n not in expected]
+    if missing:
+        problems.append(f"missing markers: {', '.join(f'[#{n}]' for n in missing[:20])}")
+    if extra:
+        problems.append(f"markers with no source cue: {', '.join(f'[#{n}]' for n in extra[:20])}")
+    if order != sorted(order):
+        problems.append("markers are out of order")
+    for n, src in enumerate(source, start=1):
+        if n in translated and src.lines and not translated[n]:
+            problems.append(f"[#{n}] is empty but the source cue has text")
+    if problems:
+        raise ValueError("; ".join(problems))
+
+    out_blocks = []
+    for n, src in enumerate(source, start=1):
+        out_blocks.append(
+            f"{src.index}\n"
+            f"{_format_ts(src.start_ms)} --> {_format_ts(src.end_ms)}\n"
+            + "\n".join(translated[n])
+        )
+    return "\n\n".join(out_blocks) + "\n"
+
+
+def _format_ts(ms: int) -> str:
+    h, rem = divmod(ms, 3_600_000)
+    m, rem = divmod(rem, 60_000)
+    s, msec = divmod(rem, 1000)
+    return f"{h:02d}:{m:02d}:{s:02d},{msec:03d}"
