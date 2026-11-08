@@ -1,51 +1,58 @@
-# Philosophical Translation Reference Guide (راهنمای ترجمه فلسفه و علوم انسانی)
+# راهنمای ترجمه‌ی فلسفه و علوم انسانی
 
-## Overview
-The Philosophical domain profile is designed for theoretical philosophy, metaphysics, phenomenology, continental thought, ethics, and epistemology. Philosophical texts hinge on conceptual architecture, rigorous terminology consistency, and deep awareness of Greek, Latin, and German etymological roots.
+برای متن فلسفی، نظریه‌ی اجتماعی و ادبی، الهیات، تاریخ اندیشه و جستار (essay).
+
+## در یک نگاه
+
+- **مفهوم، یک معادل.** اصطلاح کلیدی را یک بار انتخاب کن، بار اول اصلش را در پرانتز بیاور و تا آخر عوضش نکن. ثبات اصطلاح در فلسفه از روانی مهم‌تر است.
+- **معادل جاافتاده‌ی سنت فارسی** را بگیر (پیشینی، پدیدارشناسی، هستی‌شناسی)، نه ساختن واژه‌ی تازه.
+- **استدلال را ساده نکن.** پیچیدگی اندیشه می‌ماند؛ پیچیدگی نحو انگلیسی نمی‌ماند. جمله‌ی تودرتو را بشکن، ولی رابطه‌ی منطقی (پس، زیرا، با این حال، مگر آنکه) را نگه دار.
+- **قید و قیدِ تردید** («شاید»، «تا حدی»، «به یک معنا») جزو استدلال‌اند. حذفشان نکن.
+- **بازی با ریشه‌ی کلمه** را که در فارسی درنمی‌آید، با معادل اصلی و اصل واژه در پرانتز یا پانویس مترجم برسان.
+- **خط تیره‌ی انگلیسی** نه؛ جمله‌ی معترضه را با ویرگول یا جمله‌ی جدا بیاور.
 
 ---
 
-## 1. Conceptual Etymology & Canonical Equivalence
+## ۱. اصطلاح‌های کلیدی
 
-Philosophical translation in Persian possesses a venerable heritage through masters such as Ahmad Fardid, Dariush Shayegan, Reza Davari Ardakani, and Mohammad-Hassan Lotfi. Crucial philosophical terms require exact conceptual mappings:
-
-| Source Term & Etymology | Canonical Persian Equivalent | Contextual Notes & Disambiguation |
+| اصطلاح | فارسی | نکته |
 |---|---|---|
-| **Dasein** (German: *Da-sein*) | دازاین / آن‌جا-بودگی | Keep *دازاین* in Heideggerian contexts; gloss as *وجود انضمامی انسان* or *آنجا-بودگی* upon first mention. |
-| **Being** (German: *Sein* / Greek: *Einai*) | هستی / وجود | In phenomenology/Heidegger, distinguish *Sein* (هستی) from *Seiendes* (موجود / هستنده). |
-| **Being-in-the-world** (*In-der-Welt-sein*) | هستی-در-جهان / در-جهان-بودگی | Use hyphenated compound nouns joined with ZWNJ or hyphens. |
-| **Existence** (*Existenz*) | وجود / اگزیستانس | Distinguish existential *وجود* from scholastic essentialism. |
-| **Essence** (*Wesen* / *Essentia*) | ذات / ماهیت | *ماهیت* for scholastic *quidditas*; *ذات* for core substance. |
-| **Ontology** | هستی‌شناسی / وجودشناسی | Prefer *هستی‌شناسی* in continental thought, *وجودشناسی* in Islamic-analytic parallels. |
-| **Epistemology** | معرفت‌شناسی | Standard academic Persian. |
-| **Phenomenology** | پدیدارشناسی | Translating *Phänomenologie*. |
-| **Sublation** (German: *Aufhebung*) | رفع / فراگذری / ابطال و حفظ | Crucial in Hegelian dialectics: preservation through negation. |
-| **A priori / A posteriori** | پیشینی / پسینی | Kantian epistemology. |
+| Being / Sein | هستی، وجود | در هایدگر Sein «هستی» و Seiendes «هستنده» یا «موجود» |
+| Dasein | دازاین | بار اول توضیح کوتاه در پرانتز یا پانویس |
+| being-in-the-world | در-جهان-بودن | |
+| existence | وجود، اگزیستانس (در اگزیستانسیالیسم) | |
+| essence | ذات، ماهیت | «ماهیت» در برابر وجود در فلسفه‌ی اسلامی |
+| ontology / epistemology | هستی‌شناسی / معرفت‌شناسی | |
+| phenomenology | پدیدارشناسی | |
+| a priori / a posteriori | پیشینی / پسینی | |
+| Aufhebung | رفع (با حفظ و فراروی) | در هگل؛ اصل آلمانی را نگه دار |
+| self-consciousness | خودآگاهی | |
+| subject / object | سوژه، فاعل شناسا / ابژه، متعلق شناسایی | یکی را انتخاب کن |
+| reason / understanding (Kant) | عقل / فاهمه | |
+| discourse (Foucault) | گفتمان | |
+| agency | عاملیت | |
 
----
+اگر مترجمان فارسیِ آن فیلسوف معادل جاافتاده‌ای دارند، همان را بگیر و در یادداشت مترجم بگو.
 
-## 2. Syntactic Density & Complex Subordination
+## ۲. جمله
 
-Philosophical prose in Kant, Hegel, or Derrida often features nested subordinate clauses.
-- **Do not flatten depth into simplistic platitudes**: Retain the philosophical gravity and nuance of the original thought.
-- **Preserve Intellectual Rhythm**: Use Persian relative clauses with *که* and appositive structures without creating syntactic confusion or dangling modifiers.
-- **Hyphenated Concepts**: Many German and contemporary French concepts are composite nouns. Mirror them using Persian compounds with ZWNJ or hyphens:
-  - *Self-consciousness* -> خودآگاهی
-  - *Non-being* -> ناهستی / عدم
-  - *Ready-to-hand* (Zuhandenheit) -> دمِ‌دستی / فرادست‌بودگی
+- **جمله‌ی تودرتو** را به دو یا سه جمله بشکن و رابط منطقی را صریح کن. «که»های زنجیره‌ای («... که ... که ...») را کم کن.
+- **اسم‌سازی انتزاعی** انگلیسی (the impossibility of the determination of meaning) را با فعل باز کن: «اینکه نمی‌توان معنا را تعیین کرد».
+- **ضمیرهای it و this** که به یک ایده‌ی کامل برمی‌گردند، در فارسی مبهم می‌شوند. اسم مرجع را تکرار کن: «این دیدگاه»، «این تمایز».
+- **ایتالیک تأکیدی** نویسنده را با تأکید فارسی (گیومه یا ساختار جمله) نشان بده، نه با «خودِ».
 
----
+## ۳. یادداشت مترجم
 
-## 3. Footnoting & Conceptual Glossing
+- وقتی دو معنای یک واژه هم‌زمان مراد است (Aletheia: حقیقت و ناپوشیدگی)، در متن یکی را بنویس و اصل واژه را در پرانتز بیاور: «حقیقت در مقام ناپوشیدگی (aletheia)». توضیح بیشتر در پانویس با برچسب «ـ م.».
+- نقل‌قول از کتابی که ترجمه‌ی فارسی معتبر دارد: اگر ترجمه را در اختیار داری از همان استفاده کن و بگو. اگر نداری، خودت ترجمه کن؛ ترجمه‌ی منتشرشده را از حافظه نساز.
 
-Whenever translating polysemic concepts where the source language plays on dual etymologies (e.g., Heidegger's *Aletheia* as un-concealment / ناپوشیدگی):
-- Maintain the primary Persian philosophical term in the text.
-- Include the original Greek/German/Latin in parentheses or note in the text during first occurrence:
-  - *Example*: «حقیقت در مقام ناپوشیدگی (Aletheia) روی می‌دهد.»
+## نمونه‌های بد ← خوب
 
----
-
-## 4. Typography & Quotation Rules
-- Use Persian quotation marks `«...»` for all conceptual citations and author references.
-- Zero em-dash: Replace parenthetical dashes with commas or explanatory subclauses.
-- Use Persian digits `۰۱۲۳۴۵۶۷۸۹` for volume, section, and page citations in standard monographs.
+| انگلیسی | ترجمه‌ی ماشینی | فارسی خوب |
+|---|---|---|
+| The question of Being has today been forgotten. | سؤال وجود امروز فراموش شده است. | پرسش از هستی امروز به فراموشی سپرده شده است. |
+| It is this distinction that makes freedom possible. | این این تمایز است که آزادی را ممکن می‌سازد. | همین تمایز است که آزادی را ممکن می‌کند. |
+| Knowledge, insofar as it is knowledge, must be universal. | دانش، تا جایی که آن دانش است، باید جهانی باشد. | دانش، از آن حیث که دانش است، باید کلی باشد. |
+| The impossibility of a final determination of meaning is not a failure of language. | غیرممکن بودن یک تعیین نهایی معنا یک شکست زبان نیست. | اینکه معنا هیچ‌گاه به‌طور نهایی تعیین نمی‌شود، نقص زبان نیست. |
+| Man is condemned to be free. | انسان محکوم شده است که آزاد باشد. | انسان محکوم به آزادی است. |
+| This is, in a sense, the central problem. | این، در یک حس، مسئله‌ی مرکزی است. | این به یک معنا مسئله‌ی اصلی است. |

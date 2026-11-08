@@ -46,10 +46,39 @@ class TestSkillpacks(unittest.TestCase):
         skill_path = os.path.join(PROJECT_ROOT, ".claude", "skills", "tarjoman", "SKILL.md")
         with open(skill_path, "r", encoding="utf-8") as f:
             content = f.read()
-        self.assertLessEqual(len(content.splitlines()), 130)
+        self.assertLessEqual(len(content.splitlines()), 110)
         refs_dir = os.path.join(PROJECT_ROOT, ".claude", "skills", "tarjoman", "references")
         for name in re.findall(r"references/([a-z\-]+\.md)", content):
             self.assertTrue(os.path.exists(os.path.join(refs_dir, name)), name)
+
+    def test_routed_guides_open_with_a_glance_section(self) -> None:
+        """Progressive disclosure: every guide SKILL.md routes to starts with a short «در یک نگاه»."""
+        skill_dir = os.path.join(PROJECT_ROOT, ".claude", "skills", "tarjoman")
+        with open(os.path.join(skill_dir, "SKILL.md"), "r", encoding="utf-8") as f:
+            skill = f.read()
+        table = skill.split("## ۱.", 1)[1].split("**چقدر", 1)[0]
+        routed = sorted(set(re.findall(r"references/([a-z\-]+\.md)", table)))
+        self.assertGreaterEqual(len(routed), 14)
+        for name in routed:
+            with open(os.path.join(skill_dir, "references", name), "r", encoding="utf-8") as f:
+                lines = f.read().splitlines()
+            head = "\n".join(lines[:8])
+            self.assertIn("## در یک نگاه", head, name)
+            start = lines.index("## در یک نگاه")
+            end = next(i for i in range(start + 1, len(lines)) if lines[i].startswith("## "))
+            bullets = [l for l in lines[start:end] if l.startswith("- ")]
+            self.assertTrue(3 <= len(bullets) <= 8, f"{name}: {len(bullets)} bullets")
+
+    def test_routed_guides_are_written_in_persian(self) -> None:
+        """The agent reads these guides; English-only prose was the old marketing style."""
+        refs = os.path.join(PROJECT_ROOT, ".claude", "skills", "tarjoman", "references")
+        for name in ["scientific.md", "financial.md", "philosophy.md", "classical.md", "transcreation.md"]:
+            with open(os.path.join(refs, name), "r", encoding="utf-8") as f:
+                text = f.read()
+            self.assertNotIn("## Overview", text, name)
+            fa = len(re.findall(r"[\u0600-\u06FF]", text))
+            latin = len(re.findall(r"[A-Za-z]", text))
+            self.assertGreater(fa, 2 * latin, name)
 
     def test_hermes_skill_exists_and_configured(self) -> None:
         """Verify Hermes Agent SKILL.md exists and has runtime instructions."""
@@ -75,7 +104,7 @@ class TestSkillpacks(unittest.TestCase):
         self.assertIn("»", content)
 
     def test_all_12_reference_guides_exist(self) -> None:
-        """Verify all 10 domain guides plus anti-calque and mqm-taxonomy guides exist."""
+        """Verify the domain guides plus the on-demand reference guides exist."""
         refs_dir = os.path.join(PROJECT_ROOT, ".claude", "skills", "tarjoman", "references")
         self.assertTrue(os.path.isdir(refs_dir), f"Directory not found: {refs_dir}")
 
@@ -94,7 +123,6 @@ class TestSkillpacks(unittest.TestCase):
             "classical.md",
             "transcreation.md",
             "anti-calque.md",
-            "mqm-taxonomy.md",
             "genre-fiction.md",
             "subtitles.md",
             "terminology-sources.md",
