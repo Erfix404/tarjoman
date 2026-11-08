@@ -311,8 +311,37 @@ def verify_cmd(source_file: Path, target_file: Path) -> None:
 # -----------------------------------------------------------------------------
 @cli.group("srt")
 def srt_group() -> None:
-    """Subtitle (SRT) checks."""
+    """Subtitle (SRT) checks and the text-only translation workflow."""
     pass
+
+
+@srt_group.command("extract")
+@click.argument("source_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("-o", "--output", "output", required=True, type=click.Path(dir_okay=False, path_type=Path), help="Write the marker-delimited text here")
+def srt_extract_cmd(source_file: Path, output: Path) -> None:
+    """Extract only the cue text, with [#n] markers, so the timeline is never touched."""
+    from tarjoman.parsers.srt import extract_for_translation
+
+    text = extract_for_translation(source_file.read_text(encoding="utf-8-sig"))
+    output.write_text(text, encoding="utf-8")
+    click.echo(f"Extracted {text.count('[#')} cue(s) to {output}.")
+
+
+@srt_group.command("merge")
+@click.argument("source_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.argument("translated_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("-o", "--output", "output", required=True, type=click.Path(dir_okay=False, path_type=Path), help="Write the translated SRT here")
+def srt_merge_cmd(source_file: Path, translated_file: Path, output: Path) -> None:
+    """Rebuild an SRT from the source timings and the translated [#n] text. Fails on any marker mismatch."""
+    from tarjoman.parsers.srt import merge_translation
+
+    try:
+        merged = merge_translation(source_file.read_text(encoding="utf-8-sig"), translated_file.read_text(encoding="utf-8-sig"))
+    except ValueError as exc:
+        click.echo(f"Merge refused: {exc}")
+        sys.exit(1)
+    output.write_text(merged, encoding="utf-8")
+    click.echo(f"Merged subtitles written to {output}.")
 
 
 @srt_group.command("check")

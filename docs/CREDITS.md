@@ -42,3 +42,8 @@ rootrager · https://github.com/rootrager/subfarsipro · (مخزن فایل مج
 - **روند کار با SRT** در بخش ۱۰ `references/subtitles.md`: ترجمه‌ی دسته‌ای شماره‌دار با چند زیرنویس قبلی به‌عنوان بافت فقط‌خواندنی، «فقط ترجمه، هیچ چیز دیگر»، و درست نوشتن اسم‌ها و اصطلاح‌های علمی.
 
 از بخش «عبور از فیلتر کپی‌رایت» آن پروژه و از ترجمه‌های آثار دارای حق نشر در آن هیچ چیزی برداشته نشده است.
+
+## subtitle-translator
+rockbenben · https://github.com/rockbenben/subtitle-translator · مجوز MIT
+
+- **ترجمه‌ی متن‌محور با زمان‌بندی ثابت** (`tarjoman srt extract` و `tarjoman srt merge`، `tarjoman/parsers/srt.py`): زمان‌بندی و شماره‌ها از ترجمه جدا می‌شوند و بعد از ترجمه دوباره سر جای خودشان می‌نشینند. کد از نو نوشته شده است.
