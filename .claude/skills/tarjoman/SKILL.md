@@ -29,7 +29,7 @@ description: مترجم و ویراستار حرفه‌ای فارسی. هر و�
 | ترسناک، درام، عاشقانه، طنز، کودک، شعر | `references/genre-fiction.md` فقط بخش همان ژانر، به‌علاوه‌ی `literary.md` |
 | معمایی، جنایی، تریلر | `references/mystery.md` + `literary.md` |
 | علمی‌تخیلی، فانتزی | `references/speculative.md` + `literary.md` |
-| زیرنویس (SRT، VTT) | `references/subtitles.md` |
+| زیرنویس (SRT، VTT) و متن دوبله | `references/subtitles.md` |
 | مستندات، README، رابط کاربری، فایل ترجمه‌ی اپ | `references/technical.md` |
 | مقاله و متن دانشگاهی | `references/scientific.md` |
 | بروشور دارو، آموزش بیمار، متن بالینی | `references/medical.md` |
