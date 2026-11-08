@@ -21,6 +21,7 @@ from typing import Dict, Iterable, List, Optional, Set
 
 _RUN_RE = re.compile(r"[A-Z][A-Za-z'’-]*(?:[ \t]+(?:of|the|de|von|van|al|bin|ibn)?[ \t]*[A-Z][A-Za-z'’-]*)*")
 _CONNECTORS = {"of", "the", "de", "von", "van", "al", "bin", "ibn"}
+_CONTRACTION_RE = re.compile(r"I['’](?:m|ll|ve|d)")
 _SENTENCE_START_RE = re.compile(r"(?:^|[.!?\"“”]\s+|\n\s*)$")
 
 #: Capitalised function words and common sentence openers that are not terms.
@@ -61,6 +62,7 @@ def extract_candidates(
     counts: Counter = Counter()
     mid_sentence: Counter = Counter()
     example: Dict[str, str] = {}
+    spellings: Dict[str, Counter] = defaultdict(Counter)
     for m in _RUN_RE.finditer(text):
         raw = m.group(0)
         tokens = list(re.finditer(r"\S+", raw))
@@ -75,18 +77,20 @@ def extract_candidates(
         term = re.sub(r"\s+", " ", raw).strip()
         if len(words) == 1 and (term in STOPWORDS or len(term) < 3):
             continue
-        if term.casefold() in known_fold:
+        if _CONTRACTION_RE.fullmatch(term) or term.casefold() in known_fold:
             continue
-        counts[term] += 1
+        key = term.casefold()  # "Caucus-race" and the heading "Caucus-Race" are one term
+        spellings[key][term] += 1
+        counts[key] += 1
         if len(words) > 1 or not _is_sentence_start(text, pos):
-            mid_sentence[term] += 1  # a single word needs one non-initial use to count
-        if term not in example:
+            mid_sentence[key] += 1  # a single word needs one non-initial use to count
+        if key not in example:
             start = max(0, pos - 30)
-            example[term] = re.sub(r"\s+", " ", text[start : m.end() + 30]).strip()
+            example[key] = re.sub(r"\s+", " ", text[start : m.end() + 30]).strip()
     out = [
-        Candidate(term=t, count=c, example=example[t])
-        for t, c in counts.most_common()
-        if c >= min_count and mid_sentence[t] > 0
+        Candidate(term=spellings[k].most_common(1)[0][0], count=c, example=example[k])
+        for k, c in counts.most_common()
+        if c >= min_count and mid_sentence[k] > 0
     ]
     out.sort(key=lambda c: (-c.count, c.term))
     return out[:max_items]
