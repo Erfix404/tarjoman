@@ -44,3 +44,15 @@ def test_cli_candidates_writes_file(tmp_path):
     res = CliRunner().invoke(cli, ["book", "candidates", str(src), "--min-count", "2", "-o", str(out)])
     assert res.exit_code == 0, res.output
     assert "Alice" in out.read_text(encoding="utf-8")
+
+
+def test_contractions_are_not_terms():
+    text = "Alice said I'm late. Then I'm sure I'm right, and Alice agreed with Alice."
+    terms = [c.term for c in extract_candidates(text, min_count=2)]
+    assert "I'm" not in terms and "Alice" in terms
+
+
+def test_case_variants_merge_into_one_term():
+    text = "A Caucus-race began. Was the Caucus-Race fair? The caucus-race ended. Caucus-race again."
+    found = {c.term: c.count for c in extract_candidates(text, min_count=2)}
+    assert found == {"Caucus-race": 3}  # the most common spelling wins; sentence-initial "Caucus-race" has a mid use
