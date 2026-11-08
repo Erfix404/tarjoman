@@ -47,3 +47,8 @@ rootrager · https://github.com/rootrager/subfarsipro · (مخزن فایل مج
 rockbenben · https://github.com/rockbenben/subtitle-translator · مجوز MIT
 
 - **ترجمه‌ی متن‌محور با زمان‌بندی ثابت** (`tarjoman srt extract` و `tarjoman srt merge`، `tarjoman/parsers/srt.py`): زمان‌بندی و شماره‌ها از ترجمه جدا می‌شوند و بعد از ترجمه دوباره سر جای خودشان می‌نشینند. کد از نو نوشته شده است.
+
+## TranslateBooksWithLLMs
+GasyCoder · https://github.com/GasyCoder/TranslateBooksWithLLMs · مجوز AGPL-3.0
+
+- **پیشنهاد واژه‌نامه از متن منبع** (`tarjoman book candidates`، `tarjoman/parsers/term_candidates.py`): ایده‌ی استخراج خودکار اسم‌ها و اصطلاح‌های تکرارشونده برای واژه‌نامه‌ی کتاب. از این مخزن هیچ کدی کپی نشده و کد از نو نوشته شده است.

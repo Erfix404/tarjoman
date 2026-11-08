@@ -613,6 +613,26 @@ def _write_terms_tsv(project: Path, termbase: "Termbase") -> None:
     (project / "terms.tsv").write_text("\n".join(rows) + "\n", encoding="utf-8")
 
 
+@book_group.command("candidates")
+@click.argument("source_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("-o", "--output", "output", default=None, type=click.Path(dir_okay=False, path_type=Path), help="Write the candidate list as TSV here (default: print)")
+@click.option("--min-count", default=3, show_default=True, help="Only terms that recur at least this often")
+@click.option("--max-items", default=200, show_default=True, help="Maximum number of candidates")
+@click.option("--project", "project_dir", default=None, type=click.Path(exists=True, file_okay=False, path_type=Path), help="Book project whose terms.tsv entries are skipped")
+def book_candidates_cmd(source_file: Path, output: Optional[Path], min_count: int, max_items: int, project_dir: Optional[Path]) -> None:
+    """Suggest recurring names and terms from the English source, for review before translating."""
+    from tarjoman.parsers.term_candidates import candidates_to_tsv, extract_candidates
+
+    known = list(_read_terms_tsv(project_dir).keys()) if project_dir else []
+    found = extract_candidates(source_file.read_text(encoding="utf-8-sig"), min_count, max_items, known)
+    tsv = candidates_to_tsv(found)
+    if output:
+        output.write_text(tsv, encoding="utf-8")
+        click.echo(f"{len(found)} candidate(s) written to {output}. Review them, then record with `tarjoman book terms --add EN=FA`.")
+    else:
+        click.echo(tsv, nl=False)
+
+
 @book_group.command("terms")
 @click.argument("project_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
 @click.option("--add", "add_spec", default=None, help="Add term: EN=FA[:DOMAIN]")
