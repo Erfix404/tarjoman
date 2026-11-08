@@ -44,6 +44,9 @@ from tarjoman.stages.stage4_polish import StylisticPolishStage  # noqa: E402
 
 DEFAULT_SAMPLES = PROJECT_ROOT / "docs" / "research" / "eval-set" / "samples.jsonl"
 STYLE_CATEGORIES = {"ai-tell", "calque"}
+# Typography and structure signals that also betray a literal translation
+# (English dash, English quotes, Latin decimal point, redundant «یک», ezafe chains).
+SIGNAL_CATEGORIES = STYLE_CATEGORIES | {"em-dash", "quote-style", "punct", "generic-article", "ezafe-chain"}
 
 JUDGE_PROMPT = """You are a professional English-to-Persian translation reviewer and a native Persian speaker.
 Score the candidate translation on two separate axes, each 1-5. Do not let one axis influence the other.
@@ -68,8 +71,21 @@ def load_samples(path: Path) -> List[Dict]:
         return [json.loads(line) for line in f if line.strip()]
 
 
-def style_findings(text: str) -> int:
-    return sum(1 for i in lint_text(text) if i.category in STYLE_CATEGORIES)
+def style_findings(text: str, categories=STYLE_CATEGORIES) -> int:
+    return sum(1 for i in lint_text(text) if i.category in categories)
+
+
+def separation(samples: List[Dict], categories=STYLE_CATEGORIES) -> Dict[str, List[int]]:
+    """Per genre: [samples where literal gets more findings than natural, total]."""
+    out: Dict[str, List[int]] = {}
+    for s in samples:
+        if s.get("type") == "negative":
+            continue
+        row = out.setdefault(s.get("genre", "?"), [0, 0])
+        row[1] += 1
+        if style_findings(s["literal"], categories) > style_findings(s["natural"], categories):
+            row[0] += 1
+    return out
 
 
 def word_count(text: str) -> int:
@@ -104,6 +120,15 @@ def self_check(samples: List[Dict]) -> bool:
             f"\nDetector separates literal from natural in {caught}/{len(positives)} samples "
             f"(findings: literal={literal_total}, natural={natural_total})."
         )
+        by_genre = separation(samples)
+        with_typo = separation(samples, SIGNAL_CATEGORIES)
+        print("\nBy genre (style only | style + typography):")
+        for genre in sorted(by_genre):
+            a, n = by_genre[genre]
+            b, _ = with_typo[genre]
+            print(f"  {genre:<14} {a}/{n} | {b}/{n}")
+        total_typo = sum(v[0] for v in with_typo.values())
+        print(f"  {'all':<14} {caught}/{len(positives)} | {total_typo}/{len(positives)}")
     return ok
 
 

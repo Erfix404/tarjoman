@@ -1,52 +1,53 @@
-# Transcreation & Marketing Copywriting Reference Guide (راهنمای بازآفرینی و ترجمه تبلیغاتی)
+# راهنمای ترجمه‌ی تبلیغاتی و بازآفرینی (transcreation)
 
-## Overview
-The Transcreation domain profile is engineered for marketing slogans, brand taglines, advertising campaigns, landing page hero copy, creative product descriptions, and persuasive calls-to-action (CTAs). Transcreation (ترجمه بازآفرینانه / خلق خلاقانه) transcends literal translation; its primary mandate is to evoke the identical emotional reaction, desire, and brand resonance in the Persian target audience.
+برای شعار و تگ‌لاین، تبلیغ، صفحه‌ی فرود (landing page)، توضیح محصول، ایمیل بازاریابی و دکمه‌های اقدام (CTA).
 
----
+## در یک نگاه
 
-## 1. Principles of Cultural Adaptation (اصول انطباق فرهنگی و حسی)
-
-1. **Emotion and Intent Over Words**:
-   Never translate a marketing slogan word-for-word. Identify the core benefit, emotional hook, and brand personality, then recreate it natively in Persian.
-   - *Example (Nike - "Just Do It")*:
-     - Literal (Catastrophic): فقط انجامش بده.
-     - Transcreated: دست به کار شو / درنگ نکن، حرکت کن.
-   - *Example (Apple - "Think Different")*:
-     - Literal: متفاوت فکر کن.
-     - Transcreated: جور دیگر بیندیش / طرحی نو درانداز.
-
-2. **Humor, Idioms, and Cultural Puns**:
-   Western cultural idioms or puns rarely land in Persian if translated literally. Replace them with equivalent Persian cultural metaphors, alliteration, or rhythmic rhymes.
+- **حس و هدف را ترجمه کن، نه کلمه را.** بپرس: «این جمله می‌خواهد خواننده چه حسی پیدا کند و چه کاری بکند؟» بعد همان را به فارسی بساز.
+- **ادعا اضافه نکن.** تخفیف، رایگان بودن، عدد، «بهترین» و «تضمینی» فقط اگر در اصل هست. آزادی در شکل است، نه در واقعیت.
+- **کوتاه و آهنگین.** شعار حداکثر ۸ کلمه؛ سجع و توازن وقتی طبیعی است.
+- **دکمه فعل امرِ کوتاه است:** «شروع رایگان»، «ثبت‌نام»، «بیشتر بدانید».
+- **لحن برند ثابت:** «تو» یا «شما» را یک بار انتخاب کن (`colloquial.md` بخش ۱) و تا آخر نگه دار.
+- **برای شعار دو یا سه گزینه بده** و بگو کدام را ترجیح می‌دهی و چرا؛ برای بقیه‌ی متن یک ترجمه کافی است.
 
 ---
 
-## 2. Rhythmic Cadence, Rhyme & Alliteration (آهنگین بودن، سجع و واج‌آرایی)
+## ۱. از هدف به جمله
 
-Persian consumers respond strongly to musical, rhythmic slogans:
-- Use internal rhyme (سجع) or balanced parallel phrasing:
-  - *English*: Clean energy for a brighter tomorrow.
-  - *Persian*: انرژی پاک، برای فردایی تابناک.
-- Keep hero headers short, punchy, and memorable (under 8-10 words).
+1. منفعت اصلی چیست؟ (سرعت، سادگی، اعتبار، لذت)
+2. قلاب احساسی کدام است؟ (کنجکاوی، ترس از جا ماندن، غرور، آرامش)
+3. شخصیت برند چیست؟ (جوان و شوخ، رسمی و مطمئن، لوکس)
+4. همین سه را با فارسی‌ای بنویس که یک کپی‌رایتر ایرانی می‌نوشت.
 
----
+بازی کلامی انگلیسی (pun) معمولاً در فارسی درنمی‌آید. بازی کلامی فارسیِ هم‌اثر بساز، یا اگر نشد، معنای مستقیم و جذاب را بنویس. توضیح دادن جوک ممنوع.
 
-## 3. High-Converting Calls-to-Action (CTAها و دکمه‌های اقدام)
+## ۲. دکمه و CTA
 
-CTAs must be active, urgent, and frictionless:
-
-| English CTA | Standard Persian Transcreation | Avoid (Stiff/Passive) |
+| انگلیسی | فارسی | ننویس |
 |---|---|---|
-| Get Started Free | شروع رایگان / همین حالا رایگان بیازمایید | اقدام به شروع به صورت رایگان |
-| Claim Your Discount | دریافت تخفیف شگفت‌انگیز | مطالبه تخفیف |
-| Join the Waitlist | ثبت‌نام در صف انتظار | عضویت در لیست انتظار |
-| Learn More | بیشتر بدانید / کشف جزئیات | یادگیری بیشتر |
-| Book a Demo | رزرو جلسه دمو | رزرو کردن نسخه نمایشی |
-| Shop the Collection | مشاهده و خرید مجموعه | خرید از کلکسیون |
+| Get started free | رایگان شروع کنید | اقدام به شروع به صورت رایگان |
+| Claim your discount | تخفیفتان را بگیرید | مطالبه‌ی تخفیف |
+| Join the waitlist | عضویت در فهرست انتظار | پیوستن به لیست انتظار |
+| Learn more | بیشتر بدانید | یادگیری بیشتر |
+| Book a demo | درخواست دمو | رزرو کردن نسخه‌ی نمایشی |
+| Shop now | همین حالا بخرید | خرید کنید اکنون |
+| Try it for free | رایگان امتحان کنید | آن را به صورت رایگان امتحان کنید |
 
----
+## ۳. لحن برند
 
-## 4. Brand Tone & Persona Alignment
-- **Youthful & Disruptive Tech**: Use vibrant, modern Persian with clean ZWNJ and direct verbs.
-- **Luxury & Premium Brands**: Use elegant, sophisticated Persian vocabulary (*اصالت*, *شکوه*, *کمال*).
-- **B2B SaaS**: Focus on reliability, ROI, and simplicity (*بهره‌وری بی‌وقفه*, *اتوماسیون هوشمند*).
+- **فناوری جوان:** محاوره‌ی مؤدب یا خودمانی، جمله‌ی کوتاه، فعل مستقیم.
+- **لوکس:** معیار فاخر، کم‌حرف، بی‌علامت تعجب.
+- **نرم‌افزار سازمانی (B2B):** روشن و دقیق؛ منفعت را با عدد و نتیجه بگو، نه با صفت.
+
+## نمونه‌های بد ← خوب
+
+| انگلیسی | ترجمه‌ی تحت‌اللفظی | فارسی خوب |
+|---|---|---|
+| Just do it. | فقط انجامش بده. | دست به کار شو. |
+| Clean energy for a brighter tomorrow. | انرژی پاک برای یک فردای روشن‌تر. | انرژی پاک، برای فردایی روشن. |
+| Never miss a beat. | هرگز یک ضرب را از دست نده. | هیچ لحظه‌ای را از دست نده. |
+| Work smarter, not harder. | هوشمندانه‌تر کار کن، نه سخت‌تر. | کم‌تر جان بکن، بیشتر نتیجه بگیر. |
+| We've got you covered. | ما شما را پوشش داده‌ایم. | خیالتان راحت، حواسمان هست. |
+| Your new favorite app. | اپ مورد علاقه‌ی جدید شما. | اپی که عاشقش می‌شوید. |
+| Built for teams that move fast. | ساخته شده برای تیم‌هایی که سریع حرکت می‌کنند. | برای تیم‌هایی که منتظر نمی‌مانند. |

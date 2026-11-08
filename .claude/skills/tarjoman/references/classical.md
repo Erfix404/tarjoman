@@ -1,35 +1,51 @@
-# Classical & Historical Translation Reference Guide (راهنمای ترجمه متون کهن و تاریخی)
+# راهنمای ترجمه‌ی متن کهن، تاریخی، حماسی و مذهبی
 
-## Overview
-The Classical domain profile is tailored for historical chronicles, antiquarian essays, medieval treatises, mythological narratives, and epic prose. Classical translation demands solemn cadence (وقار و صلابت نثر کهن), archaic lexical richness, and syntactic gravity reminiscent of Beyhaqi, Bal'ami, and Golestan-e Sa'di, while remaining fully intelligible to modern readers.
+برای تاریخ‌نگاری قدیم (گیبون، پلوتارک، هرودوت)، حماسه و اسطوره، متن مذهبی، و نثر قرن‌های هجدهم و نوزدهم.
 
----
+## در یک نگاه
 
-## 1. Archaic Syntax and Diction (نحو و واژگان کهن)
-
-When translating historical or classicizing texts (e.g., Edward Gibbon's *Decline and Fall of the Roman Empire*, Plutarch, or classical epics):
-- **Solemn Vocabulary**: Prefer resonant Persian terms over bland colloquialisms:
-  - *Emperor / King* -> شهریار، خدیو، پادشاه
-  - *Army / Troops* -> سپاه، لشکریان، جند
-  - *Treachery / Betrayal* -> غدر، خیانت، پیمان‌شکنی
-  - *Victory* -> ظفر، پیروزی، فتح
-  - *Perish / Fall* -> هلاک شدن، به خاک افتادن، رخت به سرای دیگر کشیدن
-- **Archaic Prepositions & Particles**: Use archaic nuances judiciously to evoke period atmosphere without turning the text into an impenetrable riddle:
-  - Occasional use of *اندر* for *در* where euphonic cadence demands it.
-  - Classical continuous prefixes (*همی‌گفت*, *همی‌کرد*) only in strictly classicist or poetic prose.
-  - Classical conjunctions (*لاجرم*, *فی‌الجمله*, *باری*, *القصه*).
+- **کهنگیِ ترجمه به اندازه‌ی کهنگیِ اصل.** گیبون را به نثر بیهقی برنگردان. برای نثر رسمی قرن ۱۸ و ۱۹ فارسی معیارِ فاخر و روشن کافی است؛ واژه و نحو کهن فقط برای متنی که خودش کهن یا حماسی است.
+- **کهنه‌نمایی نکن:** «همی»، «اندر»، «بیامد»، «می‌بایست» و فعل‌های مهجور تزیینی، متن را مضحک می‌کنند. وقار را با واژه‌ی سنجیده و جمله‌ی متوازن بساز.
+- **امروزی‌نویسی هم نکن:** «پروسه»، «فاکتور»، «مدیریت کردن»، «توسط»، «به عنوان» و اصطلاح‌های اداری در این متن‌ها جایی ندارند.
+- **نام‌ها:** شکل جاافتاده در فارسی (اسکندر، کوروش، یولیوس سزار، هرودوت)، نه آوانویسی تازه.
+- **متن مذهبی:** معادل‌های جاافتاده‌ی همان سنت را بگیر و نقل از کتاب مقدس هر دین را از ترجمه‌ی رایجش بیاور، اگر در دست داری. چیزی نساز.
+- **ارقام فارسی**، گیومه‌ی «»، بی خط تیره‌ی انگلیسی.
 
 ---
 
-## 2. Rhythmic Cadence (آهنگ و فصاحت کلام)
+## ۱. سطح زبان را از اصل بگیر
 
-Classical Persian prose excels in balance, parallel clauses (سجع و توازن), and cadenced phrasing:
-- *English*: The Roman legions, exhausted by the desert march and betrayed by their guides, succumbed to the onslaught of the Parthian cavalry.
-- *Classical Persian*: سپاهیان روم، خسته از راهپیمایی در بیابان‌های سوزان و فریب‌خورده از غدر راهنمایان، در برابر هجوم سواران اشکانی تاب نیاوردند و در کام شکست فرورفتند.
+| اصل | ترجمه |
+|---|---|
+| حماسه، اسطوره، متن کهن (هومر، گیلگمش، ادا) | فارسی ادبی و موزون، با واژه‌های کهن سنجیده (سپاه، نبرد، شهریار)، بدون نحو مهجور |
+| تاریخ‌نگاری کلاسیک (هرودوت، پلوتارک، گیبون) | معیارِ فاخر: جمله‌ی بلند ولی روشن، واژه‌ی سنجیده |
+| رمان یا نامه‌ی قرن ۱۹ | `literary.md` بخش ۳-۱ |
+| متن مذهبی | زبان رایج ترجمه‌های همان سنت؛ رسمی، روشن و بی‌تزیین |
 
----
+## ۲. واژه
 
-## 3. Eradication of Modern Calques & Colloquialisms
-- Absolutely ban modern bureaucratic words like `توسط`, `فاکتور`, `پروسه`, `مدیریت کردن`, or `به عنوان`.
-- Replace passive structures with robust classical active verbs or reflexive constructions (*بر باد رفت*, *تباه شد*, *نابود گشت*).
-- Punctuation: Eradicate em-dashes completely. Use Persian quotation marks `«...»` and Persian numerals `۰۱۲۳۴۵۶۷۸۹`.
+| انگلیسی | سنجیده | تزیینی یا نامناسب |
+|---|---|---|
+| king / emperor | پادشاه / امپراتور (شهریار در حماسه) | خدیو (مگر در شعر) |
+| army / troops | سپاه، لشکر، سپاهیان | نیروها، پرسنل |
+| treachery | خیانت، پیمان‌شکنی | غدر (کم‌کاربرد) |
+| victory | پیروزی، ظفر (در حماسه) | موفقیت |
+| to perish | هلاک شدن، از پا درآمدن | فوت کردن، از بین رفتن |
+| the people | مردم، رعیت (در متن پادشاهی) | جامعه‌ی هدف |
+| province | ولایت، ایالت (در امپراتوری روم) | استان |
+
+## ۳. جمله و آهنگ
+
+- جمله‌های بلند گیبون را می‌شود بلند نگه داشت، به شرطی که فعل اصلی گم نشود. اگر بیش از دو بند «که» دارد، بشکنش.
+- توازن و تقارن (دو یا سه عبارت هم‌وزن) در نثر کهن فارسی پسندیده است، ولی فقط وقتی اصل هم توازن دارد. صنعت نساز.
+- در حماسه، تکرار عبارت‌های ثابت («آتنه‌ی چشم‌روشن»، «سپیده‌دمِ گلگون‌انگشت») را یکدست ترجمه کن؛ تکرار جزو سبک است.
+
+## نمونه‌های بد ← خوب
+
+| انگلیسی | کهنه‌نما یا ماشینی | فارسی خوب |
+|---|---|---|
+| The Roman legions, exhausted by the desert march and betrayed by their guides, succumbed to the Parthian cavalry. | لژیون‌های رومی که توسط راهپیمایی بیابان خسته شده و توسط راهنمایانشان خیانت شده بودند، به سواره‌نظام پارتی تسلیم شدند. | لژیون‌های روم که از راهپیمایی در بیابان از پا افتاده بودند و راهنمایانشان به آن‌ها خیانت کرده بودند، در برابر سواران اشکانی تاب نیاوردند. |
+| The emperor died in the third year of his reign. | امپراتور اندر سال سیم پادشاهی‌اش رخت به سرای دیگر کشید. | امپراتور در سومین سال پادشاهی‌اش درگذشت. |
+| He managed the affairs of the province with prudence. | او امور استان را با احتیاط مدیریت کرد. | امور ولایت را با تدبیر اداره کرد. |
+| In the beginning God created the heaven and the earth. | در ابتدا خدا بهشت و زمین را خلق کرد. | در ابتدا، خدا آسمان‌ها و زمین را آفرید. |
+| Sing, O goddess, the anger of Achilles son of Peleus. | آواز بخوان، ای الهه، عصبانیت آشیل پسر پلئوس را. | ای الهه، خشم آشیل، پسر پلئوس، را بسرای. |

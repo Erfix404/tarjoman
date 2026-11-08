@@ -172,4 +172,4 @@ NP1 of NP2 of NP3 (of NP4 ...)
   `tarjoman/stages/stage2_draft.py::STRUCTURAL_GRAMMAR_PROMPT`،
   مقوله‌های `ezafe-chain` و `generic-article` در `tarjoman/linter.py`.
 - آزمون‌ها: `tests/test_structural_grammar.py`.
-- سند هم‌خانواده: `anti-calque.md` (گرته‌های واژگانی)، `mqm-taxonomy.md` (ارزیابی).
+- سند هم‌خانواده: `anti-calque.md` (گرته‌های واژگانی)، `docs/dev/mqm-taxonomy.md` (ارزیابی، برای توسعه‌دهنده).

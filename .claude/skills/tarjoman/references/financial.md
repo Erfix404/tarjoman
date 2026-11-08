@@ -1,69 +1,67 @@
-# Financial & Economic Translation Reference Guide (راهنمای ترجمه مالی، اقتصادی و بورس)
+# راهنمای ترجمه‌ی مالی و اقتصادی
 
-## Overview
-The Financial domain profile is designed for investment research, corporate annual reports (10-K, 10-Q), equity analysis, macroeconomics, IFRS/GAAP financial statements, and cryptocurrency/forex market commentary. Financial translation demands standardized accounting terminology, accurate financial ratios, and authentic rendering of market sentiment metaphors.
+برای گزارش سالانه، صورت‌های مالی، تحلیل بازار، خبر اقتصادی، گزارش بانک مرکزی و متن بورس و رمزارز.
+
+## در یک نگاه
+
+- **عدد مقدس است.** هر رقم، واحد پول، درصد، مقیاس (میلیون/میلیارد) و دوره (فصل، سال مالی) را دوبار با اصل بسنج. billion یعنی «میلیارد».
+- **اصطلاح حسابداری استاندارد** را بنویس (ترازنامه، صورت سود و زیان، حقوق صاحبان سهام)، نه ترجمه‌ی لغوی.
+- **استعاره‌ی بازار را با معنایش ترجمه کن:** hawkish ← «انقباضی»، headwinds ← «عوامل بازدارنده».
+- **ساختار «یک + اسم + ی» را بشکن:** «یک زیان خالص ۳ میلیون دلاری» ← «۳ میلیون دلار زیان خالص».
+- **ارقام:** در جدول و صورت مالی مثل اصل؛ در خبر و تحلیل عمومی ارقام فارسی با ممیز «٫». یکدست بمان.
+- **نماد و کد** (`AAPL`، `BTC/USDT`، `P/E`) دست نمی‌خورد.
 
 ---
 
-## 1. Financial Statements & Accounting Standards (IFRS / GAAP)
+## ۱. صورت‌های مالی
 
-Accounting terms carry standardized equivalents codified by the Iranian Association of Certified Public Accountants (جامعه حسابداران رسمی ایران) and auditing standards:
-
-| English Financial Term | Canonical Persian Accounting Equivalent |
+| انگلیسی | فارسی |
 |---|---|
-| Balance Sheet | ترازنامه |
-| Income Statement / P&L | صورت سود و زیان |
-| Statement of Cash Flows | صورت جریان وجوه نقد |
-| Statement of Changes in Equity | صورت تغییرات در حقوق صاحبان سهام |
-| Comprehensive Income | سود و زیان جامع |
-| Assets (Current / Non-current) | دارایی‌ها (جاری / غیرجاری) |
-| Liabilities | بدهی‌ها |
-| Shareholders' Equity | حقوق صاحبان سهام |
-| Gross Margin / Net Margin | حاشیه سود ناخالص / حاشیه سود خالص |
-| EBITDA | سود قبل از بهره، مالیات، استهلاک و افت ارزش (EBITDA) |
-| Free Cash Flow (FCF) | جریان نقدی آزاد |
-| Goodwill | سرقفلی |
-| Depreciation & Amortization | استهلاک دارایی‌های مشهود و نامشهود |
-| Accounts Receivable / Payable | حساب‌ها و اسناد دریافتنی / پرداختنی |
+| balance sheet | ترازنامه (صورت وضعیت مالی) |
+| income statement / P&L | صورت سود و زیان |
+| statement of cash flows | صورت جریان‌های نقدی |
+| statement of changes in equity | صورت تغییرات در حقوق مالکانه |
+| current / non-current assets | دارایی‌های جاری / غیرجاری |
+| liabilities | بدهی‌ها |
+| shareholders' equity | حقوق صاحبان سهام |
+| gross / net margin | حاشیه‌ی سود ناخالص / خالص |
+| EBITDA | سود پیش از بهره، مالیات و استهلاک (EBITDA) |
+| free cash flow | جریان نقدی آزاد |
+| goodwill | سرقفلی |
+| depreciation / amortization | استهلاک دارایی‌های مشهود / نامشهود |
+| accounts receivable / payable | حساب‌های دریافتنی / پرداختنی |
+| guidance (earnings guidance) | پیش‌بینی (سود) شرکت |
 
----
+## ۲. استعاره‌ها و زبان بازار
 
-## 2. Market Sentiment & Trading Metaphors (استعاره‌های بازار سرمایه)
-
-Financial markets are replete with idiomatic expressions and metaphors. Avoid literal word-for-word calques:
-
-| English Market Idiom | Context & Meaning | Natural Persian Financial Equivalent | Never Translate As |
+| انگلیسی | معنا | فارسی | ننویس |
 |---|---|---|---|
-| Bull market / Bullish | Rising, optimistic market | بازار گاوی / روند صعودی و خوش‌بینانه | *بازار گاو نر* |
-| Bear market / Bearish | Falling, pessimistic market | بازار خرسی / روند نزولی و رکودی | *بازار خرس* |
-| Hawkish (Central Bank) | Leaning towards interest rate hikes | رویکرد انقباضی / سیاست انقباضی تهاجمی | *عقاب‌وار* |
-| Dovish (Central Bank) | Leaning towards monetary easing | رویکرد انبساطی / سیاست تسهیل پولی | *کبوتروار* |
-| Headwinds | Economic obstacles or resistance | فشارهای بازدارنده / موانع اقتصادی | *بادهای مخالف از روبرو* |
-| Tailwinds | Positive growth drivers | پیشران‌های رشد / عوامل تقویت‌کننده | *بادهای موافق از پشت سر* |
-| Short squeeze | Rapid rally squeezing short sellers | فشردگی فروش تعهدی / اسکوییز شورت | *چلاندن کوتاه‌مدت* |
-| Liquidity crunch | Scarcity of liquid cash | بحران نقدینگی / تنگنای مالی | *خرد شدن نقدینگی* |
+| bull / bullish | بازار رو به بالا | صعودی، خوش‌بینانه (بازار گاوی) | بازار گاو نر |
+| bear / bearish | بازار رو به پایین | نزولی، بدبینانه (بازار خرسی) | بازار خرس |
+| hawkish | متمایل به افزایش نرخ بهره | انقباضی | عقاب‌وار |
+| dovish | متمایل به سیاست پولی آسان | انبساطی | کبوتروار |
+| headwinds / tailwinds | عوامل منفی / مثبت | عوامل بازدارنده / پیشران | بادهای مخالف |
+| short squeeze | جهش قیمت که فروشندگان استقراضی را مجبور به خرید می‌کند | شورت اسکوییز (فشار بر فروشندگان استقراضی) | چلاندن کوتاه |
+| liquidity crunch | کمبود ناگهانی نقدینگی | تنگنای نقدینگی | خرد شدن نقدینگی |
+| soft landing | مهار تورم بدون رکود | فرود نرم | |
+| rally | رشد سریع قیمت‌ها | جهش، رشد تند | رالی (در خبر عمومی) |
 
----
+## ۳. عدد، درصد و پول
 
-## 3. Formatting Numbers, Currencies & Percentages
+- **مقیاس:** million ← میلیون، billion ← میلیارد، trillion ← هزار میلیارد (یا تریلیون). $3.2bn ← «۳٫۲ میلیارد دلار».
+- **واحد پایه:** 25 basis points ← «۲۵ واحد پایه» (۰٫۲۵ درصد). 
+- **درصد و واحد درصد:** «۲ درصد» با «۲ واحد درصد» فرق دارد (percentage point). جابه‌جا نکن.
+- **سال‌به‌سال، فصل‌به‌فصل:** year over year ← «نسبت به سال گذشته» یا «در مقایسه با مدت مشابه سال قبل»، نه «سال به سال».
+- **ممیز:** با ارقام فارسی «٫» (۹٫۵)، با ارقام لاتین نقطه (9.5). ممیز لاتین بین ارقام فارسی نگذار.
 
-- **Western Digits**: Always retain Western Latin digits (`0123456789`) in financial tables, ticker symbols (`AAPL`, `BTC/USDT`), stock prices (`$182.50`), and financial ratios (`P/E ratio of 18.4`, `Debt-to-Equity of 1.2`).
-- **Percentages**: In Persian text, place the percent symbol correctly without flipping: `۱۲٫۵٪` or `12.5%`.
-- **Currencies**: Use standardized abbreviations or Persian transliterations:
-  - `$50 million` -> «۵۰ میلیون دلار» or «50 میلیون دلار»
-  - `€1.2 billion` -> «۱٫۲ میلیارد یورو»
-  - `Basis Points (bps)` -> «واحد پایه‌ای (bps)» — note: 100 bps = 1%.
-
----
-
-## نمونه‌های بد ← خوب (فارسی)
-
-این نمونه‌ها مهم‌تر از قاعده‌های بالا هستند: پیش از ترجمه، چند بار بخوانشان. الگو در همه یکی است: ساختار انگلیسی را رها کن، معنا را با فعل فارسی بگو، «توسط» و «یک» و ضمیرهای اضافه را حذف کن، و اصطلاح جاافتاده‌ی همان رشته را به کار ببر.
+## نمونه‌های بد ← خوب
 
 | انگلیسی | ترجمه‌ی ماشینی | فارسی خوب |
 |---|---|---|
-| Revenue grew 12% year over year. | درآمد ۱۲٪ سال به سال رشد کرد. | درآمد نسبت به سال گذشته 12% رشد کرد. |
-| The company reported a net loss of $3 million. | شرکت یک زیان خالص ۳ میلیون دلاری را گزارش کرد. | شرکت 3 میلیون دلار زیان خالص گزارش کرد. |
+| Revenue grew 12% year over year. | درآمد ۱۲٪ سال به سال رشد کرد. | درآمد نسبت به سال گذشته ۱۲ درصد رشد کرد. |
+| The company reported a net loss of $3 million. | شرکت یک زیان خالص ۳ میلیون دلاری را گزارش کرد. | شرکت ۳ میلیون دلار زیان خالص گزارش کرد. |
 | Investors are concerned about rising interest rates. | سرمایه‌گذاران در مورد نرخ‌های بهره‌ی در حال افزایش نگران هستند. | سرمایه‌گذاران نگران بالا رفتن نرخ بهره‌اند. |
 | Shares fell sharply in early trading. | سهام به شدت در معاملات اولیه سقوط کرد. | سهام در ساعات اولیه‌ی معاملات به‌شدت افت کرد. |
 | The outlook remains uncertain. | چشم‌انداز نامطمئن باقی می‌ماند. | چشم‌انداز هنوز روشن نیست. |
+| The Fed struck a hawkish tone. | فدرال رزرو یک لحن عقاب‌وار زد. | فدرال رزرو لحنی انقباضی در پیش گرفت. |
+| Margins came under pressure due to higher input costs. | حاشیه‌ها به دلیل هزینه‌های ورودی بالاتر تحت فشار قرار گرفتند. | با گران‌تر شدن مواد اولیه، حاشیه‌ی سود زیر فشار رفت. |

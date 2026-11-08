@@ -148,7 +148,7 @@ Follow `.claude/skills/tarjoman/references/structural-grammar-rules.md`: NP orde
 
 Tarjoman v2.3.0 includes the Persian De-AI Humanizer: 18 AI-tell patterns (T1-T18),
 tanvin auto-repair, fake tanvin correction, hekasre detection, and Code & Markdown
-Table Shielding. See `.claude/skills/tarjoman/references/de-ai-humanizer.md`.
+Table Shielding. See `docs/dev/de-ai-humanizer.md`.
 
 ## 5. Resumable Book Projects (v2)
 

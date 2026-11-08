@@ -103,3 +103,48 @@ class TestBookTermsTsv(unittest.TestCase):
             tgt.write_text("دوشس گفت: «ای وای!»\n", encoding="utf-8")
             result = runner.invoke(cli, ["book", "check", str(project), str(src), str(tgt)])
             self.assertIn("Oh dear", result.output)
+
+
+class TestEvalSetRoundThreeCalques(unittest.TestCase):
+    """Patterns found by the expanded eval set; each must leave plain Persian alone."""
+
+    @staticmethod
+    def calques(text):
+        from tarjoman.linter import lint_text
+        return [i for i in lint_text(text) if i.category == "calque"]
+
+    def test_literal_translations_flagged(self) -> None:
+        for text in [
+            "آیا شما مطمئن هستید؟",
+            "این جالب است که یک ساحل را تماشا کنیم.",
+            "این از خیرخواهی قصاب، آبجوساز یا نانوا نیست که شام می‌خوریم.",
+            "هیچ دری بهتر وجود ندارد که از آن وارد شوید.",
+            "هیچ کارت اعتباری مورد نیاز نیست.",
+            "در یک انتشار آینده حذف خواهد شد.",
+            "تورم بالا باقی می‌ماند.",
+            "تورم به طور سرسختانه‌ای بالاست.",
+            "این یک حقیقت است که یک مرد به یک همسر نیاز دارد.",
+            "چطور روی زمین آن را می‌دانستید؟",
+            "به صفحات گسترده‌ی نامرتب خداحافظی کنید.",
+            "اجازه بده نور وجود داشته باشد.",
+            "تو باید داری با من شوخی می‌کنی.",
+            "ما وقتی برای این نداریم.",
+            "جلسه را فراموش کردم، بد من!",
+        ]:
+            self.assertTrue(self.calques(text), text)
+
+    def test_plain_persian_untouched(self) -> None:
+        for text in [
+            "آیا می‌دانستید که زنبورها می‌رقصند؟",
+            "این کتاب مهم است.",
+            "مواد مورد نیاز را از قبل بخرید.",
+            "در آینده دوباره امتحان کنید.",
+            "قیمت‌ها بالا رفت.",
+            "به طور کلی نتیجه خوب بود.",
+            "یک روز با دوستش به پارک رفت.",
+            "حال بد من کم‌کم بهتر شد.",
+            "با او خداحافظی کرد و رفت.",
+            "از این فلگ فقط به‌عنوان آخرین چاره استفاده کنید.",
+            "به طرز عجیبی آرام بود.",
+        ]:
+            self.assertFalse(self.calques(text), text)
