@@ -142,7 +142,7 @@ Step 8: Call selected composer (Typst/EPUB3/HTML/Bilingual) -> Produce deliverab
 
 ## 4b. Structural Grammar (v2.2.0)
 
-Follow `.claude/skills/tarjoman/references/structural-grammar-rules.md`: NP order `M1 -> N -> M3 -> M2 -> M4/M5`, break 3+ ezafe chains (`smooth_ezafe_chains` / `ezafe-chain` lint), six `a/an` methods (`generic-article` lint for redundant sentence-initial «یک»).
+Follow `.claude/skills/tarjoman/references/structural-grammar-rules.md`: noun-phrase order head -> classifying adjective -> descriptive adjective -> complement, break 3+ ezafe chains (`smooth_ezafe_chains` / `ezafe-chain` lint), when to drop «یک» for `a/an` (`generic-article` lint for redundant sentence-initial «یک»).
 
 ## 4c. De-AI Humanizer (v2.3.0)
 
