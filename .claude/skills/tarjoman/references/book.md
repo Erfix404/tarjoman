@@ -40,6 +40,12 @@
    tarjoman book terms ./my-book --add "Muggle=ماگل"
    ```
 
+   پیش از این مرحله می‌توانی فهرست نامزدها را از متن انگلیسی بگیری تا چیزی از قلم نیفتد. این فهرست فقط پیشنهاد است و چیزی ثبت نمی‌کند:
+   ```bash
+   tarjoman book candidates ./book-en.txt --min-count 3 --project ./my-book -o ./my-book/candidates.tsv
+   ```
+   ستون `count` تعداد تکرار و ستون `example` جای آن در متن را نشان می‌دهد. اسم‌های واقعی را با `book terms --add` ثبت کن و بقیه را دور بریز.
+
 ---
 
 ## ۲. چرخه‌ی هر فصل
