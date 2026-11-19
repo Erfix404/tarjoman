@@ -151,7 +151,7 @@ tarjoman epub merge book.epub ./epub_work -o book.fa.epub --json
 }
 ```
 
-راهنمای کامل کتاب: `.claude/skills/tarjoman/references/book.md` · یادداشت پژوهشی ارتقای کیفیت: `docs/research/translation-quality-roadmap.md` · داوری مقایسه‌ای کور (دقت و روانی، ۹۸ نمونه در همه‌ی ۲۲ سبک): `python benchmarks/run_judge.py --self-demo --provider heuristic`
+راهنمای کامل کتاب: `.claude/skills/tarjoman/references/book.md` · یادداشت پژوهشی ارتقای کیفیت: `docs/research/translation-quality-roadmap.md` · آزمایش واقعی A/B روی مدل هیدروژن (برد ۷–۱ ترجمان): `docs/research/real-texts/round3/README.md` · داوری مقایسه‌ای کور (دقت و روانی، ۱۰۴ نمونه در همه‌ی ۲۲ سبک): `python benchmarks/run_judge.py --self-demo --provider heuristic`
 
 ---
 

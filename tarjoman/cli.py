@@ -26,7 +26,13 @@ from tarjoman.core.contracts import BookManifest, TextSegment
 from tarjoman.core.pipeline import TranslationPipeline
 from tarjoman.domains.router import DomainRegistry, DomainRouter
 from tarjoman.fixer import fix_text, format_fix_summary
-from tarjoman.linter import VALID_STYLES, format_json_report, format_report, lint_text
+from tarjoman.linter import (
+    VALID_STYLES,
+    format_json_report,
+    format_report,
+    lint_json_text,
+    lint_text,
+)
 from tarjoman.memory import BookManifestManager, CharacterBible, Termbase
 from tarjoman.stages.stage5_audit import AuditStage
 
@@ -371,7 +377,10 @@ def lint_cmd(
 ) -> None:
     """Run Persian linguistic & typography linter on a file."""
     content = file.read_text(encoding="utf-8")
-    issues = lint_text(content, style=style)
+    if file.suffix.lower() in {".json", ".arb"}:
+        issues = lint_json_text(content, style=style)
+    else:
+        issues = lint_text(content, style=style)
     if only:
         wanted = {c.lower() for c in only}
         issues = [i for i in issues if i.category.lower() in wanted]

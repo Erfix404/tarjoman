@@ -7,7 +7,7 @@
 [![Version](https://img.shields.io/badge/version-v2.3.0-blue.svg)](https://github.com/Erfix404/tarjoman/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-487%20passing-brightgreen.svg)](#benchmarks--quality-evidence)
+[![Tests](https://img.shields.io/badge/tests-495%20passing-brightgreen.svg)](#benchmarks--quality-evidence)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-10%2F10%20domains%20100%25%20PASS-success.svg)](#benchmarks--quality-evidence)
 [![Creator](https://img.shields.io/badge/creator-Erfan%20Ashouri%20%28%40Erfix404%29-orange.svg)](https://github.com/Erfix404)
 [![Multi-Agent](https://img.shields.io/badge/agents-Claude%20Code%20%7C%20Hermes%20%7C%20Cursor-purple.svg)](#multi-agent-super-skill-integration)
@@ -356,7 +356,7 @@ tarjoman srt merge film.en.vtt film.fa.cues.txt -o film.fa.vtt
 tarjoman srt check film.fa.srt --source film.en.srt --json
 ```
 
-> Research notes & blind two-axis evaluation: [docs/research/translation-quality-roadmap.md](docs/research/translation-quality-roadmap.md), the 98-sample naturalness eval set across all 22 routed styles ([`benchmarks/eval_naturalness.py`](benchmarks/eval_naturalness.py)), blind position-randomized A/B judge ([`benchmarks/run_judge.py`](benchmarks/run_judge.py)), plus Persian guides in `.claude/skills/tarjoman/references/`: `fidelity.md` (Khazaeifar fidelity, equal-effect worksheet, blind review & selective back-translation), `editor-najafi.md`, `naturalize.md`, `colloquialize.md`, and `book.md` (style anchoring).
+> Research notes & blind two-axis evaluation: [docs/research/translation-quality-roadmap.md](docs/research/translation-quality-roadmap.md), Round 3 blind Hydrogen A/B study ([docs/research/real-texts/round3/README.md](docs/research/real-texts/round3/README.md), Skill 7–1 over raw baseline), the 104-sample naturalness eval set across all 22 routed styles ([`benchmarks/eval_naturalness.py`](benchmarks/eval_naturalness.py)), blind position-randomized A/B judge ([`benchmarks/run_judge.py`](benchmarks/run_judge.py)), plus Persian guides in `.claude/skills/tarjoman/references/`: `fidelity.md` (Khazaeifar fidelity, equal-effect worksheet, blind review & selective back-translation), `editor-najafi.md`, `naturalize.md`, `colloquialize.md`, and `book.md` (style anchoring).
 
 ### Multi-Format Composing
 
@@ -450,7 +450,7 @@ python benchmarks/run_benchmarks.py
 | 9 | Classical & Historical | ≥ 90.0 | 0 | ✅ PASS |
 | 10 | Transcreation & Creative | ≥ 90.0 | 0 | ✅ PASS |
 
-**Unit Tests**: 487 passing (`unittest` CI suite) / 511 passing (`pytest`)
+**Unit Tests**: 495 passing (`unittest` CI suite) / 519 passing (`pytest`)
 
 ```bash
 python -m unittest discover -s tests -p "test_*.py"

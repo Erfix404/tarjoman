@@ -78,7 +78,10 @@ _FA_B_R_LINT = r"(?![؀-ۿً-ّ‌])"
 #: Common words ending in «ه» that are never a misspelled ezafe (function
 #: words, adverbs, verbal nouns). Kept out of hekasre detection.
 _HE_NON_EZAFE = set("""همه توجه اینکه آنکه چگونه بلکه گرچه اگرچه هرچه آنچه چنانچه وگرنه
-همیشه ویژه نه چه که به البته اتفاقیه روزانه ماهانه سالانه هفتگانه جداگانه آگاهانه""".split())
+همیشه ویژه نه چه که به البته اتفاقیه روزانه ماهانه سالانه هفتگانه جداگانه آگاهانه
+داره نداره باشه نباشه بشه نشه بگه نگه بره نره بده نده بکنه نکنه بذاره نذاره
+بگیره نگیره بزنه نزنه ببینه نبینه بمونه نمونه بخوره نخوره بیاره نیاره ببره نبره
+بخره نخره بدونه ندونه بتونه نتونه میشه نمیشه""".split())
 
 
 def find_hekasre(text: str) -> List[Tuple[str, str, str]]:
@@ -149,6 +152,17 @@ VALID_STYLES: Tuple[str, ...] = (
     "financial",
     "classical",
     "poetry",
+    "mystery",
+    "speculative",
+    "memoir",
+    "philosophy",
+    "transcreation",
+    "game",
+    "ui",
+    "script",
+    "subtitles",
+    "comics",
+    "edit",
 )
 
 _FORMAL_STYLES = frozenset({
@@ -159,6 +173,15 @@ _FORMAL_STYLES = frozenset({
     "media",
     "financial",
     "classical",
+    "philosophy",
+    "edit",
+})
+
+_LITERARY_STYLES = frozenset({
+    "literary",
+    "mystery",
+    "speculative",
+    "memoir",
 })
 
 
@@ -197,6 +220,10 @@ _BIDI_ISOLATED_SPAN_RE: Pattern = re.compile("[\u2066-\u2068][^\u2069]*\u2069")
 _BIDI_LATIN_TOKEN_RE: Pattern = re.compile(r"[A-Za-z][A-Za-z0-9_./:-]*")
 _PERSIAN_CHAR_RE: Pattern = re.compile("[\u0600-\u06FF]")
 _INLINE_CODE_SPAN_RE: Pattern = re.compile(r"`[^`\n]+`")
+_MARKUP_TAG_RE: Pattern = re.compile(r"<[^>\n]+>")
+_TEMPLATE_PLACEHOLDER_RE: Pattern = re.compile(
+    r"\{\{[^}\n]+\}\}|\{[A-Za-z_][A-Za-z0-9_]*(?::[^}\n]+)?\}"
+)
 
 
 #: TRN-013 structural grammar: a word carrying an explicit ezafe marker
@@ -297,7 +324,7 @@ _URL_STRIP_RE: Pattern = re.compile(r"https?://[^\s<>\"'()«»]+")
 _CITATION_STRIP_RE: Pattern = re.compile(r"\[\^?\d+[a-z]?\]")
 _HEADING_OR_LIST_PREFIX_RE: Pattern = re.compile(r"^\s*(?:#{1,6}\s+|\d+[.)]\s+)")
 _ASCII_DIGIT_SPAN_RE: Pattern = re.compile(
-    r"(?<![A-Za-z0-9_./:-])\d+(?:\.\d+)?(?![A-Za-z0-9_./:-])"
+    r"(?<![A-Za-z0-9_./:-])[0-9]+(?:\.[0-9]+)?(?![A-Za-z0-9_./:-])"
 )
 _REGISTER_STANDARD_RES: Tuple[Tuple[str, str, Pattern[str]], ...] = tuple(
     (std, col, re.compile(_FA_B_L_LINT + re.escape(std) + _FA_B_R_LINT))
@@ -345,7 +372,7 @@ def lint_text(
     lines = content.splitlines()
     narration_lines = (
         _strip_dialogue_preserving_lines(content).splitlines()
-        if norm_style == "literary"
+        if norm_style in _LITERARY_STYLES
         else lines
     )
 
@@ -466,6 +493,8 @@ def lint_text(
             )
         elif _PERSIAN_CHAR_RE.search(line):
             bare = _INLINE_CODE_SPAN_RE.sub("", _BIDI_ISOLATED_SPAN_RE.sub("", line))
+            bare = _MARKUP_TAG_RE.sub("", bare)
+            bare = _TEMPLATE_PLACEHOLDER_RE.sub("", bare)
             # A speaker label at the start of a chat or script line («A:»،
             # «Sarah:») stays at the line start; it cannot be reordered.
             bare = _SPEAKER_LABEL_RE.sub("", bare)
@@ -504,7 +533,7 @@ def lint_text(
 
         # 9. Redundant generic article (TRN-013): sentence-initial «یک»
         # with a generic class subject; zero-mark (Ø) is idiomatic.
-        if norm_style not in {"colloquial", "technical", "poetry"} and _GENERIC_ARTICLE_RE.search(line):
+        if norm_style not in {"colloquial", "technical", "poetry", "game", "ui"} and _GENERIC_ARTICLE_RE.search(line):
             issues.append(
                 LintIssue(
                     line_number=idx,
@@ -686,7 +715,7 @@ def lint_text(
                             severity="suggestion",
                         )
                     )
-        elif norm_style == "literary":
+        elif norm_style in _LITERARY_STYLES:
             narr_line = re.sub(r"`[^`\n]+`", "", narration_lines[idx - 1])
             for std, col, pat in _REGISTER_COLLOQ_RES:
                 if pat.search(narr_line):
@@ -736,6 +765,73 @@ def lint_text(
             )
         )
 
+    return issues
+
+
+def _flatten_json_strings(
+    obj: Any, prefix: str = "", out: Optional[List[Tuple[str, str, str]]] = None
+) -> List[Tuple[str, str, str]]:
+    if out is None:
+        out = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if not isinstance(k, str) or k.startswith("@"):
+                continue
+            full_key = f"{prefix}.{k}" if prefix else k
+            if isinstance(v, dict):
+                _flatten_json_strings(v, full_key, out)
+            elif isinstance(v, list):
+                _flatten_json_strings(v, full_key, out)
+            elif isinstance(v, str):
+                out.append((full_key, k, v))
+    elif isinstance(obj, list):
+        for idx, item in enumerate(obj):
+            _flatten_json_strings(item, f"{prefix}[{idx}]", out)
+    return out
+
+
+def _find_json_key_line(lines: List[str], leaf_key: str, start_idx: int) -> Tuple[int, int]:
+    pat = re.compile(rf'"{re.escape(leaf_key)}"\s*:')
+    for idx in range(start_idx, len(lines)):
+        if pat.search(lines[idx]):
+            return idx + 1, idx + 1
+    for idx in range(0, min(start_idx, len(lines))):
+        if pat.search(lines[idx]):
+            return idx + 1, idx + 1
+    return 1, start_idx
+
+
+def lint_json_text(
+    content: str,
+    *,
+    enforce_bidi_isolation: bool = False,
+    style: Optional[str] = None,
+) -> List[LintIssue]:
+    """Lint localized string values in a JSON/ARB file without flagging JSON syntax quotes or keys."""
+    try:
+        parsed = json.loads(content)
+    except ValueError:
+        return lint_text(content, enforce_bidi_isolation=enforce_bidi_isolation, style=style)
+
+    if not isinstance(parsed, (dict, list)):
+        return lint_text(content, enforce_bidi_isolation=enforce_bidi_isolation, style=style)
+
+    raw_lines = content.splitlines()
+    entries = _flatten_json_strings(parsed)
+    issues: List[LintIssue] = []
+    cursor = 0
+    for full_key, leaf_key, value in entries:
+        line_no, cursor = _find_json_key_line(raw_lines, leaf_key, cursor)
+        val_issues = lint_text(
+            value,
+            skip_code_blocks=False,
+            enforce_bidi_isolation=enforce_bidi_isolation,
+            style=style,
+        )
+        for issue in val_issues:
+            issue.line_number = line_no
+            issue.snippet = f"[{full_key}] {value.strip()}"
+            issues.append(issue)
     return issues
 
 

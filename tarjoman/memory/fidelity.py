@@ -58,7 +58,7 @@ _LATEX_STRUCT_PATTERNS = (
 )
 _PLACEHOLDER_RE = re.compile(
     r"\{\{[^}\n]+\}\}|(?<!\{)\{[A-Za-z_][A-Za-z0-9_]*(?::[^}\n]+)?\}(?!\})"
-    r"|%(?:\([A-Za-z_][A-Za-z0-9_]*\))?[#0\- +]*\d*(?:\.\d+)?[sdifuxXeEgG]"
+    r"|(?<![0-9۰-۹])%(?:\([A-Za-z_][A-Za-z0-9_]*\))?[#0\-+]*[0-9]*(?:\.[0-9]+)?[sdifuxXeEgG]"
 )
 _HEADING_RE = re.compile(r"^\s*#{1,6}\s+\S", re.MULTILINE)
 _TABLE_SEP_RE = re.compile(

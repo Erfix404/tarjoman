@@ -1,0 +1,3 @@
+My grandfather's watch-repair shop on Lalezar Street couldn't have been wider than a train compartment, yet as far as I remember it smelled permanently of brass oil, dried lemon peel, and strong black tea. It was the autumn of 1987, and I must have been ten—old enough to sit without fidgeting on the high wooden stool, though never quite steady enough to be trusted with a mainspring.
+
+Each afternoon after school, I watched him lean into a halo of warm lamp light with a loupe wedged above one eyebrow. "A watch doesn't care how hurried you are," he used to tell customers who asked for next-day miracles. I didn't understand back then that he wasn't really talking about gears at all; he was simply the sort of man who refused to let the clock set his pace.

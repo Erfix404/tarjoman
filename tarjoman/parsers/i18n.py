@@ -14,7 +14,7 @@ from tarjoman.linter import _COUNT_PLURAL_RE
 _PLACEHOLDER_RE = re.compile(
     r"\{\{[^}\n]+\}\}"
     r"|(?<!\{)\{[A-Za-z_][A-Za-z0-9_]*(?::[^}\n]+)?\}(?!\})"
-    r"|%(?:\([A-Za-z_][A-Za-z0-9_]*\))?[#0\- +]*\d*(?:\.\d+)?[sdifuxXeEgG]"
+    r"|(?<![0-9۰-۹])%(?:\([A-Za-z_][A-Za-z0-9_]*\))?[#0\-+]*[0-9]*(?:\.[0-9]+)?[sdifuxXeEgG]"
     r"|%\d+\$[sdif]"
     r"|\$[1-9](?![0-9.,])"
 )

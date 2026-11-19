@@ -1,0 +1,14 @@
+{
+  "btn_resume": "Continue Journey",
+  "btn_salvage": "Dismantle",
+  "hud_hp_low": "<color=#ff4444>WARNING: Low Health!</color> Use a bandage now.",
+  "toast_gold_short": "Not enough silver for {item}.",
+  "quest_complete": "Quest completed: Returned {count} relics to Elder Varin.",
+  "inventory_full": "Your satchel is full ({count}/{max} slots). Drop something first.",
+  "item_cloak_name": "Ashen Wanderer's Cloak",
+  "item_cloak_desc": "Woven from soot-stained wool. Grants +12% frost resistance and silences footsteps on stone.",
+  "npc_blacksmith_greet": "Back again, {player}? If you bent another blade on a rock troll, don't blame my anvil!",
+  "npc_blacksmith_refuse": "Bring me three iron ingots first—nobody works a forge on thin air.",
+  "death_tip": "Tip: Hold Shift to parry heavy attacks instead of burning all your stamina rolling.",
+  "confirm_quit": "Unsaved camp progress will be lost. Quit to main menu?"
+}
