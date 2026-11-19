@@ -9,7 +9,7 @@ This skillpack integrates the **Tarjoman Universal Persian Translation Engine v2
 
 > Actual CLI signatures: `translate` takes a positional `INPUT_FILE` (use `-o` for output, `-d` for domain, `--composer` for format). There are no `--input`/`--local`/`--model`/`--provider` flags. Composers: `bilingual`, `html`, `typst`, `epub`.
 
-> The canonical, Persian-language instructions live in `.claude/skills/tarjoman/SKILL.md` and its `references/` (notably `colloquial.md`, `literary.md`, `technical.md`). Load them alongside this pack.
+> The canonical, Persian-language instructions live in `.claude/skills/tarjoman/SKILL.md` and its `references/` directory (covering colloquial, literary, memoir, genre-fiction, mystery, speculative, subtitles/dubbing, script, comics, technical/UI, game, scientific, medical, legal, media, financial, philosophy, classical, transcreation, editor, book, and supporting grammar/terminology checklists). Load only the relevant row's guide alongside this pack.
 
 ---
 
@@ -134,9 +134,14 @@ Step 3: Call Stage 1 Pre-Analysis -> Mask formulas, code fences, and tokens
 Step 4: Generate Draft Segment by Segment (consulting StateManager termbase)
 Step 5: Execute Self-Critique (Accuracy, Fluency, Terminology, Style)
 Step 6: Apply AntiCalqueEngine and TypographicRefiner
-Step 7: Run AuditStage & Linter -> If quality < 85%, iterate polish
+Step 7: Run AuditStage, `tarjoman verify source.md output.md`, and `tarjoman lint output.md` -> If quality < 85%, iterate polish
 Step 8: Call selected composer (Typst/EPUB3/HTML/Bilingual) -> Produce deliverable
 ```
+
+Additional CLI utilities for preprocessing, completeness, and subtitles:
+- PDF extract cleanup: `tarjoman prep raw.txt -o clean.txt`
+- Completeness verification: `tarjoman verify source.md translated.md`
+- Subtitle timeline-safe workflow: `tarjoman srt extract en.srt -o cues.txt`, `tarjoman srt merge en.srt fa_cues.txt -o fa.srt`, and `tarjoman srt check fa.srt --source en.srt`
 
 ---
 
@@ -155,10 +160,12 @@ Table Shielding. See `docs/dev/de-ai-humanizer.md`.
 Long-form Hermes translations run as resumable book projects with three memory modules:
 
 ```bash
-tarjoman book init "My Book" -o ./my-book   # scaffold manifest.json + terms.tsv
+tarjoman book init "My Book" -o ./my-book   # scaffold manifest.json + terms.tsv + style.md
+tarjoman book candidates book.en.md --project ./my-book  # suggest recurring names/terms
 tarjoman book manifest ./my-book            # SHA-256 chunk cache: resume, skip translated
 tarjoman book characters ./my-book --add "Harry:هری:brave:شما" --list
 tarjoman book terms ./my-book --add "wand=چوب‌دستی:literary" --search wand --cascades
+tarjoman book check ./my-book ch1.en.md ch1.fa.md       # terms, characters, register & fidelity
 ```
 
 - **Manifest** (`tarjoman.memory.BookManifestManager`): SHA-256 chunk/chapter caching; `pending_chunks()` tells the agent what still needs translation.

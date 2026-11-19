@@ -103,6 +103,16 @@ class TestSkillpacks(unittest.TestCase):
         self.assertIn("«", content)
         self.assertIn("»", content)
 
+    def test_cursorrules_root_matches_agent_pack(self) -> None:
+        """Verify root .cursorrules and agent-packs/cursor/.cursorrules stay identical."""
+        root_cursor = os.path.join(PROJECT_ROOT, ".cursorrules")
+        pack_cursor = os.path.join(PROJECT_ROOT, "agent-packs", "cursor", ".cursorrules")
+        with open(root_cursor, "r", encoding="utf-8") as f:
+            root_content = f.read()
+        with open(pack_cursor, "r", encoding="utf-8") as f:
+            pack_content = f.read()
+        self.assertEqual(root_content, pack_content)
+
     def test_all_12_reference_guides_exist(self) -> None:
         """Verify the domain guides plus the on-demand reference guides exist."""
         refs_dir = os.path.join(PROJECT_ROOT, ".claude", "skills", "tarjoman", "references")

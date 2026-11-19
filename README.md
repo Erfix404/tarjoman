@@ -7,7 +7,7 @@
 [![Version](https://img.shields.io/badge/version-v2.3.0-blue.svg)](https://github.com/Erfix404/tarjoman/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-343%20passing-brightgreen.svg)](#benchmarks--quality-evidence)
+[![Tests](https://img.shields.io/badge/tests-407%20passing-brightgreen.svg)](#benchmarks--quality-evidence)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-10%2F10%20domains%20100%25%20PASS-success.svg)](#benchmarks--quality-evidence)
 [![Creator](https://img.shields.io/badge/creator-Erfan%20Ashouri%20%28%40Erfix404%29-orange.svg)](https://github.com/Erfix404)
 [![Multi-Agent](https://img.shields.io/badge/agents-Claude%20Code%20%7C%20Hermes%20%7C%20Cursor-purple.svg)](#multi-agent-super-skill-integration)
@@ -246,10 +246,12 @@ pip install -e ".[dev]"
 
 ## Quickstart & CLI Guide
 
+> **Note on CLI translation:** Tarjoman does not bundle an LLM client. The AI coding agent performs the actual translation using the skill, while the CLI provides deterministic checking, preprocessing, book-project tracking, subtitle tools, and publishing composers. By default, `tarjoman translate` runs the 5-pass pipeline using `EchoDraftBackend` unless a custom `TranslationBackend` is wired in via the Python API.
+
 ### Translate a Document
 
 ```bash
-# Auto-detect domain and translate
+# Auto-detect domain and run the 5-pass pipeline (uses EchoDraftBackend by default)
 tarjoman translate article.txt
 
 # Specify domain and output file
@@ -259,24 +261,34 @@ tarjoman translate paper.txt --domain scientific --output paper_fa.txt
 ### Manage a Book Project
 
 ```bash
-# Initialize a book project
-tarjoman book init "My Novel" --source-dir chapters/
+# Initialize a book project (creates manifest.json, terms.tsv, and style.md)
+tarjoman book init "My Novel" -o ./my-book
 
-# Translate all chapters
-tarjoman book translate
+# Suggest recurring names and terms from the English source before translating
+tarjoman book candidates chapter1.en.md --project ./my-book
 
-# Check progress
-tarjoman book status
+# Register character voices, transliterations, and تو/شما address rules
+tarjoman book characters ./my-book --add "Alice:آلیس:formal:تو" --list
+
+# Record domain-tagged terms (keeps terms.db and terms.tsv in sync)
+tarjoman book terms ./my-book --add "Oh dear=وای خدا:literary"
+
+# Check translated chapter against termbase, characters, register, and completeness
+tarjoman book check ./my-book chapter1.en.md chapter1.fa.md
+
+# Check progress and resumable chunk manifest
+tarjoman book status ./my-book
+tarjoman book manifest ./my-book
 ```
 
 ### EPUB Roundtrip
 
 ```bash
-# Translate an EPUB preserving structure and styling
+# Structural EPUB parse and RTL recompose roundtrip (plug in translations programmatically via EpubRoundtripComposer)
 tarjoman epub roundtrip input.epub --output output_fa.epub
 ```
 
-### Quality Linting & Auto-Fixing
+### Quality Linting, Verification & Subtitles
 
 ```bash
 # Lint Persian text for calques, typography, and orthography issues
@@ -291,24 +303,26 @@ tarjoman verify source.md translated.md
 # Clean PDF-extracted text before translating (headers, page numbers, hyphen breaks, wrapped lines)
 tarjoman prep book.txt -o book.clean.txt
 
-# Subtitles: cue alignment, line length, reading speed, chatbot residue
+# Subtitles: text-only timeline-safe workflow (extract -> translate -> merge -> check)
+tarjoman srt extract film.en.srt -o film.cues.txt
+tarjoman srt merge film.en.srt film.fa.cues.txt -o film.fa.srt
 tarjoman srt check film.fa.srt --source film.en.srt
 ```
 
 ### Multi-Format Composing
 
 ```bash
-# Compose Typst PDF
-tarjoman compose typst source.txt translated.txt --output book.pdf
+# Compose Typst source (and optionally compile to PDF)
+tarjoman compose typst translated.md -o book.typ --style book --compile
 
 # Compose interactive HTML reader
-tarjoman compose html source.txt translated.txt --output reader.html
+tarjoman compose html source.md translated.md -o reader.html
 
-# Compose EPUB
-tarjoman compose epub source.txt translated.txt --output book.epub
+# Compose W3C EPUB 3 RTL e-book
+tarjoman compose epub translated.md -o book.epub --title "My Book"
 
-# Compose bilingual Markdown
-tarjoman compose markdown source.txt translated.txt --output bilingual.md
+# Compose bilingual Markdown comparison table
+tarjoman compose bilingual source.md translated.md -o bilingual.md
 ```
 
 ### Domain Detection
@@ -316,7 +330,7 @@ tarjoman compose markdown source.txt translated.txt --output bilingual.md
 ```bash
 # Detect the domain of a text
 tarjoman route "The court hereby declares..."
-# → Legal & Statutory (confidence: 0.94)
+# → Domain: legal (Confidence: 74.0%)
 ```
 
 ---
@@ -325,15 +339,15 @@ tarjoman route "The court hereby declares..."
 
 ```python
 from tarjoman.core.pipeline import TranslationPipeline
-from tarjoman.core.contracts import DomainProfile, DomainType
-from tarjoman.domains.router import DomainRegistry, DomainRouter
+from tarjoman.domains.router import DomainRouter
 from tarjoman.stages.humanizer import PersianHumanizer
 from tarjoman.stages.anti_calque import AntiCalqueEngine
 
 # 1. Route to the correct domain
 router = DomainRouter()
-domain_type = router.route("The cellular membrane exhibits selective permeability...")
-profile = DomainRegistry.get_profile(domain_type)
+profile, confidence = router.route(
+    "The cellular membrane exhibits selective permeability..."
+)
 
 # 2. Run the 5-pass translation pipeline
 pipeline = TranslationPipeline()
@@ -346,19 +360,20 @@ segments, audit = pipeline.run(
 for seg in segments:
     print(seg.translated_text)
 
-print(f"MQM Score: {audit.score}")
-print(f"Critical findings: {len(audit.critical_findings)}")
+print(f"MQM Score: {audit.quality_score:.1f}")
+critical = [f for f in audit.findings if f.severity == "critical"]
+print(f"Critical findings: {len(critical)}")
 
 # 4. Humanize existing Persian text (strip AI artifacts)
 humanized = PersianHumanizer.humanize(
     "این موضوع دارای اهمیت ویژه‌ای می‌باشد.",
     register="formal-human",
 )
-# → "این موضوع اهمیت زیادی دارد."
+# → "این موضوع دارای اهمیت ویژه‌ای است."
 
 # 5. Detect calques in Persian text
 calques = AntiCalqueEngine.detect_calques("او نقش مهمی بازی می‌کند.")
-# → ["نقش بازی کردن → idiomatic rewrite needed"]
+# → ["نقش مهمی بازی می‌کند"]
 ```
 
 ---
@@ -386,10 +401,11 @@ python benchmarks/run_benchmarks.py
 | 9 | Classical & Historical | ≥ 90.0 | 0 | ✅ PASS |
 | 10 | Transcreation & Creative | ≥ 90.0 | 0 | ✅ PASS |
 
-**Unit Tests**: 343 passing (265 core + 78 humanizer/de-AI)
+**Unit Tests**: 407 passing (`unittest` CI suite) / 431 passing (`pytest`)
 
 ```bash
-pytest  # Run full test suite
+python -m unittest discover -s tests -p "test_*.py"
+pytest  # Also collects standalone test_* functions
 ```
 
 ---
@@ -419,13 +435,19 @@ tarjoman/
 ├── domains/               # 10 specialized domain profiles
 │   └── router.py          # DomainRouter & DomainRegistry
 ├── memory/                # Long-form book support
-│   ├── character_bible.py # Character & Style Bible
-│   ├── scene_continuity.py# Scene Continuity Tracker
 │   ├── cache.py           # SHA-256 chunk caching
-│   ├── termbase.py        # Dynamic terminology extraction
-│   └── manifest.py        # Book manifest management
-├── parsers/               # Input parsers
-│   └── epub_parser.py     # EPUB structure parser
+│   ├── character_bible.py # Character & Style Bible
+│   ├── consistency.py     # Cross-chapter term/name/register checks
+│   ├── fidelity.py        # Completeness checks (verify)
+│   ├── manifest.py        # Book manifest management
+│   ├── scene_continuity.py# Scene Continuity Tracker
+│   ├── state_manager.py   # Project termbase & voice ledger
+│   └── termbase.py        # Dynamic terminology extraction (SQLite)
+├── parsers/               # Input parsers & preprocessors
+│   ├── epub_parser.py     # EPUB structure parser
+│   ├── srt.py             # Subtitle (SRT) extract, merge & check
+│   ├── term_candidates.py # Recurring name/term candidate extractor
+│   └── text_prep.py       # PDF-extracted text cleaner
 ├── linter.py              # Persian linguistic & typography linter
 └── cli.py                 # Click CLI entry point
 ```

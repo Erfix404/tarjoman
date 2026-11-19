@@ -14,13 +14,10 @@ Checks Persian text/markdown files for:
 5. Unbalanced Persian quotation marks ('«' vs '»')
 6. Non-standard Arabic characters ('ي', 'ك', 'ى', 'ة', 'ـ')
 7. Heavy ezafe chains: 3+ consecutive explicit ezafe markers (TRN-013)
-8. Redundant generic article: sentence-initial
+8. Redundant generic article: sentence-initial «یک» with generic class
    subject + generic predicate (TRN-013)
 9. Hekasre detection: ezafe kasre confused with colloquial clitic (v2.3.0)
 10. Tanvin: missing tanvin on Arabic loans, fake tanvin on Persian words (v2.3.0)
-
-Exit codes: «یک» with generic class
-   subject + generic predicate (TRN-013)
 
 Exit codes:
 - 0: Clean / PASSED

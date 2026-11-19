@@ -17,6 +17,7 @@ if hasattr(sys.stderr, "reconfigure"):
 
 import click
 
+from tarjoman import __version__
 from tarjoman.composers.bilingual_md import BilingualMarkdownComposer
 from tarjoman.composers.epub3 import Epub3Composer
 from tarjoman.composers.html_reader import HtmlReaderComposer
@@ -30,7 +31,7 @@ from tarjoman.stages.stage5_audit import AuditStage
 
 
 @click.group()
-@click.version_option(version="1.0.0", prog_name="tarjoman")
+@click.version_option(version=__version__, prog_name="tarjoman")
 def cli() -> None:
     """Tarjoman: Universal Persian Translation Engine & Multi-Agent Skillpack."""
     pass

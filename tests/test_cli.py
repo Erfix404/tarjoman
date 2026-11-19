@@ -19,6 +19,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
+from tarjoman import __version__
 from tarjoman.cli import cli
 
 
@@ -32,7 +33,7 @@ class TestCliSuite(unittest.TestCase):
         """Verify tarjoman --version prints correct version string."""
         result = self.runner.invoke(cli, ["--version"])
         self.assertEqual(result.exit_code, 0)
-        self.assertIn("1.0.0", result.output)
+        self.assertIn(__version__, result.output)
 
     def test_route_command_string(self) -> None:
         """Verify route subcommand on inline text string."""
