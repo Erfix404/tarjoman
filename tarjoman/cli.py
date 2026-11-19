@@ -25,7 +25,8 @@ from tarjoman.composers.typst_pdf import TypstPdfComposer
 from tarjoman.core.contracts import BookManifest, TextSegment
 from tarjoman.core.pipeline import TranslationPipeline
 from tarjoman.domains.router import DomainRegistry, DomainRouter
-from tarjoman.linter import format_report, lint_text
+from tarjoman.fixer import fix_text, format_fix_summary
+from tarjoman.linter import VALID_STYLES, format_json_report, format_report, lint_text
 from tarjoman.memory import BookManifestManager, CharacterBible, Termbase
 from tarjoman.stages.stage5_audit import AuditStage
 
@@ -257,6 +258,83 @@ def audit_cmd(file: Path, domain: Optional[str], src_file: Optional[Path]) -> No
                 click.echo(f"     Excerpt: {finding.excerpt}")
 
 
+def _echo_findings_json(findings: list, extra: Dict[str, object]) -> None:
+    """Print structured JSON findings report with consistent fields."""
+    payload: Dict[str, object] = {
+        **extra,
+        "passed": len(findings) == 0,
+        "total": len(findings),
+        "findings": [
+            {
+                **({"cue": f.cue} if hasattr(f, "cue") else {}),
+                "category": f.category,
+                "message": f.message,
+            }
+            for f in findings
+        ],
+    }
+    click.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+
+
+# -----------------------------------------------------------------------------
+# fix subcommand (safe orthography-only auto-fixer)
+# -----------------------------------------------------------------------------
+@cli.command("fix")
+@click.argument("file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("-o", "--output", "output_path", default=None, type=click.Path(dir_okay=False, path_type=Path), help="Write fixed text to this path")
+@click.option("-i", "--in-place", "in_place", is_flag=True, default=False, help="Modify FILE in place when changes are needed")
+@click.option("--dry-run", "dry_run", is_flag=True, default=False, help="Check for safe fixes without writing; exit 1 if changes needed")
+@click.option("--json", "as_json", is_flag=True, default=False, help="Output structured JSON report")
+def fix_cmd(
+    file: Path,
+    output_path: Optional[Path],
+    in_place: bool,
+    dry_run: bool,
+    as_json: bool,
+) -> None:
+    """Apply safe, non-semantic orthography fixes (Arabic ی/ک, ZWNJ, tanvin, punctuation)."""
+    if output_path is not None and in_place:
+        raise click.UsageError("Cannot combine --output and --in-place.")
+
+    raw = file.read_text(encoding="utf-8")
+    result = fix_text(raw)
+
+    if dry_run:
+        if as_json:
+            click.echo(json.dumps(result.to_dict(str(file)), ensure_ascii=False, indent=2))
+        else:
+            click.echo(format_fix_summary(str(file), result))
+        if result.changed:
+            sys.exit(1)
+        return
+
+    if in_place:
+        if result.changed:
+            file.write_text(result.text, encoding="utf-8")
+        if as_json:
+            click.echo(json.dumps(result.to_dict(str(file)), ensure_ascii=False, indent=2))
+        else:
+            click.echo(format_fix_summary(str(file), result))
+        return
+
+    if output_path is not None:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(result.text, encoding="utf-8")
+        if as_json:
+            payload = {**result.to_dict(str(output_path)), "source": str(file)}
+            click.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+        else:
+            click.echo(format_fix_summary(str(output_path), result))
+        return
+
+    if as_json:
+        payload = {**result.to_dict(str(file)), "text": result.text}
+        click.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+    else:
+        click.echo(result.text, nl=False)
+        click.echo(format_fix_summary(str(file), result), err=True)
+
+
 # -----------------------------------------------------------------------------
 # lint subcommand
 # -----------------------------------------------------------------------------
@@ -268,14 +346,37 @@ def audit_cmd(file: Path, domain: Optional[str], src_file: Optional[Path]) -> No
     multiple=True,
     help="Report only these categories (repeatable), e.g. --only ai-tell --only calque",
 )
-def lint_cmd(file: Path, only: tuple) -> None:
+@click.option(
+    "--style",
+    "style",
+    type=click.Choice(VALID_STYLES, case_sensitive=False),
+    default=None,
+    help="Style/domain rules (checks register consistency and style-specific conventions)",
+)
+@click.option(
+    "--errors-only",
+    "errors_only",
+    is_flag=True,
+    default=False,
+    help="Report only hard orthography/typography errors (suppress style suggestions)",
+)
+@click.option("--json", "as_json", is_flag=True, default=False, help="Output structured JSON report")
+def lint_cmd(
+    file: Path,
+    only: tuple,
+    style: Optional[str],
+    errors_only: bool,
+    as_json: bool,
+) -> None:
     """Run Persian linguistic & typography linter on a file."""
     content = file.read_text(encoding="utf-8")
-    issues = lint_text(content)
+    issues = lint_text(content, style=style)
     if only:
         wanted = {c.lower() for c in only}
         issues = [i for i in issues if i.category.lower() in wanted]
-    report = format_report(str(file), issues)
+    if errors_only:
+        issues = [i for i in issues if i.severity == "error"]
+    report = format_json_report(str(file), issues) if as_json else format_report(str(file), issues)
     click.echo(report)
     if issues:
         sys.exit(1)
@@ -287,7 +388,8 @@ def lint_cmd(file: Path, only: tuple) -> None:
 @cli.command("verify")
 @click.argument("source_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
 @click.argument("target_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
-def verify_cmd(source_file: Path, target_file: Path) -> None:
+@click.option("--json", "as_json", is_flag=True, default=False, help="Output structured JSON report")
+def verify_cmd(source_file: Path, target_file: Path, as_json: bool) -> None:
     """Check that a translation kept everything: paragraphs, numbers, citations, URLs, code.
 
     Findings are hints, not verdicts: a number written out as a word or a
@@ -298,6 +400,11 @@ def verify_cmd(source_file: Path, target_file: Path) -> None:
     findings = check_fidelity(
         source_file.read_text(encoding="utf-8"), target_file.read_text(encoding="utf-8")
     )
+    if as_json:
+        _echo_findings_json(findings, {"source": str(source_file), "target": str(target_file)})
+        if findings:
+            sys.exit(1)
+        return
     if not findings:
         click.echo("Fidelity check passed: paragraphs, numbers, citations, URLs and code all match.")
         return
@@ -351,12 +458,28 @@ def srt_merge_cmd(source_file: Path, translated_file: Path, output: Path) -> Non
 @click.option("--max-chars", default=42, show_default=True, help="Max characters per line")
 @click.option("--max-lines", default=2, show_default=True, help="Max lines per cue")
 @click.option("--max-cps", default=17.0, show_default=True, help="Max reading speed (characters per second)")
-def srt_check_cmd(target_file: Path, source_file: Optional[Path], max_chars: int, max_lines: int, max_cps: float) -> None:
+@click.option("--json", "as_json", is_flag=True, default=False, help="Output structured JSON report")
+def srt_check_cmd(
+    target_file: Path,
+    source_file: Optional[Path],
+    max_chars: int,
+    max_lines: int,
+    max_cps: float,
+    as_json: bool,
+) -> None:
     """Check a translated SRT: cue alignment, line length, reading speed, leftover residue."""
     from tarjoman.parsers.srt import check_srt
 
     source = source_file.read_text(encoding="utf-8-sig") if source_file else None
     findings = check_srt(source, target_file.read_text(encoding="utf-8-sig"), max_chars, max_lines, max_cps)
+    if as_json:
+        extra: Dict[str, object] = {"target": str(target_file)}
+        if source_file is not None:
+            extra["source"] = str(source_file)
+        _echo_findings_json(findings, extra)
+        if findings:
+            sys.exit(1)
+        return
     if not findings:
         click.echo("Subtitle check passed.")
         return
@@ -700,7 +823,10 @@ def book_terms_cmd(
 @click.argument("project_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
 @click.argument("source_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
 @click.argument("target_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
-def book_check_cmd(project_dir: Path, source_file: Path, target_file: Path) -> None:
+@click.option("--json", "as_json", is_flag=True, default=False, help="Output structured JSON report")
+def book_check_cmd(
+    project_dir: Path, source_file: Path, target_file: Path, as_json: bool
+) -> None:
     """Check a translated chapter against the termbase, character bible and register."""
     from tarjoman.memory.consistency import check_chapter
 
@@ -722,6 +848,18 @@ def book_check_cmd(project_dir: Path, source_file: Path, target_file: Path) -> N
     from tarjoman.memory.fidelity import check_fidelity
 
     findings = check_chapter(source, target, terms, characters) + check_fidelity(source, target)
+    if as_json:
+        _echo_findings_json(
+            findings,
+            {
+                "project": str(project_dir),
+                "source": str(source_file),
+                "target": str(target_file),
+            },
+        )
+        if findings:
+            sys.exit(1)
+        return
     if not findings:
         click.echo(
             "Consistency check passed: terms, names and dialogue register are consistent, "

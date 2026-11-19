@@ -14,15 +14,31 @@ Covers:
 """
 from __future__ import annotations
 
+import contextlib
 import io
+import os
+import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 import zipfile
+from pathlib import Path
+from typing import Iterator
 
 from click.testing import CliRunner
 
 from tarjoman.cli import cli
 from tarjoman.composers.epub3 import Epub3Composer
+
+
+@contextlib.contextmanager
+def _temp_cwd() -> Iterator[Path]:
+    prev = os.getcwd()
+    with tempfile.TemporaryDirectory() as tmp:
+        os.chdir(tmp)
+        try:
+            yield Path(tmp)
+        finally:
+            os.chdir(prev)
 
 
 SAMPLE_FA = (
@@ -199,7 +215,7 @@ class TestEpub3Cli(unittest.TestCase):
 
     def test_compose_epub_subcommand(self) -> None:
         runner = CliRunner()
-        with runner.isolated_filesystem():
+        with _temp_cwd():
             with open("fa.txt", "w", encoding="utf-8") as f:
                 f.write(SAMPLE_FA)
             result = runner.invoke(

@@ -9,7 +9,7 @@ This skillpack integrates the **Tarjoman Universal Persian Translation Engine v2
 
 > Actual CLI signatures: `translate` takes a positional `INPUT_FILE` (use `-o` for output, `-d` for domain, `--composer` for format). There are no `--input`/`--local`/`--model`/`--provider` flags. Composers: `bilingual`, `html`, `typst`, `epub`.
 
-> The canonical, Persian-language instructions live in `.claude/skills/tarjoman/SKILL.md` and its `references/` directory (covering colloquial, literary, memoir, genre-fiction, mystery, speculative, subtitles/dubbing, script, comics, technical/UI, game, scientific, medical, legal, media, financial, philosophy, classical, transcreation, editor, book, and supporting grammar/terminology checklists). Load only the relevant row's guide alongside this pack.
+> The canonical, Persian-language instructions live in `.claude/skills/tarjoman/SKILL.md` and its `references/` directory (covering colloquial, literary, memoir, genre-fiction, mystery, speculative, subtitles/dubbing, script, comics, technical/UI, game, scientific, medical, legal, media, financial, philosophy, classical, transcreation, editor, `editor-najafi.md`, `fidelity.md`, `naturalize.md`, `colloquialize.md`, book, and supporting grammar/terminology checklists). Load only the relevant row's guide alongside this pack.
 
 ---
 
@@ -134,14 +134,16 @@ Step 3: Call Stage 1 Pre-Analysis -> Mask formulas, code fences, and tokens
 Step 4: Generate Draft Segment by Segment (consulting StateManager termbase)
 Step 5: Execute Self-Critique (Accuracy, Fluency, Terminology, Style)
 Step 6: Apply AntiCalqueEngine and TypographicRefiner
-Step 7: Run AuditStage, `tarjoman verify source.md output.md`, and `tarjoman lint output.md` -> If quality < 85%, iterate polish
+Step 7: Run AuditStage, `tarjoman fix output.md --in-place`, `tarjoman verify source.md output.md --json`, and `tarjoman lint output.md --style <mode> --json` -> If quality < 85%, iterate polish
 Step 8: Call selected composer (Typst/EPUB3/HTML/Bilingual) -> Produce deliverable
 ```
 
-Additional CLI utilities for preprocessing, completeness, and subtitles:
+Additional CLI utilities for preprocessing, safe auto-fixing, completeness, and subtitles:
 - PDF extract cleanup: `tarjoman prep raw.txt -o clean.txt`
-- Completeness verification: `tarjoman verify source.md translated.md`
-- Subtitle timeline-safe workflow: `tarjoman srt extract en.srt -o cues.txt`, `tarjoman srt merge en.srt fa_cues.txt -o fa.srt`, and `tarjoman srt check fa.srt --source en.srt`
+- Safe orthography auto-fixer: `tarjoman fix output.md --in-place` (supports `--dry-run`, `--json`)
+- Style & severity linting: `tarjoman lint output.md --style literary --errors-only --json`
+- Completeness verification: `tarjoman verify source.md translated.md --json`
+- Subtitle timeline-safe workflow: `tarjoman srt extract en.srt -o cues.txt`, `tarjoman srt merge en.srt fa_cues.txt -o fa.srt`, and `tarjoman srt check fa.srt --source en.srt --json`
 
 ---
 

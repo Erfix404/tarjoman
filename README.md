@@ -7,7 +7,7 @@
 [![Version](https://img.shields.io/badge/version-v2.3.0-blue.svg)](https://github.com/Erfix404/tarjoman/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-407%20passing-brightgreen.svg)](#benchmarks--quality-evidence)
+[![Tests](https://img.shields.io/badge/tests-468%20passing-brightgreen.svg)](#benchmarks--quality-evidence)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-10%2F10%20domains%20100%25%20PASS-success.svg)](#benchmarks--quality-evidence)
 [![Creator](https://img.shields.io/badge/creator-Erfan%20Ashouri%20%28%40Erfix404%29-orange.svg)](https://github.com/Erfix404)
 [![Multi-Agent](https://img.shields.io/badge/agents-Claude%20Code%20%7C%20Hermes%20%7C%20Cursor-purple.svg)](#multi-agent-super-skill-integration)
@@ -288,17 +288,21 @@ tarjoman book manifest ./my-book
 tarjoman epub roundtrip input.epub --output output_fa.epub
 ```
 
-### Quality Linting, Verification & Subtitles
+### Safe Orthography Auto-Fixing, Linting, Verification & Subtitles
 
 ```bash
-# Lint Persian text for calques, typography, and orthography issues
-tarjoman lint translated_text.txt
+# Apply safe, non-semantic orthography fixes (Arabic ی/ک, ZWNJ, tanvin, punctuation; shields code/LaTeX/URLs/placeholders)
+tarjoman fix translated_text.txt --in-place
+tarjoman fix translated_text.txt --dry-run --json
+
+# Lint Persian text (filter by style, hard errors only, or structured JSON)
+tarjoman lint translated_text.txt --style literary --errors-only --json
 
 # Run MQM quality audit
 tarjoman audit translated_text.txt
 
-# Completeness: dropped/summarized paragraphs, numbers, citation markers, URLs, code
-tarjoman verify source.md translated.md
+# Completeness: dropped/summarized paragraphs, numbers, citation markers, URLs, code (--json supported)
+tarjoman verify source.md translated.md --json
 
 # Clean PDF-extracted text before translating (headers, page numbers, hyphen breaks, wrapped lines)
 tarjoman prep book.txt -o book.clean.txt
@@ -306,8 +310,10 @@ tarjoman prep book.txt -o book.clean.txt
 # Subtitles: text-only timeline-safe workflow (extract -> translate -> merge -> check)
 tarjoman srt extract film.en.srt -o film.cues.txt
 tarjoman srt merge film.en.srt film.fa.cues.txt -o film.fa.srt
-tarjoman srt check film.fa.srt --source film.en.srt
+tarjoman srt check film.fa.srt --source film.en.srt --json
 ```
+
+> Also supports `tarjoman book check ./my-book ch1.en.md ch1.fa.md --json`, plus new Persian guides in `.claude/skills/tarjoman/references/`: `fidelity.md` (Khazaeifar fidelity & equal-effect worksheet), `editor-najafi.md` (Najafi plural/spelling track), `naturalize.md`, and `colloquialize.md`.
 
 ### Multi-Format Composing
 
@@ -401,7 +407,7 @@ python benchmarks/run_benchmarks.py
 | 9 | Classical & Historical | ≥ 90.0 | 0 | ✅ PASS |
 | 10 | Transcreation & Creative | ≥ 90.0 | 0 | ✅ PASS |
 
-**Unit Tests**: 407 passing (`unittest` CI suite) / 431 passing (`pytest`)
+**Unit Tests**: 468 passing (`unittest` CI suite) / 492 passing (`pytest`)
 
 ```bash
 python -m unittest discover -s tests -p "test_*.py"
@@ -448,7 +454,8 @@ tarjoman/
 │   ├── srt.py             # Subtitle (SRT) extract, merge & check
 │   ├── term_candidates.py # Recurring name/term candidate extractor
 │   └── text_prep.py       # PDF-extracted text cleaner
-├── linter.py              # Persian linguistic & typography linter
+├── fixer.py               # Safe orthography-only auto-fixer
+├── linter.py              # Persian linguistic & typography linter (style/severity/JSON)
 └── cli.py                 # Click CLI entry point
 ```
 

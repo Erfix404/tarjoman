@@ -14,13 +14,10 @@ Checks Persian text/markdown files for:
    is set)
 8. Heavy ezafe chains: 3+ consecutive explicit ezafe markers
    (TRN-013 structural grammar)
-9. Redundant generic article:
+9. Redundant generic article: sentence-initial «یک» with a generic class
    subject + generic predicate (TRN-013 structural grammar)
 10. Hekasre detection: ezafe kasre confused with colloquial clitic
 11. Tanvin: missing tanvin on Arabic loans, fake tanvin on Persian words
-
-Both this module and the skillpack script sentence-initial «یک» with a generic class
-   subject + generic predicate (TRN-013 structural grammar)
 
 Both this module and the skillpack script
 (``.claude/skills/tarjoman/scripts/linter.py``) consume the shared pattern
@@ -28,9 +25,12 @@ table in ``tarjoman.stages.anti_calque`` — one source of truth.
 """
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass, field
-from typing import List, Pattern, Tuple
+from typing import Any, Dict, List, Optional, Pattern, Tuple
+
+from tarjoman.memory.consistency import REGISTER_PAIRS
 
 from tarjoman.stages.anti_calque import (
     LINT_ARABIC_CHARS,
@@ -116,13 +116,64 @@ BOLD = "\033[1m"
 RESET = "\033[0m"
 
 
+CATEGORY_SEVERITY: Dict[str, str] = {
+    "arabic": "error",
+    "fake-zwnj": "error",
+    "quote": "error",
+    "bidi-isolate": "error",
+    "zwnj": "error",
+    "punct": "error",
+    "punct-space": "error",
+    "tanvin": "error",
+    "spelling": "error",
+    "em-dash": "error",
+    "quote-style": "error",
+    "calque": "suggestion",
+    "ai-tell": "suggestion",
+    "ezafe-chain": "suggestion",
+    "generic-article": "suggestion",
+    "hekasre": "suggestion",
+    "register": "suggestion",
+    "digits": "suggestion",
+}
+
+VALID_STYLES: Tuple[str, ...] = (
+    "formal",
+    "literary",
+    "colloquial",
+    "technical",
+    "scientific",
+    "legal",
+    "medical",
+    "media",
+    "financial",
+    "classical",
+    "poetry",
+)
+
+_FORMAL_STYLES = frozenset({
+    "formal",
+    "scientific",
+    "legal",
+    "medical",
+    "media",
+    "financial",
+    "classical",
+})
+
+
 @dataclass
 class LintIssue:
     line_number: int
-    category: str  # "em-dash", "quote-style", "calque", "zwnj", "quote", "arabic", "bidi-isolate", "ezafe-chain", "generic-article", "hekasre", "tanvin"
+    category: str
     message: str
     snippet: str
     suggestion: str = field(default="")
+    severity: str = field(default="")
+
+    def __post_init__(self) -> None:
+        if not self.severity:
+            self.severity = CATEGORY_SEVERITY.get(self.category, "suggestion")
 
 
 BANNED_CALQUE_PATTERNS: List[Tuple[str, Pattern]] = [
@@ -241,9 +292,37 @@ _COUNT_PLURAL_RE: Pattern = re.compile(
     r"(?<![\d۰-۹])(?:[0-9۰-۹]{1,3}|\{[A-Za-z_]+\}|%d)\s+[\u0621-\u06CC]+\u200c?(?:ها|های)" + _FA_WORD_R
 )
 
+_MD_LINK_URL_RE: Pattern = re.compile(r"\]\([^)\n]+\)")
+_URL_STRIP_RE: Pattern = re.compile(r"https?://[^\s<>\"'()«»]+")
+_CITATION_STRIP_RE: Pattern = re.compile(r"\[\^?\d+[a-z]?\]")
+_HEADING_OR_LIST_PREFIX_RE: Pattern = re.compile(r"^\s*(?:#{1,6}\s+|\d+[.)]\s+)")
+_ASCII_DIGIT_SPAN_RE: Pattern = re.compile(
+    r"(?<![A-Za-z0-9_./:-])\d+(?:\.\d+)?(?![A-Za-z0-9_./:-])"
+)
+_REGISTER_STANDARD_RES: Tuple[Tuple[str, str, Pattern[str]], ...] = tuple(
+    (std, col, re.compile(_FA_B_L_LINT + re.escape(std) + _FA_B_R_LINT))
+    for std, col in REGISTER_PAIRS
+)
+_REGISTER_COLLOQ_RES: Tuple[Tuple[str, str, Pattern[str]], ...] = tuple(
+    (std, col, re.compile(_FA_B_L_LINT + re.escape(col) + _FA_B_R_LINT))
+    for std, col in REGISTER_PAIRS
+)
+
+
+def _strip_dialogue_preserving_lines(text: str) -> str:
+    """Blank out «...» dialogue spans while preserving newline offsets."""
+    return re.sub(
+        r"«[^»]*»",
+        lambda m: "".join("\n" if ch == "\n" else " " for ch in m.group(0)),
+        text,
+    )
+
 
 def lint_text(
-    content: str, skip_code_blocks: bool = True, enforce_bidi_isolation: bool = False
+    content: str,
+    skip_code_blocks: bool = True,
+    enforce_bidi_isolation: bool = False,
+    style: Optional[str] = None,
 ) -> List[LintIssue]:
     """Analyze Persian text and return list of detected lint issues.
 
@@ -253,9 +332,22 @@ def lint_text(
         enforce_bidi_isolation: If True, every bare Latin token in a Persian
             sentence is flagged; otherwise only tokens risking bidi corruption
             (digits, dots, slashes, or other neutrals inside the token).
+        style: Optional style/domain mode (see :data:`VALID_STYLES`).
     """
+    norm_style: Optional[str] = None
+    if style is not None:
+        norm_style = style.strip().lower()
+        if norm_style not in VALID_STYLES:
+            valid = ", ".join(VALID_STYLES)
+            raise ValueError(f"Unknown lint style '{style}'. Valid styles: {valid}")
+
     issues: List[LintIssue] = []
     lines = content.splitlines()
+    narration_lines = (
+        _strip_dialogue_preserving_lines(content).splitlines()
+        if norm_style == "literary"
+        else lines
+    )
 
     total_opening_quotes = 0
     total_closing_quotes = 0
@@ -272,6 +364,7 @@ def lint_text(
             continue
 
         # 1. Em-dash, en-dash, and standalone double-hyphen detection.
+        em_sev = "suggestion" if norm_style == "poetry" else "error"
         for dash_char, name in [("—", "em-dash"), ("–", "en-dash")]:
             if dash_char in line:
                 issues.append(
@@ -281,6 +374,7 @@ def lint_text(
                         message=f"Lingering {name} ('{dash_char}') found. Eradicate or adapt into authentic Persian punctuation.",
                         snippet=line.strip(),
                         suggestion="Replace with a Persian comma (،) or parentheses; run AntiCalqueEngine.eliminate_em_dashes().",
+                        severity=em_sev,
                     )
                 )
         if _DOUBLE_HYPHEN_PATTERN.search(line):
@@ -291,6 +385,7 @@ def lint_text(
                     message="Lingering standalone double-hyphen ('--') found. It reads as an em-dash in Persian prose.",
                     snippet=line.strip(),
                     suggestion="Replace with a Persian comma (،) or parentheses.",
+                    severity=em_sev,
                 )
             )
 
@@ -392,7 +487,7 @@ def lint_text(
                 )
 
         # 8. Heavy ezafe chain (TRN-013): 3+ consecutive ezafe markers.
-        if _EZAFE_CHAIN_RE.search(line):
+        if norm_style not in {"colloquial", "poetry"} and _EZAFE_CHAIN_RE.search(line):
             issues.append(
                 LintIssue(
                     line_number=idx,
@@ -409,7 +504,7 @@ def lint_text(
 
         # 9. Redundant generic article (TRN-013): sentence-initial «یک»
         # with a generic class subject; zero-mark (Ø) is idiomatic.
-        if _GENERIC_ARTICLE_RE.search(line):
+        if norm_style not in {"colloquial", "technical", "poetry"} and _GENERIC_ARTICLE_RE.search(line):
             issues.append(
                 LintIssue(
                     line_number=idx,
@@ -564,6 +659,65 @@ def lint_text(
                     )
                 )
 
+        # 13. Style-aware register & digit checks
+        if norm_style == "colloquial":
+            for std, col, pat in _REGISTER_STANDARD_RES:
+                if pat.search(_or_line):
+                    issues.append(
+                        LintIssue(
+                            line_number=idx,
+                            category="register",
+                            message=f"Standard written form «{std}» inside colloquial style.",
+                            snippet=line.strip(),
+                            suggestion=f"Use colloquial «{col}».",
+                            severity="suggestion",
+                        )
+                    )
+        elif norm_style in _FORMAL_STYLES:
+            for std, col, pat in _REGISTER_COLLOQ_RES:
+                if pat.search(_or_line):
+                    issues.append(
+                        LintIssue(
+                            line_number=idx,
+                            category="register",
+                            message=f"Colloquial form «{col}» inside {norm_style} style.",
+                            snippet=line.strip(),
+                            suggestion=f"Use standard «{std}».",
+                            severity="suggestion",
+                        )
+                    )
+        elif norm_style == "literary":
+            narr_line = re.sub(r"`[^`\n]+`", "", narration_lines[idx - 1])
+            for std, col, pat in _REGISTER_COLLOQ_RES:
+                if pat.search(narr_line):
+                    issues.append(
+                        LintIssue(
+                            line_number=idx,
+                            category="register",
+                            message=f"Colloquial form «{col}» in literary narration (outside «» dialogue).",
+                            snippet=line.strip(),
+                            suggestion=f"Use standard «{std}» in narration.",
+                            severity="suggestion",
+                        )
+                    )
+            if _PERSIAN_CHAR_RE.search(_or_line):
+                digit_scan = _HEADING_OR_LIST_PREFIX_RE.sub("", _or_line)
+                digit_scan = _MD_LINK_URL_RE.sub("]", digit_scan)
+                digit_scan = _URL_STRIP_RE.sub("", digit_scan)
+                digit_scan = _CITATION_STRIP_RE.sub("", digit_scan)
+                dm = _ASCII_DIGIT_SPAN_RE.search(digit_scan)
+                if dm:
+                    issues.append(
+                        LintIssue(
+                            line_number=idx,
+                            category="digits",
+                            message=f"ASCII digit «{dm.group(0)}» in literary prose; Persian digits (۱۲۳) are preferred.",
+                            snippet=line.strip(),
+                            suggestion="Convert digits to Persian numerals (۰-۹).",
+                            severity="suggestion",
+                        )
+                    )
+
         # Quote counting
         total_opening_quotes += line.count("«")
         total_closing_quotes += line.count("»")
@@ -583,6 +737,33 @@ def lint_text(
         )
 
     return issues
+
+
+def issues_to_dict(file_path: str, issues: List[LintIssue]) -> Dict[str, Any]:
+    """Serialize lint issues into a structured dictionary for JSON output."""
+    return {
+        "file": file_path,
+        "passed": len(issues) == 0,
+        "total": len(issues),
+        "errors": sum(1 for i in issues if i.severity == "error"),
+        "suggestions": sum(1 for i in issues if i.severity != "error"),
+        "issues": [
+            {
+                "line": i.line_number,
+                "category": i.category,
+                "severity": i.severity,
+                "message": i.message,
+                "snippet": i.snippet,
+                "suggestion": i.suggestion,
+            }
+            for i in issues
+        ],
+    }
+
+
+def format_json_report(file_path: str, issues: List[LintIssue]) -> str:
+    """Format lint issues as pretty UTF-8 JSON."""
+    return json.dumps(issues_to_dict(file_path, issues), ensure_ascii=False, indent=2)
 
 
 def format_report(file_path: str, issues: List[LintIssue]) -> str:

@@ -7,9 +7,9 @@
 ترجمان خودش مترجم ماشینی نیست. ترجمه را ایجنت (مثلاً Claude) انجام می‌دهد؛ ترجمان به او یاد می‌دهد **چطور** ترجمه کند: کدام راهنمای سبک را بخواند، پیش‌نویس را چطور از نو بنویسد تا «ترجمه‌ای» به نظر نیاید، و با چه ابزارهایی کارش را بررسی کند.
 
 - سبک‌ها: محاوره و چت، رمان، ژانرهای داستانی (ترسناک، طنز، کودک، شعر، معمایی و جنایی، علمی‌تخیلی و فانتزی)، خاطرات و زندگی‌نامه، نمایشنامه و فیلمنامه، کمیک، بازی، زیرنویس و دوبله، فنی و رابط کاربری، علمی، پزشکی، حقوقی، خبر، مالی، فلسفه، متن کهن، تبلیغات
-- حالت ویراستار: روان کردن متن فارسی‌ای که یک مدل زبانی نوشته
+- حالت ویراستار و فارسی‌به-فارسی: روان کردن متن ماشینی (`editor.md` + `editor-najafi.md`)، روان‌سازی با حفظ سطح (`naturalize.md`) و خودمونی‌سازی (`colloquialize.md`)، همراه با پروتکل وفاداری خزاعی‌فر (`fidelity.md`)
 - کتاب: واژه‌نامه، فهرست شخصیت‌ها، شیوه‌نامه و بررسی یکدستی فصل‌ها
-- ابزارها: لینتر نگارش و نشانه‌های متن ماشینی، بررسی کامل بودن ترجمه، بررسی زیرنویس
+- ابزارها: اصلاح خودکار امن نگارش (`fix`)، لینتر سبک‌محور با خروجی `--json` و تفکیک شدت (`lint`)، بررسی کامل بودن ترجمه (`verify`)، بررسی زیرنویس (`srt check`)
 
 ---
 
@@ -76,8 +76,10 @@ tarjoman --help
 3. با متن اصلی مقایسه می‌کند و این‌ها را اجرا می‌کند:
 
 ```bash
-tarjoman verify chapter1.md chapter1.fa.md   # چیزی جا نیفتاده؟ عدد، پاراگراف، کد
-tarjoman lint chapter1.fa.md                 # نگارش، نیم‌فاصله، گرته‌برداری، نشانه‌های متن ماشینی
+tarjoman verify chapter1.md chapter1.fa.md --json   # چیزی جا نیفتاده؟ عدد، پاراگراف، کد
+tarjoman fix chapter1.fa.md --in-place               # اصلاح خودکار و امن ی/ک، نیم‌فاصله، تنوین و نقطه‌گذاری
+tarjoman lint chapter1.fa.md --style literary        # نگارش، نیم‌فاصله، یکدستی لحن، گرته‌برداری
+tarjoman lint chapter1.fa.md --errors-only --json    # فقط خطاهای قطعی نگارش با خروجی ساختاریافته
 ```
 
 نمونه‌ی واقعی از همین مهارت (Kate Chopin، ۱۸۹۴):
@@ -103,7 +105,7 @@ tarjoman lint post.md --only ai-tell --only calque
 ### زیرنویس
 
 ```bash
-tarjoman srt check film.fa.srt --source film.en.srt   # تعداد، زمان، طول خط، سرعت خواندن
+tarjoman srt check film.fa.srt --source film.en.srt --json   # تعداد، زمان، طول خط، سرعت خواندن
 ```
 
 ### کتاب
@@ -112,7 +114,7 @@ tarjoman srt check film.fa.srt --source film.en.srt   # تعداد، زمان، 
 tarjoman book init "عنوان کتاب" -o ./my-book
 tarjoman book characters ./my-book --add "Alice:آلیس:formal:تو"
 tarjoman book terms ./my-book --add "Oh dear=وای خدا"
-tarjoman book check ./my-book ch1.en.md ch1.fa.md
+tarjoman book check ./my-book ch1.en.md ch1.fa.md --json
 ```
 
 راهنمای کامل: `.claude/skills/tarjoman/references/book.md`

@@ -12,15 +12,30 @@ Covers:
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import os
+import tempfile
 import unittest
 from pathlib import Path
+from typing import Iterator
 
 from click.testing import CliRunner
 
 from tarjoman import __version__
 from tarjoman.cli import cli
+
+
+@contextlib.contextmanager
+def _temp_cwd() -> Iterator[Path]:
+    """Run inside a temporary working directory without Click's deprecated helper."""
+    prev = os.getcwd()
+    with tempfile.TemporaryDirectory() as tmp:
+        os.chdir(tmp)
+        try:
+            yield Path(tmp)
+        finally:
+            os.chdir(prev)
 
 
 class TestCliSuite(unittest.TestCase):
@@ -46,7 +61,7 @@ class TestCliSuite(unittest.TestCase):
 
     def test_route_command_file(self) -> None:
         """Verify route subcommand on a text file."""
-        with self.runner.isolated_filesystem():
+        with _temp_cwd():
             sample_file = Path("med_sample.txt")
             sample_file.write_text(
                 "In this randomized clinical trial, patients received a therapeutic dosage of 50 mg/kg.",
@@ -59,7 +74,7 @@ class TestCliSuite(unittest.TestCase):
 
     def test_translate_command_stdout(self) -> None:
         """Verify translate command outputs translated text to stdout when no -o is provided."""
-        with self.runner.isolated_filesystem():
+        with _temp_cwd():
             src_file = Path("source.txt")
             src_file.write_text("The developer installed dependencies using npm install in the repository.", encoding="utf-8")
 
@@ -69,7 +84,7 @@ class TestCliSuite(unittest.TestCase):
 
     def test_translate_command_output_file_and_composer(self) -> None:
         """Verify translate command with output path and composer option."""
-        with self.runner.isolated_filesystem():
+        with _temp_cwd():
             src_file = Path("lit_input.txt")
             src_file.write_text("Marcus smiled faintly, his heart aching.", encoding="utf-8")
             out_file = Path("output.md")
@@ -95,7 +110,7 @@ class TestCliSuite(unittest.TestCase):
 
     def test_compose_bilingual_subcommand(self) -> None:
         """Verify compose bilingual command creates aligned Markdown table."""
-        with self.runner.isolated_filesystem():
+        with _temp_cwd():
             src = Path("en.txt")
             tgt = Path("fa.txt")
             out = Path("bilingual.md")
@@ -115,7 +130,7 @@ class TestCliSuite(unittest.TestCase):
 
     def test_compose_html_subcommand(self) -> None:
         """Verify compose html command creates standalone HTML reader."""
-        with self.runner.isolated_filesystem():
+        with _temp_cwd():
             src = Path("en.txt")
             tgt = Path("fa.txt")
             out = Path("reader.html")
@@ -145,7 +160,7 @@ class TestCliSuite(unittest.TestCase):
 
     def test_compose_typst_subcommand(self) -> None:
         """Verify compose typst generates Typst source and compiles PDF."""
-        with self.runner.isolated_filesystem():
+        with _temp_cwd():
             tgt = Path("text.txt")
             tgt.write_text("این یک متن نمونه برای کامپایل تایپست است.", encoding="utf-8")
             out_typ = Path("doc.typ")
@@ -174,7 +189,7 @@ class TestCliSuite(unittest.TestCase):
 
     def test_audit_subcommand(self) -> None:
         """Verify audit subcommand runs Stage 5 MQM audit."""
-        with self.runner.isolated_filesystem():
+        with _temp_cwd():
             target_file = Path("target.txt")
             target_file.write_text(
                 "او با آرامش گفت: «این یک ترجمه دقیق است.»",
@@ -188,7 +203,7 @@ class TestCliSuite(unittest.TestCase):
 
     def test_lint_subcommand_clean_and_faulty(self) -> None:
         """Verify lint subcommand passes clean files and flags faulty files."""
-        with self.runner.isolated_filesystem():
+        with _temp_cwd():
             clean_file = Path("clean.md")
             clean_file.write_text("او گفت: «سلام بر شما.»", encoding="utf-8")
 
@@ -207,7 +222,7 @@ class TestCliSuite(unittest.TestCase):
 
     def test_book_init_and_status(self) -> None:
         """Verify book init creates project files and book status displays statistics."""
-        with self.runner.isolated_filesystem():
+        with _temp_cwd():
             proj_dir = Path("my_persian_novel")
 
             init_res = self.runner.invoke(
@@ -278,7 +293,7 @@ class TestPackCCli(unittest.TestCase):
 
     def test_epub_roundtrip_default_output(self) -> None:
         """Verify epub roundtrip composes a translated EPUB with default name."""
-        with self.runner.isolated_filesystem():
+        with _temp_cwd():
             src = Path("book.epub")
             self._make_epub(src)
             result = self.runner.invoke(cli, ["epub", "roundtrip", str(src)])
@@ -289,7 +304,7 @@ class TestPackCCli(unittest.TestCase):
 
     def test_epub_roundtrip_custom_output_and_domain(self) -> None:
         """Verify epub roundtrip honors -o and --domain options."""
-        with self.runner.isolated_filesystem():
+        with _temp_cwd():
             src = Path("book.epub")
             self._make_epub(src)
             result = self.runner.invoke(
@@ -303,7 +318,7 @@ class TestPackCCli(unittest.TestCase):
 
     def test_scene_record_status_check_reset(self) -> None:
         """Verify scene record/status/check/reset lifecycle."""
-        with self.runner.isolated_filesystem():
+        with _temp_cwd():
             state = "scene.json"
             result = self.runner.invoke(
                 cli,
@@ -328,7 +343,7 @@ class TestPackCCli(unittest.TestCase):
 
     def test_scene_status_empty(self) -> None:
         """Verify scene status with no recorded state."""
-        with self.runner.isolated_filesystem():
+        with _temp_cwd():
             result = self.runner.invoke(
                 cli, ["scene", "status", "--state-file", "missing.json"]
             )

@@ -75,11 +75,15 @@ You are an expert Persian literary and technical translator, editor, and typogra
 
 ## 6. Verification & Workflow Commands
 - Pre-clean PDF extracts: `tarjoman prep raw.txt -o clean.txt`
-- Subtitles (text-only timeline-safe flow): `tarjoman srt extract en.srt -o cues.txt`, `tarjoman srt merge en.srt fa_cues.txt -o fa.srt`, `tarjoman srt check fa.srt --source en.srt`
-- Completeness vs. source: `tarjoman verify source.md translated.md`
-- Lint Persian orthography, calques, and AI tells:
+- Subtitles (text-only timeline-safe flow): `tarjoman srt extract en.srt -o cues.txt`, `tarjoman srt merge en.srt fa_cues.txt -o fa.srt`, `tarjoman srt check fa.srt --source en.srt --json`
+- Completeness vs. source: `tarjoman verify source.md translated.md --json`
+- Safe orthography auto-fix (Arabic ی/ک, ZWNJ, tanvin, punctuation; shields code/LaTeX/URLs/placeholders):
   ```bash
-  tarjoman lint <path-to-file>
+  tarjoman fix <path-to-file> --in-place
+  ```
+- Lint Persian orthography, style/register, calques, and AI tells:
+  ```bash
+  tarjoman lint <path-to-file> --style <literary|colloquial|technical|formal|...> --errors-only --json
   # or standalone fallback:
   python .claude/skills/tarjoman/scripts/linter.py <path-to-file>
   ```
@@ -90,4 +94,4 @@ You are an expert Persian literary and technical translator, editor, and typogra
 - After drafting, rewrite your own draft reading only the Persian; then compare with the source for accuracy.
 - Keep one register: narration in standard Persian, modern dialogue in consistent colloquial («می‌خوام»، «می‌شه»).
 - Treat `tarjoman lint` calque / ai-tell findings as suggestions, not commands.
-- Full guide & domain/genre router: `.claude/skills/tarjoman/SKILL.md` (routes to specialized guides in `references/` covering colloquial, literary, memoir, genre-fiction, mystery, speculative, subtitles/dubbing, script, comics, technical/UI, game, scientific, medical, legal, media, financial, philosophy, classical, transcreation, editor, and book).
+- Full guide & domain/genre router: `.claude/skills/tarjoman/SKILL.md` (routes to specialized guides in `references/` including `fidelity.md`, `editor-najafi.md`, `naturalize.md`, `colloquialize.md`, plus domain/genre guides).

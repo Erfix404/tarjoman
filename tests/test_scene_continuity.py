@@ -1,12 +1,25 @@
 """Tests for SceneContinuityTracker and SceneState (Pack C)."""
 from __future__ import annotations
 
+import contextlib
+import os
+import tempfile
 import unittest
 from pathlib import Path
-
-from click.testing import CliRunner
+from typing import Iterator
 
 from tarjoman.memory import SceneContinuityTracker, SceneState
+
+
+@contextlib.contextmanager
+def _temp_cwd() -> Iterator[Path]:
+    prev = os.getcwd()
+    with tempfile.TemporaryDirectory() as tmp:
+        os.chdir(tmp)
+        try:
+            yield Path(tmp)
+        finally:
+            os.chdir(prev)
 
 
 class TestSceneState(unittest.TestCase):
@@ -97,8 +110,7 @@ class TestSceneContinuityTracker(unittest.TestCase):
         self.assertEqual(self.tracker.get_context_summary(), "")
 
     def test_save_load_persistence(self) -> None:
-        runner = CliRunner()
-        with runner.isolated_filesystem():
+        with _temp_cwd():
             self.tracker.record_scene(
                 "ch1", pov="first_person", location="Library",
                 pronoun_references={"he": "Jekyll"},
