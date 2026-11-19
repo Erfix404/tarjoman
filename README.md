@@ -7,7 +7,7 @@
 [![Version](https://img.shields.io/badge/version-v2.3.0-blue.svg)](https://github.com/Erfix404/tarjoman/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-476%20passing-brightgreen.svg)](#benchmarks--quality-evidence)
+[![Tests](https://img.shields.io/badge/tests-487%20passing-brightgreen.svg)](#benchmarks--quality-evidence)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-10%2F10%20domains%20100%25%20PASS-success.svg)](#benchmarks--quality-evidence)
 [![Creator](https://img.shields.io/badge/creator-Erfan%20Ashouri%20%28%40Erfix404%29-orange.svg)](https://github.com/Erfix404)
 [![Multi-Agent](https://img.shields.io/badge/agents-Claude%20Code%20%7C%20Hermes%20%7C%20Cursor-purple.svg)](#multi-agent-super-skill-integration)
@@ -188,6 +188,18 @@ Purpose-built for translating entire books across hundreds of pages:
 
 Tarjoman is designed as a **skill** that AI coding agents load and invoke autonomously.
 
+### Multi-Agent Skill Installer (`tarjoman install`)
+
+Install the skillpack (or modern Cursor `.mdc` rules) and optional MCP server configuration into any workspace in one command:
+
+```bash
+tarjoman install --target claude --with-mcp       # .claude/skills/tarjoman + .mcp.json
+tarjoman install --target cursor --with-mcp       # .cursor/rules/tarjoman.mdc + .cursor/mcp.json
+tarjoman install --target antigravity --with-mcp  # .agent/skills/tarjoman + .mcp.json
+tarjoman install --target codex --with-mcp        # .codex/skills/tarjoman + .mcp.json
+tarjoman install --target hermes --with-mcp       # .hermes/skills/tarjoman + .mcp.json
+```
+
 ### Claude Code CLI
 
 Copy the skill folder into your Claude Code skills, then install the checking tools:
@@ -282,6 +294,10 @@ tarjoman book init "My Novel" -o ./my-book
 # Suggest recurring names and terms from the English source before translating
 tarjoman book candidates chapter1.en.md --project ./my-book
 
+# Seed a book project with curated starter glossaries (technical-ai, medical-patient, financial, legal-licenses)
+tarjoman book glossary list
+tarjoman book glossary import ./my-book technical-ai --json
+
 # Register character voices, transliterations, and تو/شما address rules
 tarjoman book characters ./my-book --add "Alice:آلیس:formal:تو" --list
 
@@ -340,7 +356,7 @@ tarjoman srt merge film.en.vtt film.fa.cues.txt -o film.fa.vtt
 tarjoman srt check film.fa.srt --source film.en.srt --json
 ```
 
-> Research notes on raising Persian translation quality: [docs/research/translation-quality-roadmap.md](docs/research/translation-quality-roadmap.md), plus new Persian guides in `.claude/skills/tarjoman/references/`: `fidelity.md` (Khazaeifar fidelity & equal-effect worksheet), `editor-najafi.md` (Najafi plural/spelling track), `naturalize.md`, and `colloquialize.md`.
+> Research notes & blind two-axis evaluation: [docs/research/translation-quality-roadmap.md](docs/research/translation-quality-roadmap.md), the 98-sample naturalness eval set across all 22 routed styles ([`benchmarks/eval_naturalness.py`](benchmarks/eval_naturalness.py)), blind position-randomized A/B judge ([`benchmarks/run_judge.py`](benchmarks/run_judge.py)), plus Persian guides in `.claude/skills/tarjoman/references/`: `fidelity.md` (Khazaeifar fidelity, equal-effect worksheet, blind review & selective back-translation), `editor-najafi.md`, `naturalize.md`, `colloquialize.md`, and `book.md` (style anchoring).
 
 ### Multi-Format Composing
 
@@ -434,7 +450,7 @@ python benchmarks/run_benchmarks.py
 | 9 | Classical & Historical | ≥ 90.0 | 0 | ✅ PASS |
 | 10 | Transcreation & Creative | ≥ 90.0 | 0 | ✅ PASS |
 
-**Unit Tests**: 476 passing (`unittest` CI suite) / 500 passing (`pytest`)
+**Unit Tests**: 487 passing (`unittest` CI suite) / 511 passing (`pytest`)
 
 ```bash
 python -m unittest discover -s tests -p "test_*.py"
@@ -467,6 +483,7 @@ tarjoman/
 │   └── bilingual_md.py    # Segment-aligned Markdown
 ├── domains/               # 10 specialized domain profiles
 │   └── router.py          # DomainRouter & DomainRegistry
+├── glossaries/            # Curated domain starter glossaries (.tsv) & loader
 ├── memory/                # Long-form book support
 │   ├── cache.py           # SHA-256 chunk caching
 │   ├── character_bible.py # Character & Style Bible
@@ -485,6 +502,7 @@ tarjoman/
 │   ├── term_candidates.py # Recurring name/term candidate extractor
 │   └── text_prep.py       # PDF-extracted text cleaner
 ├── fixer.py               # Safe orthography-only auto-fixer
+├── installer.py           # Multi-platform skill & MCP installer
 ├── linter.py              # Persian linguistic & typography linter (style/severity/JSON)
 ├── mcp_server.py          # Zero-dependency stdio JSON-RPC 2.0 MCP server
 └── cli.py                 # Click CLI entry point

@@ -1,0 +1,27 @@
+english_term	persian_term	domain	notes
+acute	حاد	medical-patient	Sudden onset or short duration
+adverse effect	عارضه‌ی ناخواسته	medical-patient	Harmful unexpected medication effect
+antibiotic resistance	مقاومت آنتی‌بیوتیکی	medical-patient	Bacteria no longer respond to antibiotic
+benign	خوش‌خیم	medical-patient	Non-cancerous finding
+biopsy	نمونه‌برداری	medical-patient	Tissue sample for lab diagnosis
+blood pressure	فشار خون	medical-patient	Cardiovascular pressure reading
+booster dose	نوبت یادآور	medical-patient	Follow-up vaccine dose
+chronic	مزمن	medical-patient	Long-lasting or recurring condition
+contraindication	مورد منع مصرف	medical-patient	Reason not to use a drug or procedure
+dosage	مقدار مصرف	medical-patient	Prescribed dose amount and schedule
+fasting	ناشتا	medical-patient	Without food before lab test
+follow-up	پیگیری درمان	medical-patient	Scheduled check after care
+informed consent	رضایت آگاهانه	medical-patient	Patient approval after explaining risks
+inflammation	التهاب	medical-patient	Immune redness, swelling, or pain response
+inpatient	بستری	medical-patient	Admitted to hospital overnight
+malignant	بدخیم	medical-patient	Cancerous or invasive growth
+outpatient	سرپایی	medical-patient	Treated without overnight stay
+placebo	دارونما	medical-patient	Inactive control substance
+prognosis	پیش‌آگهی	medical-patient	Expected course and outcome of illness
+remission	فروکش بیماری	medical-patient	Decrease or disappearance of symptoms
+screening	غربالگری	medical-patient	Early check before symptoms appear
+side effect	عارضه‌ی جانبی	medical-patient	Known secondary effect of treatment
+sign	نشانه	medical-patient	Objective finding observed by clinician
+symptom	علامت	medical-patient	Subjective experience reported by patient
+triage	تریاژ	medical-patient	Prioritizing urgent patient care
+vaccine	واکسن	medical-patient	Preventive immunization preparation

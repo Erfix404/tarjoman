@@ -59,6 +59,16 @@ tarjoman --help
 
 برای Cursor، فایل `.cursorrules` ریشه‌ی مخزن را در پروژه‌ات کپی کن. برای Hermes، `agent-packs/hermes/SKILL.md` هست.
 
+یا با یک دستور مهارت و تنظیمات MCP را برای ایجنت دلخواه نصب کن:
+
+```bash
+tarjoman install --target claude --with-mcp
+tarjoman install --target cursor --with-mcp
+tarjoman install --target antigravity --with-mcp
+tarjoman install --target codex --with-mcp
+tarjoman install --target hermes --with-mcp
+```
+
 ---
 
 ## شروع سریع
@@ -120,6 +130,8 @@ tarjoman i18n check locales/en.json locales/fa.json --max-ratio 1.8 --json
 
 ```bash
 tarjoman book init "عنوان کتاب" -o ./my-book
+tarjoman book glossary list
+tarjoman book glossary import ./my-book technical-ai --json
 tarjoman book characters ./my-book --add "Alice:آلیس:formal:تو"
 tarjoman book terms ./my-book --add "Oh dear=وای خدا"
 tarjoman book context ./my-book ch2.en.md --prev ch1.fa.md --json   # فقط اصطلاح و شخصیت همین تکه
@@ -139,7 +151,7 @@ tarjoman epub merge book.epub ./epub_work -o book.fa.epub --json
 }
 ```
 
-راهنمای کامل کتاب: `.claude/skills/tarjoman/references/book.md` · یادداشت پژوهشی ارتقای کیفیت: `docs/research/translation-quality-roadmap.md`
+راهنمای کامل کتاب: `.claude/skills/tarjoman/references/book.md` · یادداشت پژوهشی ارتقای کیفیت: `docs/research/translation-quality-roadmap.md` · داوری مقایسه‌ای کور (دقت و روانی، ۹۸ نمونه در همه‌ی ۲۲ سبک): `python benchmarks/run_judge.py --self-demo --provider heuristic`
 
 ---
 

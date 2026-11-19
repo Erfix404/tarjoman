@@ -11,11 +11,12 @@
 | فیلد | معنا |
 |---|---|
 | `id` | شناسه‌ی یکتا |
-| `genre` | ژانر: `chat`، `dialogue`، `narrative`، `poetry`، `subtitles`، `technical`، `ui`، `scientific`، `medical`، `legal`، `news`، `financial`، `philosophy`، `classical`، `transcreation`، `edit`، `mystery`، `speculative` |
+| `genre` | ژانر: `chat`، `dialogue`، `narrative`، `poetry`، `subtitles`، `technical`، `ui`، `scientific`، `medical`، `legal`، `news`، `financial`، `philosophy`، `classical`، `transcreation`، `edit`، `mystery`، `speculative`، `game`، `script`، `memoir`، `comics` |
 | `source` | متن انگلیسی |
 | `literal` | نمونه‌ی ترجمه‌نمایی برای سنجش؛ عمداً حاوی خطای شناخته‌شده |
 | `natural` | ترجمه‌ی طبیعی پیشنهادی؛ هنوز توسط گویشور بومی بازبینی نشده |
 | `calques` | الگوهای ترجمه‌نمایی موجود در `literal` |
+| `human_verified` | بولین (پیش‌فرض `false`)؛ مشخص می‌کند آیا گویشور بومی یا بازبین انسانی آن را تأیید کرده است یا نه |
 
 ## روش استفاده
 
@@ -26,8 +27,8 @@
 
 ## محدودیت‌ها
 
-- این مجموعه ۸۸ نمونه دارد (۶۲ مثبت، ۲۶ منفی) و هنوز برای سنجش آماری کافی نیست. نمونه‌های `real-*` از متن‌های واقعی آمده‌اند: متن‌های `docs/research/real-texts/` و متن‌های مالکیت عمومی (داروین، فارادی، آدام اسمیت، هیوم، دکارت، گیبون، ایلیاد، سفر پیدایش، آستن، کانن دویل). منبع هر نمونه در فیلد `note` است.
-- نمونه‌های `natural` را یک مدل نوشته‌اند. قبل از هر ادعای کیفیت باید گویشور بومی بازبینی کند.
+- این مجموعه ۹۸ نمونه دارد (۷۰ مثبت، ۲۸ منفی) و همه‌ی ۲۲ سبک مسیریابی‌شده‌ی مهارت را پوشش می‌دهد، ولی هنوز برای سنجش آماری کافی نیست. نمونه‌های `real-*` از متن‌های واقعی آمده‌اند: متن‌های `docs/research/real-texts/` و متن‌های مالکیت عمومی (داروین، فارادی، آدام اسمیت، هیوم، دکارت، گیبون، ایلیاد، سفر پیدایش، آستن، کانن دویل). منبع هر نمونه در فیلد `note` است.
+- نمونه‌های `natural` را یک مدل نوشته‌اند. قبل از هر ادعای کیفیت باید گویشور بومی بازبینی کند (`human_verified: true`).
 - داوری LLM ممکن است به متن خودش امتیاز بیشتری بدهد. برای نتیجه‌ی جدی، بازبین انسانی لازم است.
 
 ## اجرای خودکار
@@ -42,6 +43,10 @@ python benchmarks/eval_naturalness.py --candidates out.jsonl
 
 # پرامپت داور (دقت و روانی، جدا از هم) برای یک نمونه
 python benchmarks/eval_naturalness.py --judge-prompt dlg-01
+
+# داوری مقایسه‌ای کور (A/B با جایگشت تصادفی و امتیاز جداگانه‌ی دقت و روانی)
+python benchmarks/run_judge.py --self-demo --provider heuristic
+python benchmarks/run_judge.py --cand-a a.jsonl --cand-b b.jsonl --provider openai --model gpt-4o-mini --json
 ```
 
 امتیاز خودکار فقط شمارش هشدارهای لینتر است و جای داور را نمی‌گیرد. برای مقایسه‌ی جدی دو نسخه از مهارت، از پرامپت داور یا بازبین انسانی استفاده کن.

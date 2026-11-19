@@ -1,0 +1,27 @@
+english_term	persian_term	domain	notes
+affiliate	شخص یا شرکت وابسته	legal-licenses	Entity controlling, controlled by, or under common control
+as-is	به همین صورتِ موجود	legal-licenses	Provided without express or implied warranty
+assignment	واگذاری حقوق	legal-licenses	Transfer of contractual rights or duties
+breach of contract	نقض قرارداد	legal-licenses	Failure to perform a binding duty
+confidentiality	محرمانگی	legal-licenses	Duty not to disclose protected information
+copyleft	کپی‌لفت	legal-licenses	Share-alike licensing obligation
+copyright	حق تکثیر	legal-licenses	Exclusive legal right over original work
+covenant	تعهد قراردادی	legal-licenses	Formal binding promise in an agreement
+derivative work	اثر اشتقاقی	legal-licenses	Work modified or built upon prior work
+disclaimer	سلب مسئولیت	legal-licenses	Clause limiting warranty or liability
+dispute resolution	حل‌وفصل اختلافات	legal-licenses	Procedure for resolving claims (e.g. arbitration)
+force majeure	فورس ماژور	legal-licenses	Unforeseeable event excusing performance
+governing law	قانون حاکم	legal-licenses	Designated body of law interpreting contract
+indemnity	جبران خسارت	legal-licenses	Obligation to compensate third-party loss
+intellectual property	مالکیت فکری	legal-licenses	Patents, trademarks, trade secrets, copyrights
+jurisdiction	صلاحیت قضایی	legal-licenses	Court authority over disputes
+liability	مسئولیت حقوقی	legal-licenses	Legal accountability for loss or damages
+non-disclosure	عدم افشا	legal-licenses	Prohibition on sharing confidential data
+permissive license	مجوز آزادِ غیرمقید	legal-licenses	Open-source license such as MIT or Apache-2.0
+proprietary	مالکیتی	legal-licenses	Closed-source or exclusively owned
+representation	اظهار و تضمین واقعیات	legal-licenses	Statement of fact made to induce contract
+severability	استقلال بندها	legal-licenses	Invalid clause leaves rest of contract valid
+termination	فسخ یا خاتمه‌ی قرارداد	legal-licenses	Ending the agreement per stated terms
+third party	شخص ثالث	legal-licenses	Party outside the primary agreement
+waiver	اسقاط حق	legal-licenses	Voluntary relinquishment of a known right
+warranty	ضمانت	legal-licenses	Contractual guarantee of quality or title

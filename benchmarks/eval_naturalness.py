@@ -96,6 +96,8 @@ def self_check(samples: List[Dict]) -> bool:
     ok = True
     negatives = [s for s in samples if s.get("type") == "negative"]
     positives = [s for s in samples if s.get("type") != "negative"]
+    verified = sum(1 for s in samples if s.get("human_verified") is True)
+    print(f"Human-verified samples: {verified}/{len(samples)}")
 
     print(f"Negative samples (must stay unchanged): {len(negatives)}")
     for s in negatives:
@@ -155,10 +157,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--samples", type=Path, default=DEFAULT_SAMPLES)
     parser.add_argument("--candidates", type=Path, default=None)
+    parser.add_argument("--only-verified", action="store_true", help="Filter to human_verified samples")
     parser.add_argument("--judge-prompt", metavar="ID", default=None, help="Print an LLM-judge prompt for one sample")
     args = parser.parse_args()
 
     samples = load_samples(args.samples)
+    if args.only_verified:
+        samples = [s for s in samples if s.get("human_verified") is True]
     if args.judge_prompt:
         sample = next((s for s in samples if s["id"] == args.judge_prompt), None)
         if not sample:

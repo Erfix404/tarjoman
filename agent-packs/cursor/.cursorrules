@@ -68,6 +68,7 @@ You are an expert Persian literary and technical translator, editor, and typogra
 
 - Scaffold: `tarjoman book init "Title" -o ./dir` → `manifest.json`, `terms.tsv`, and `style.md`.
 - Candidates: `tarjoman book candidates source.en.md --project ./dir` (suggest recurring names/terms before translating).
+- Starter glossaries: `tarjoman book glossary list` and `tarjoman book glossary import ./dir technical-ai --json` (or `medical-patient`, `financial`, `legal-licenses`).
 - Resume: `tarjoman book manifest ./dir` (SHA-256 chunk cache — skip translated chunks).
 - Voices: `tarjoman book characters ./dir --add "Name:فارسی:tone:شما" --list` (Character Bible: تو/شما per character).
 - Terms: `tarjoman book terms ./dir --add "en=فا:domain" --search q --cascades` (SQLite termbase; re-translate cascade-flagged segments, then acknowledge).
@@ -81,6 +82,7 @@ You are an expert Persian literary and technical translator, editor, and typogra
 - Localization files (JSON/ARB/PO/YAML): `tarjoman i18n check en.json fa.json --json`
 - Completeness vs. source: `tarjoman verify source.md translated.md --json` (covers paragraphs, numbers, citations, URLs, code, LaTeX, placeholders, headings, tables)
 - MCP server (stdio JSON-RPC 2.0): `tarjoman mcp` (exposes `tarjoman_route_guide`, `tarjoman_lint`, `tarjoman_fix_safe`, `tarjoman_verify`, `tarjoman_book_context`, `tarjoman_srt_check`, `tarjoman_i18n_check`)
+- Multi-platform installer: `tarjoman install --target claude|cursor|antigravity|codex|hermes [--with-mcp] [--dry-run]`
 - Safe orthography auto-fix (Arabic ی/ک, ZWNJ, tanvin, punctuation; shields code/LaTeX/URLs/placeholders):
   ```bash
   tarjoman fix <path-to-file> --in-place

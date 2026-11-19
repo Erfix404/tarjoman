@@ -915,6 +915,67 @@ def book_context_cmd(
         click.echo("\nPrevious Tail:\n" + ctx["previous_tail"])
 
 
+@book_group.group("glossary")
+def book_glossary_group() -> None:
+    """List and import curated starter domain glossaries into a book project."""
+    pass
+
+
+@book_glossary_group.command("list")
+@click.option("--json", "as_json", is_flag=True, default=False, help="Output structured JSON list")
+def book_glossary_list_cmd(as_json: bool) -> None:
+    """List bundled starter glossaries."""
+    from tarjoman.glossaries import list_glossaries
+
+    metas = list_glossaries()
+    if as_json:
+        payload = [
+            {
+                "name": m.name,
+                "domain": m.domain,
+                "term_count": m.term_count,
+                "description": m.description,
+            }
+            for m in metas
+        ]
+        click.echo(json.dumps({"glossaries": payload}, ensure_ascii=False, indent=2))
+        return
+
+    click.echo(f"Bundled Starter Glossaries ({len(metas)}):")
+    click.echo("=" * 40)
+    for m in metas:
+        click.echo(f"- {m.name} ({m.term_count} terms): {m.description}")
+
+
+@book_glossary_group.command("import")
+@click.argument("project_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
+@click.argument("name", type=str)
+@click.option("--overwrite", is_flag=True, default=False, help="Overwrite existing Persian equivalents on collision")
+@click.option("--json", "as_json", is_flag=True, default=False, help="Output structured JSON summary")
+def book_glossary_import_cmd(
+    project_dir: Path,
+    name: str,
+    overwrite: bool,
+    as_json: bool,
+) -> None:
+    """Import a bundled starter glossary into PROJECT_DIR (terms.db + terms.tsv)."""
+    from tarjoman.glossaries import import_glossary_to_project
+
+    try:
+        summary = import_glossary_to_project(project_dir, name, overwrite=overwrite)
+    except (FileNotFoundError, NotADirectoryError) as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+
+    if as_json:
+        click.echo(json.dumps(summary, ensure_ascii=False, indent=2))
+        return
+    click.echo(
+        f"Imported glossary '{summary['glossary']}' into {summary['project']}: "
+        f"added={summary['added']}, updated={summary['updated']}, skipped={summary['skipped']}."
+    )
+
+
 # -----------------------------------------------------------------------------
 # epub command group (roundtrip + extract/merge)
 # -----------------------------------------------------------------------------
@@ -1114,6 +1175,63 @@ def mcp_cmd() -> None:
     from tarjoman.mcp_server import TarjomanMcpServer
 
     TarjomanMcpServer().serve_stdio()
+
+
+# -----------------------------------------------------------------------------
+# install subcommand (multi-platform skillpack + MCP installer)
+# -----------------------------------------------------------------------------
+@cli.command("install")
+@click.option(
+    "--target",
+    required=True,
+    type=click.Choice(["claude", "cursor", "antigravity", "codex", "hermes"], case_sensitive=False),
+    help="Target AI coding agent or IDE",
+)
+@click.option(
+    "--dest",
+    "dest_root",
+    default=None,
+    type=click.Path(file_okay=False, path_type=Path),
+    help="Destination project root (defaults to current working directory)",
+)
+@click.option("--with-mcp", "with_mcp", is_flag=True, default=False, help="Also install/merge Tarjoman MCP server configuration")
+@click.option("--dry-run", "dry_run", is_flag=True, default=False, help="Preview planned writes without creating files")
+@click.option("--force", is_flag=True, default=False, help="Overwrite existing files instead of skipping them")
+@click.option("--json", "as_json", is_flag=True, default=False, help="Output structured JSON report")
+def install_cmd(
+    target: str,
+    dest_root: Optional[Path],
+    with_mcp: bool,
+    dry_run: bool,
+    force: bool,
+    as_json: bool,
+) -> None:
+    """Install Tarjoman skillpack/rules (and optional MCP config) for an AI agent."""
+    from tarjoman.installer import install_skill
+
+    try:
+        report = install_skill(
+            target=target,
+            dest_root=dest_root,
+            with_mcp=with_mcp,
+            dry_run=dry_run,
+            force=force,
+        )
+    except (FileNotFoundError, ValueError) as exc:
+        click.echo(f"Install failed: {exc}", err=True)
+        sys.exit(1)
+
+    if as_json:
+        click.echo(json.dumps(report, ensure_ascii=False, indent=2))
+        return
+
+    prefix = "[DRY-RUN] " if dry_run else ""
+    click.echo(
+        f"{prefix}Tarjoman installed for '{report['target']}' at {report['install_dir']} "
+        f"(written={len(report['written'])}, skipped={len(report['skipped'])})"
+    )
+    if report["mcp_config"]:
+        click.echo(f"  MCP config: {report['mcp_config']['path']}")
 
 
 if __name__ == "__main__":

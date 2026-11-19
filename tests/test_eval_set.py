@@ -39,7 +39,8 @@ class TestEvalSet(unittest.TestCase):
         genres = {s["genre"] for s in self.samples}
         for g in ("chat", "narrative", "dialogue", "subtitles", "technical", "ui", "scientific",
                   "medical", "legal", "news", "financial", "philosophy", "classical",
-                  "transcreation", "edit", "poetry", "mystery", "speculative"):
+                  "transcreation", "edit", "poetry", "mystery", "speculative",
+                  "game", "script", "memoir", "comics"):
             self.assertIn(g, genres)
 
     def test_natural_side_never_flagged(self) -> None:
@@ -50,8 +51,8 @@ class TestEvalSet(unittest.TestCase):
         by_genre = separation(self.samples)
         caught = sum(v[0] for v in by_genre.values())
         total = sum(v[1] for v in by_genre.values())
-        self.assertGreaterEqual(total, 62)
-        self.assertGreaterEqual(caught, 42, f"{caught}/{total}")
+        self.assertGreaterEqual(total, 70)
+        self.assertGreaterEqual(caught, 48, f"{caught}/{total}")
 
 
 if __name__ == "__main__":

@@ -139,6 +139,7 @@ Step 8: Call selected composer (Typst/EPUB3/HTML/Bilingual) -> Produce deliverab
 ```
 
 Additional CLI utilities for preprocessing, safe auto-fixing, completeness, EPUB, i18n, and subtitles:
+- Multi-platform installer: `tarjoman install --target hermes --with-mcp` (also supports `claude`, `cursor`, `antigravity`, `codex`)
 - MCP stdio server (`tarjoman mcp`): exposes `tarjoman_route_guide`, `tarjoman_lint`, `tarjoman_fix_safe`, `tarjoman_verify`, `tarjoman_book_context`, `tarjoman_srt_check`, and `tarjoman_i18n_check`.
 - PDF extract cleanup: `tarjoman prep raw.txt -o clean.txt`
 - Safe orthography auto-fixer: `tarjoman fix output.md --in-place` (supports `--dry-run`, `--json`)
@@ -166,6 +167,8 @@ Long-form Hermes translations run as resumable book projects with three memory m
 
 ```bash
 tarjoman book init "My Book" -o ./my-book   # scaffold manifest.json + terms.tsv + style.md
+tarjoman book glossary list                # inspect curated starter glossaries
+tarjoman book glossary import ./my-book technical-ai --json  # import starter glossary
 tarjoman book candidates book.en.md --project ./my-book  # suggest recurring names/terms
 tarjoman book manifest ./my-book            # SHA-256 chunk cache: resume, skip translated
 tarjoman book characters ./my-book --add "Harry:هری:brave:شما" --list

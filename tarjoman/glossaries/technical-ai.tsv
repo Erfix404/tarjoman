@@ -1,0 +1,29 @@
+english_term	persian_term	domain	notes
+agent	عامل هوشمند	technical-ai	Autonomous LLM tool-using system
+attention mechanism	سازوکار توجه	technical-ai	Transformer self-attention
+benchmark	معیار ارزیابی	technical-ai	Standardized evaluation suite
+cache	حافظه‌ی نهان	technical-ai	Fast intermediate store
+checkpoint	نقطه‌ی ذخیره	technical-ai	Saved model weights during training
+context window	پنجره‌ی بافت	technical-ai	Max tokens processed at once
+deprecation	منسوخ‌سازی	technical-ai	Planned removal notice in API docs
+embedding	بردار معنایی	technical-ai	Dense vector representation
+evaluation	ارزیابی	technical-ai	Systematic quality measurement
+fine-tuning	تنظیم دقیق	technical-ai	Supervised adaptation on task data
+grounding	استناد به منبع	technical-ai	Tying answers to retrieved facts
+guardrail	مرز ایمنی	technical-ai	Safety constraint or policy filter
+hallucination	ساخته‌پردازی	technical-ai	Confident fabricated output
+inference	استنتاج	technical-ai	Running a trained model on inputs
+latency	تأخیر	technical-ai	Time from request to response
+open-weight	با وزن‌های باز	technical-ai	Model checkpoints publicly available
+overfitting	بیش‌برازش	technical-ai	Fitting training noise instead of signal
+prompt	پرامپت	technical-ai	Input instruction to a language model
+quantization	کوانتیده کردن	technical-ai	Reducing weight precision (e.g. FP16 to INT4)
+rate limit	محدودیت نرخ درخواست	technical-ai	API throttling threshold
+reranker	بازرتبه‌بند	technical-ai	Second-stage relevance scorer
+retriever	بازیاب	technical-ai	First-stage document search module
+rollback	بازگشت به نسخه‌ی قبل	technical-ai	Reverting a deployment or migration
+streaming	ارسال پیوسته	technical-ai	Incremental token output over SSE
+throughput	توان عملیاتی	technical-ai	Requests or tokens per second
+token	توکن	technical-ai	Subword unit counted by tokenizer
+tool calling	فراخوانی ابزار	technical-ai	Structured function execution by model
+weights	وزن‌های مدل	technical-ai	Learned numerical parameters
