@@ -267,6 +267,7 @@ def _echo_findings_json(findings: list, extra: Dict[str, object]) -> None:
         "findings": [
             {
                 **({"cue": f.cue} if hasattr(f, "cue") else {}),
+                **({"key": f.key} if hasattr(f, "key") else {}),
                 "category": f.category,
                 "message": f.message,
             }
@@ -872,13 +873,96 @@ def book_check_cmd(
     sys.exit(1)
 
 
+@book_group.command("context")
+@click.argument("project_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
+@click.argument("source_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--prev", "prev_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path), help="Previous translated chapter/chunk file for continuity tail")
+@click.option("--tail", default=2, show_default=True, help="Number of trailing paragraphs from --prev to include")
+@click.option("--json", "as_json", is_flag=True, default=False, help="Output structured JSON context")
+def book_context_cmd(
+    project_dir: Path,
+    source_file: Path,
+    prev_file: Optional[Path],
+    tail: int,
+    as_json: bool,
+) -> None:
+    """Build compact chunk-relevant context (terms, characters, scene, tail) for a book chunk."""
+    from tarjoman.memory import build_book_context
+
+    prev_text = prev_file.read_text(encoding="utf-8") if prev_file else None
+    ctx = build_book_context(
+        project_dir=project_dir,
+        source_chunk=source_file.read_text(encoding="utf-8"),
+        previous_translation=prev_text,
+        tail_paragraphs=tail,
+    )
+    if as_json:
+        click.echo(json.dumps(ctx, ensure_ascii=False, indent=2))
+        return
+    click.echo(f"Book Context: {ctx['project']}")
+    click.echo("=" * 40)
+    click.echo(f"Matched Terms ({len(ctx['matched_terms'])}):")
+    for t in ctx["matched_terms"]:
+        click.echo(f"  - {t['en']} -> {t['fa']}")
+    click.echo(f"Matched Characters ({len(ctx['matched_characters'])}):")
+    for c in ctx["matched_characters"]:
+        click.echo(f"  - {c['name']} ({c['persian_name']}, {c['tone']}, {c['default_address']})")
+    if ctx["scene"]:
+        click.echo(f"Scene: {ctx['scene']}")
+    if ctx["pending_cascades"]:
+        click.echo(f"Pending Cascades: {len(ctx['pending_cascades'])}")
+    if ctx["previous_tail"]:
+        click.echo("\nPrevious Tail:\n" + ctx["previous_tail"])
+
+
 # -----------------------------------------------------------------------------
-# epub command group (roundtrip)
+# epub command group (roundtrip + extract/merge)
 # -----------------------------------------------------------------------------
 @cli.group("epub")
 def epub_group() -> None:
-    """Roundtrip translation of EPUB e-books."""
+    """Extract, merge, and roundtrip-translate EPUB e-books."""
     pass
+
+
+@epub_group.command("extract")
+@click.argument("input_epub", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("-o", "--out-dir", "out_dir", required=True, type=click.Path(file_okay=False, path_type=Path), help="Directory to write [#node_id] chapter markdown files")
+@click.option("--json", "as_json", is_flag=True, default=False, help="Output structured JSON summary")
+def epub_extract_cmd(input_epub: Path, out_dir: Path, as_json: bool) -> None:
+    """Extract chapter text nodes from an EPUB into [#node_id] files for translation."""
+    from tarjoman.parsers.epub_workflow import extract_epub_for_translation
+
+    info = extract_epub_for_translation(input_epub, out_dir)
+    if as_json:
+        click.echo(json.dumps(info, ensure_ascii=False, indent=2))
+        return
+    click.echo(
+        f"Extracted {info['chapters']} chapter(s), {info['total_nodes']} node(s) to {info['out_dir']}."
+    )
+
+
+@epub_group.command("merge")
+@click.argument("input_epub", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.argument("translated_path", type=click.Path(exists=True, path_type=Path))
+@click.option("-o", "--output", "output_epub", required=True, type=click.Path(dir_okay=False, path_type=Path), help="Output translated EPUB path")
+@click.option("--json", "as_json", is_flag=True, default=False, help="Output structured JSON summary")
+def epub_merge_cmd(
+    input_epub: Path, translated_path: Path, output_epub: Path, as_json: bool
+) -> None:
+    """Merge translated [#node_id] files back into a strict RTL Persian EPUB 3."""
+    from tarjoman.parsers.epub_workflow import merge_epub_translation
+
+    try:
+        info = merge_epub_translation(input_epub, translated_path, output_epub)
+    except (ValueError, FileNotFoundError) as exc:
+        click.echo(f"Merge refused: {exc}", err=True)
+        sys.exit(1)
+    if as_json:
+        click.echo(json.dumps(info, ensure_ascii=False, indent=2))
+        return
+    click.echo(
+        f"Merged {info['merged_nodes']} node(s) across {info['chapters']} chapter(s) -> {info['output_epub']}."
+    )
 
 
 @epub_group.command("roundtrip")
@@ -978,6 +1062,58 @@ def scene_reset_cmd(state_file: Optional[Path]) -> None:
     fresh = SceneContinuityTracker(state_path=path)
     fresh.save(path)
     click.echo("Scene tracker reset.")
+
+
+# -----------------------------------------------------------------------------
+# i18n command group (localization checks)
+# -----------------------------------------------------------------------------
+@cli.group("i18n")
+def i18n_group() -> None:
+    """Validate localized app/game files (.json, .arb, .po, .yaml)."""
+    pass
+
+
+@i18n_group.command("check")
+@click.argument("source_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.argument("target_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--max-ratio", "max_ratio", default=None, type=float, help="Flag translations longer than source * ratio (for strings >= 12 chars)")
+@click.option("--json", "as_json", is_flag=True, default=False, help="Output structured JSON report")
+def i18n_check_cmd(
+    source_file: Path,
+    target_file: Path,
+    max_ratio: Optional[float],
+    as_json: bool,
+) -> None:
+    """Compare translated JSON/ARB/PO/YAML strings against the source file."""
+    from tarjoman.parsers.i18n import check_i18n
+
+    findings = check_i18n(source_file, target_file, max_length_ratio=max_ratio)
+    if as_json:
+        _echo_findings_json(
+            findings,
+            {"source": str(source_file), "target": str(target_file)},
+        )
+        if findings:
+            sys.exit(1)
+        return
+    if not findings:
+        click.echo("Localization check passed: keys, placeholders, tags, and counts match.")
+        return
+    click.echo(f"Localization check: {len(findings)} finding(s)")
+    for f in findings:
+        click.echo(f"- [{f.category}] {f.key}: {f.message}")
+    sys.exit(1)
+
+
+# -----------------------------------------------------------------------------
+# mcp subcommand (stdio JSON-RPC 2.0 MCP server)
+# -----------------------------------------------------------------------------
+@cli.command("mcp")
+def mcp_cmd() -> None:
+    """Start Tarjoman MCP stdio server exposing deterministic translation/QC tools."""
+    from tarjoman.mcp_server import TarjomanMcpServer
+
+    TarjomanMcpServer().serve_stdio()
 
 
 if __name__ == "__main__":

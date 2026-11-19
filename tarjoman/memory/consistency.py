@@ -53,16 +53,28 @@ def _word_re(word: str) -> "re.Pattern[str]":
 
 
 def check_terms(source: str, target: str, terms: Dict[str, str]) -> List[ConsistencyFinding]:
-    """Report termbase entries used in the source but not rendered as recorded."""
+    """Report missing terms and multi-mention occurrence drift against source."""
     findings: List[ConsistencyFinding] = []
     for en_term, fa_term in sorted(terms.items()):
         if not en_term or not fa_term:
             continue
-        if re.search(rf"\b{re.escape(en_term)}\b", source, re.IGNORECASE) and fa_term not in target:
+        src_count = len(re.findall(rf"\b{re.escape(en_term)}\b", source, re.IGNORECASE))
+        if src_count == 0:
+            continue
+        tgt_count = target.count(fa_term)
+        if tgt_count == 0:
             findings.append(
                 ConsistencyFinding(
                     "term",
                     f"«{en_term}» appears in the source but «{fa_term}» is not in the translation.",
+                )
+            )
+        elif src_count >= 3 and tgt_count < src_count / 2:
+            findings.append(
+                ConsistencyFinding(
+                    "term",
+                    f"«{en_term}» appears {src_count} time(s) in the source, but «{fa_term}» "
+                    f"appears only {tgt_count} time(s) in the translation — check for terminology drift.",
                 )
             )
     return findings
@@ -71,16 +83,28 @@ def check_terms(source: str, target: str, terms: Dict[str, str]) -> List[Consist
 def check_characters(
     source: str, target: str, characters: Iterable[Tuple[str, str]]
 ) -> List[ConsistencyFinding]:
-    """Report characters named in the source whose Persian name is missing."""
+    """Report missing character names and multi-mention occurrence drift."""
     findings: List[ConsistencyFinding] = []
     for name, fa_name in characters:
         if not name or not fa_name:
             continue
-        if re.search(rf"\b{re.escape(name)}\b", source) and fa_name not in target:
+        src_count = len(re.findall(rf"\b{re.escape(name)}\b", source))
+        if src_count == 0:
+            continue
+        tgt_count = target.count(fa_name)
+        if tgt_count == 0:
             findings.append(
                 ConsistencyFinding(
                     "character",
                     f"«{name}» appears in the source but its recorded name «{fa_name}» is not in the translation.",
+                )
+            )
+        elif src_count >= 3 and tgt_count < src_count / 2:
+            findings.append(
+                ConsistencyFinding(
+                    "character",
+                    f"«{name}» appears {src_count} time(s) in the source, but «{fa_name}» "
+                    f"appears only {tgt_count} time(s) — check for name drift.",
                 )
             )
     return findings

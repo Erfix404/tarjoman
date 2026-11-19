@@ -26,8 +26,9 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 _TIME_RE = re.compile(
-    r"(\d{1,2}):(\d{2}):(\d{2})[,.](\d{1,3})\s*-->\s*(\d{1,2}):(\d{2}):(\d{2})[,.](\d{1,3})"
+    r"(?:(\d{1,2}):)?(\d{2}):(\d{2})[,.](\d{1,3})\s*-->\s*(?:(\d{1,2}):)?(\d{2}):(\d{2})[,.](\d{1,3})([^\n]*)"
 )
+_VTT_SKIP_BLOCK_RE = re.compile(r"^(?:WEBVTT(?:\s|$)|NOTE(?:\s|$)|STYLE(?:\s|$)|REGION(?:\s|$))")
 _TAG_RE = re.compile(r"<[^>]+>|\{\\[^}]*\}")
 _RESIDUE_RE = re.compile(
     r"^\s*(?:ترجمه|فارسی|translation|persian|farsi)\s*:|here(?:'s| is) (?:the|your) translation|"
@@ -48,6 +49,7 @@ class Cue:
     start_ms: int
     end_ms: int
     lines: List[str]
+    settings: str = ""
 
     @property
     def text(self) -> str:
@@ -65,27 +67,31 @@ class SrtFinding:
     message: str
 
 
-def _ms(h: str, m: str, s: str, ms: str) -> int:
-    return ((int(h) * 60 + int(m)) * 60 + int(s)) * 1000 + int(ms.ljust(3, "0"))
+def _ms(h: Optional[str], m: str, s: str, ms: str) -> int:
+    return ((int(h or 0) * 60 + int(m)) * 60 + int(s)) * 1000 + int(ms.ljust(3, "0"))
 
 
 def parse_srt(text: str) -> List[Cue]:
-    """Parse SRT text into cues. Tolerates a BOM, CRLF and missing indices."""
+    """Parse SRT or WebVTT text into cues. Tolerates BOM, CRLF, and missing indices."""
     text = text.lstrip("﻿").replace("\r\n", "\n").replace("\r", "\n")
     cues: List[Cue] = []
     for block in re.split(r"\n\s*\n", text.strip()):
         lines = block.split("\n")
+        if lines and _VTT_SKIP_BLOCK_RE.match(lines[0].strip()):
+            continue
         time_at: Optional[int] = next((i for i, ln in enumerate(lines) if _TIME_RE.search(ln)), None)
         if time_at is None:
             continue
         m = _TIME_RE.search(lines[time_at])
         index = lines[time_at - 1].strip() if time_at > 0 else str(len(cues) + 1)
+        settings = (m.group(9) or "").strip()
         cues.append(
             Cue(
                 index=index,
                 start_ms=_ms(*m.groups()[:4]),
-                end_ms=_ms(*m.groups()[4:]),
+                end_ms=_ms(*m.groups()[4:8]),
                 lines=[ln.strip() for ln in lines[time_at + 1 :] if ln.strip()],
+                settings=settings,
             )
         )
     return cues
@@ -229,18 +235,24 @@ def merge_translation(source_srt_text: str, translated_text: str) -> str:
     if problems:
         raise ValueError("; ".join(problems))
 
+    is_vtt = source_srt_text.lstrip("\ufeff").lstrip().startswith("WEBVTT")
+    sep = "." if is_vtt else ","
     out_blocks = []
     for n, src in enumerate(source, start=1):
-        out_blocks.append(
-            f"{src.index}\n"
-            f"{_format_ts(src.start_ms)} --> {_format_ts(src.end_ms)}\n"
-            + "\n".join(translated[n])
-        )
-    return "\n\n".join(out_blocks) + "\n"
+        timing = f"{_format_ts(src.start_ms, sep=sep)} --> {_format_ts(src.end_ms, sep=sep)}"
+        if is_vtt and src.settings:
+            timing = f"{timing} {src.settings}"
+        body = "\n".join(translated[n])
+        if is_vtt:
+            out_blocks.append(f"{timing}\n{body}")
+        else:
+            out_blocks.append(f"{src.index}\n{timing}\n{body}")
+    joined = "\n\n".join(out_blocks) + "\n"
+    return f"WEBVTT\n\n{joined}" if is_vtt else joined
 
 
-def _format_ts(ms: int) -> str:
+def _format_ts(ms: int, sep: str = ",") -> str:
     h, rem = divmod(ms, 3_600_000)
     m, rem = divmod(rem, 60_000)
     s, msec = divmod(rem, 1000)
-    return f"{h:02d}:{m:02d}:{s:02d},{msec:03d}"
+    return f"{h:02d}:{m:02d}:{s:02d}{sep}{msec:03d}"

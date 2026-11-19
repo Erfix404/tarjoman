@@ -1,4 +1,4 @@
-"""
+r"""
 Fidelity checks: did the translation keep everything the source had?
 
 A fluent translation can still silently drop a sentence, summarize a long
@@ -16,6 +16,12 @@ Checks:
 - citation: a citation or footnote marker ([12], [^3]) is missing.
 - url: a URL or e-mail address is missing or changed.
 - code: inline code or a fenced code block was changed or dropped.
+- latex: LaTeX math ($...$, $$...$$, \[...\], \(...\), environments) or key
+  commands (\cite, \ref, \label, \url, \href, \includegraphics) changed.
+- placeholder: localization placeholder ({{var}}, {name}, %(key)s, %s, %d)
+  mismatch outside code spans.
+- headings: Markdown ATX heading count mismatch outside code blocks.
+- tables: Markdown table separator/column structure mismatch outside code blocks.
 
 The idea of explicit completeness checks (never summarize, keep numbers,
 citation markers and paragraph order) is adapted from Kaman AI Translator
@@ -34,6 +40,30 @@ _INLINE_CODE_RE = re.compile(r"`[^`\n]+`")
 _URL_RE = re.compile(r"(?:https?://|www\.)[^\s<>()«»\"']+|[\w.+-]+@[\w-]+\.[\w.]+")
 _CITATION_RE = re.compile(r"\[\^?\d+[a-z]?\]")
 _NUMBER_RE = re.compile(r"(?<![\w.])\d+(?:[.,]\d+)*(?![\w])")
+
+_LATEX_STRUCT_PATTERNS = (
+    re.compile(r"\$\$[\s\S]*?\$\$"),
+    re.compile(
+        r"\\begin\{(equation|align|alignat|gather|multline|flalign|eqnarray|displaymath|math|"
+        r"verbatim|lstlisting|minted|tikzpicture|algorithmic)(\*?)\}[\s\S]*?\\end\{\1\2\}"
+    ),
+    re.compile(r"\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)"),
+    re.compile(
+        r"\\(?:cite[a-zA-Z]*|ref|eqref|autoref|cref|Cref|pageref|label|url|nocite|"
+        r"bibliography|bibliographystyle|includegraphics|input|include|usepackage|href)\*?"
+        r"(?:\[[^\]\n]*\])*\{[^{}\n]*\}"
+    ),
+    # Inline math: avoid matching currency like $1,250 or $50
+    re.compile(r"(?<![\$\\\w])\$(?![\$\d\s])([^\$\n]+?)(?<![\\\s])\$"),
+)
+_PLACEHOLDER_RE = re.compile(
+    r"\{\{[^}\n]+\}\}|(?<!\{)\{[A-Za-z_][A-Za-z0-9_]*(?::[^}\n]+)?\}(?!\})"
+    r"|%(?:\([A-Za-z_][A-Za-z0-9_]*\))?[#0\- +]*\d*(?:\.\d+)?[sdifuxXeEgG]"
+)
+_HEADING_RE = re.compile(r"^\s*#{1,6}\s+\S", re.MULTILINE)
+_TABLE_SEP_RE = re.compile(
+    r"^\s*\|?(?:\s*:?-{2,}:?\s*\|)+\s*:?-{2,}:?\s*\|?\s*$", re.MULTILINE
+)
 
 #: Below this many characters a source paragraph is too short to judge.
 MIN_PARAGRAPH_CHARS = 80
@@ -182,6 +212,105 @@ def check_code(source: str, target: str) -> List[FidelityFinding]:
     return findings
 
 
+def _extract_latex_tokens(text: str) -> List[str]:
+    cleaned = _strip_code(text)
+    tokens: List[str] = []
+    for pat in _LATEX_STRUCT_PATTERNS:
+        def _stash(m: "re.Match[str]") -> str:
+            tokens.append(m.group(0))
+            return " "
+
+        cleaned = pat.sub(_stash, cleaned)
+    return tokens
+
+
+def check_latex(source: str, target: str) -> List[FidelityFinding]:
+    target_tokens = _extract_latex_tokens(target)
+    missing: List[str] = []
+    for tok in _extract_latex_tokens(source):
+        if tok in target_tokens:
+            target_tokens.remove(tok)
+        else:
+            missing.append(tok)
+    if not missing:
+        return []
+    shown = ", ".join(dict.fromkeys(m[:40] for m in missing[:6]))
+    return [FidelityFinding("latex", f"LaTeX math or command(s) missing or altered: {shown}")]
+
+
+def check_placeholders(source: str, target: str) -> List[FidelityFinding]:
+    src_tokens = _PLACEHOLDER_RE.findall(_strip_code(source))
+    tgt_tokens = _PLACEHOLDER_RE.findall(_strip_code(target))
+    if not src_tokens and not tgt_tokens:
+        return []
+    pool = list(tgt_tokens)
+    missing: List[str] = []
+    for tok in src_tokens:
+        if tok in pool:
+            pool.remove(tok)
+        else:
+            missing.append(tok)
+    findings: List[FidelityFinding] = []
+    if missing:
+        findings.append(
+            FidelityFinding(
+                "placeholder",
+                "Missing or altered placeholder(s): " + " ".join(dict.fromkeys(missing)),
+            )
+        )
+    if pool:
+        findings.append(
+            FidelityFinding(
+                "placeholder",
+                "Extra placeholder(s) not present in source: " + " ".join(dict.fromkeys(pool)),
+            )
+        )
+    return findings
+
+
+def check_headings(source: str, target: str) -> List[FidelityFinding]:
+    src_count = len(_HEADING_RE.findall(_FENCE_RE.sub(" ", source)))
+    tgt_count = len(_HEADING_RE.findall(_FENCE_RE.sub(" ", target)))
+    if src_count > 0 and src_count != tgt_count:
+        return [
+            FidelityFinding(
+                "headings",
+                f"Source has {src_count} Markdown heading(s), translation has {tgt_count}.",
+            )
+        ]
+    return []
+
+
+def _table_signatures(text: str) -> List[int]:
+    stripped = _FENCE_RE.sub(" ", text)
+    return [
+        len(row.strip().strip("|").split("|"))
+        for row in _TABLE_SEP_RE.findall(stripped)
+    ]
+
+
+def check_tables(source: str, target: str) -> List[FidelityFinding]:
+    src_tables = _table_signatures(source)
+    tgt_tables = _table_signatures(target)
+    if not src_tables:
+        return []
+    if len(src_tables) != len(tgt_tables):
+        return [
+            FidelityFinding(
+                "tables",
+                f"Source has {len(src_tables)} Markdown table(s), translation has {len(tgt_tables)}.",
+            )
+        ]
+    if src_tables != tgt_tables:
+        return [
+            FidelityFinding(
+                "tables",
+                f"Markdown table column counts differ (source={src_tables}, translation={tgt_tables}).",
+            )
+        ]
+    return []
+
+
 def check_fidelity(source: str, target: str) -> List[FidelityFinding]:
     """Run every fidelity check. Returns an empty list when nothing looks lost."""
     findings = check_paragraphs(source, target)
@@ -193,4 +322,8 @@ def check_fidelity(source: str, target: str) -> List[FidelityFinding]:
         + check_citations(source, target)
         + check_urls(source, target)
         + check_code(source, target)
+        + check_latex(source, target)
+        + check_placeholders(source, target)
+        + check_headings(source, target)
+        + check_tables(source, target)
     )

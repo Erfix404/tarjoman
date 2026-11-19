@@ -7,7 +7,7 @@
 [![Version](https://img.shields.io/badge/version-v2.3.0-blue.svg)](https://github.com/Erfix404/tarjoman/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-468%20passing-brightgreen.svg)](#benchmarks--quality-evidence)
+[![Tests](https://img.shields.io/badge/tests-476%20passing-brightgreen.svg)](#benchmarks--quality-evidence)
 [![Benchmarks](https://img.shields.io/badge/benchmarks-10%2F10%20domains%20100%25%20PASS-success.svg)](#benchmarks--quality-evidence)
 [![Creator](https://img.shields.io/badge/creator-Erfan%20Ashouri%20%28%40Erfix404%29-orange.svg)](https://github.com/Erfix404)
 [![Multi-Agent](https://img.shields.io/badge/agents-Claude%20Code%20%7C%20Hermes%20%7C%20Cursor-purple.svg)](#multi-agent-super-skill-integration)
@@ -216,6 +216,21 @@ The `.cursorrules` file at the repository root provides editor-level integration
 cp .cursorrules /path/to/your/project/.cursorrules
 ```
 
+### MCP Server (`tarjoman mcp`)
+
+Any MCP-compatible agent (Claude Code, Claude Desktop, Cursor, Hermes, Antigravity) can connect over stdio to invoke `tarjoman_route_guide`, `tarjoman_lint`, `tarjoman_fix_safe`, `tarjoman_verify`, `tarjoman_book_context`, `tarjoman_srt_check`, and `tarjoman_i18n_check` directly:
+
+```json
+{
+  "mcpServers": {
+    "tarjoman": {
+      "command": "tarjoman",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
 ---
 
 ## Installation & Requirements
@@ -273,22 +288,31 @@ tarjoman book characters ./my-book --add "Alice:آلیس:formal:تو" --list
 # Record domain-tagged terms (keeps terms.db and terms.tsv in sync)
 tarjoman book terms ./my-book --add "Oh dear=وای خدا:literary"
 
+# Extract compact, chunk-relevant memory (only matched terms/characters + scene + previous tail)
+tarjoman book context ./my-book chapter2.en.md --prev chapter1.fa.md --tail 2 --json
+
 # Check translated chapter against termbase, characters, register, and completeness
-tarjoman book check ./my-book chapter1.en.md chapter1.fa.md
+tarjoman book check ./my-book chapter1.en.md chapter1.fa.md --json
 
 # Check progress and resumable chunk manifest
 tarjoman book status ./my-book
 tarjoman book manifest ./my-book
 ```
 
-### EPUB Roundtrip
+### EPUB Extraction, Merge & Roundtrip
 
 ```bash
-# Structural EPUB parse and RTL recompose roundtrip (plug in translations programmatically via EpubRoundtripComposer)
+# Extract EPUB chapters into marker-delimited [#node_id] Markdown files for agent translation
+tarjoman epub extract input.epub -o ./epub_work --json
+
+# Merge translated [#node_id] files back into a strict RTL Persian EPUB 3
+tarjoman epub merge input.epub ./epub_work -o output_fa.epub --json
+
+# Structural EPUB parse and RTL recompose roundtrip (or pass custom translations via EpubRoundtripComposer)
 tarjoman epub roundtrip input.epub --output output_fa.epub
 ```
 
-### Safe Orthography Auto-Fixing, Linting, Verification & Subtitles
+### Safe Orthography Auto-Fixing, Linting, Verification, Localization & Subtitles
 
 ```bash
 # Apply safe, non-semantic orthography fixes (Arabic ی/ک, ZWNJ, tanvin, punctuation; shields code/LaTeX/URLs/placeholders)
@@ -301,19 +325,22 @@ tarjoman lint translated_text.txt --style literary --errors-only --json
 # Run MQM quality audit
 tarjoman audit translated_text.txt
 
-# Completeness: dropped/summarized paragraphs, numbers, citation markers, URLs, code (--json supported)
+# Completeness: paragraphs, numbers, citations, URLs, code, LaTeX, placeholders, headings, tables
 tarjoman verify source.md translated.md --json
+
+# Localization check for JSON, ARB, PO, and YAML files (keys, placeholders, HTML tags, count plurals, length ratio)
+tarjoman i18n check locales/en.json locales/fa.json --max-ratio 1.8 --json
 
 # Clean PDF-extracted text before translating (headers, page numbers, hyphen breaks, wrapped lines)
 tarjoman prep book.txt -o book.clean.txt
 
-# Subtitles: text-only timeline-safe workflow (extract -> translate -> merge -> check)
-tarjoman srt extract film.en.srt -o film.cues.txt
-tarjoman srt merge film.en.srt film.fa.cues.txt -o film.fa.srt
+# Subtitles (SRT & WebVTT): text-only timeline-safe workflow (extract -> translate -> merge -> check)
+tarjoman srt extract film.en.vtt -o film.cues.txt
+tarjoman srt merge film.en.vtt film.fa.cues.txt -o film.fa.vtt
 tarjoman srt check film.fa.srt --source film.en.srt --json
 ```
 
-> Also supports `tarjoman book check ./my-book ch1.en.md ch1.fa.md --json`, plus new Persian guides in `.claude/skills/tarjoman/references/`: `fidelity.md` (Khazaeifar fidelity & equal-effect worksheet), `editor-najafi.md` (Najafi plural/spelling track), `naturalize.md`, and `colloquialize.md`.
+> Research notes on raising Persian translation quality: [docs/research/translation-quality-roadmap.md](docs/research/translation-quality-roadmap.md), plus new Persian guides in `.claude/skills/tarjoman/references/`: `fidelity.md` (Khazaeifar fidelity & equal-effect worksheet), `editor-najafi.md` (Najafi plural/spelling track), `naturalize.md`, and `colloquialize.md`.
 
 ### Multi-Format Composing
 
@@ -407,7 +434,7 @@ python benchmarks/run_benchmarks.py
 | 9 | Classical & Historical | ≥ 90.0 | 0 | ✅ PASS |
 | 10 | Transcreation & Creative | ≥ 90.0 | 0 | ✅ PASS |
 
-**Unit Tests**: 468 passing (`unittest` CI suite) / 492 passing (`pytest`)
+**Unit Tests**: 476 passing (`unittest` CI suite) / 500 passing (`pytest`)
 
 ```bash
 python -m unittest discover -s tests -p "test_*.py"
@@ -444,6 +471,7 @@ tarjoman/
 │   ├── cache.py           # SHA-256 chunk caching
 │   ├── character_bible.py # Character & Style Bible
 │   ├── consistency.py     # Cross-chapter term/name/register checks
+│   ├── context_builder.py # Smart chunk-relevant book context builder
 │   ├── fidelity.py        # Completeness checks (verify)
 │   ├── manifest.py        # Book manifest management
 │   ├── scene_continuity.py# Scene Continuity Tracker
@@ -451,11 +479,14 @@ tarjoman/
 │   └── termbase.py        # Dynamic terminology extraction (SQLite)
 ├── parsers/               # Input parsers & preprocessors
 │   ├── epub_parser.py     # EPUB structure parser
-│   ├── srt.py             # Subtitle (SRT) extract, merge & check
+│   ├── epub_workflow.py   # EPUB extract/merge marker workflow
+│   ├── i18n.py            # Localization checker (JSON/ARB/PO/YAML)
+│   ├── srt.py             # Subtitle (SRT & WebVTT) extract, merge & check
 │   ├── term_candidates.py # Recurring name/term candidate extractor
 │   └── text_prep.py       # PDF-extracted text cleaner
 ├── fixer.py               # Safe orthography-only auto-fixer
 ├── linter.py              # Persian linguistic & typography linter (style/severity/JSON)
+├── mcp_server.py          # Zero-dependency stdio JSON-RPC 2.0 MCP server
 └── cli.py                 # Click CLI entry point
 ```
 

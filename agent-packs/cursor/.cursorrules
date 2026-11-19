@@ -71,12 +71,16 @@ You are an expert Persian literary and technical translator, editor, and typogra
 - Resume: `tarjoman book manifest ./dir` (SHA-256 chunk cache — skip translated chunks).
 - Voices: `tarjoman book characters ./dir --add "Name:فارسی:tone:شما" --list` (Character Bible: تو/شما per character).
 - Terms: `tarjoman book terms ./dir --add "en=فا:domain" --search q --cascades` (SQLite termbase; re-translate cascade-flagged segments, then acknowledge).
-- Chapter check: `tarjoman book check ./dir ch1.en.md ch1.fa.md` (termbase, character names, dialogue register, and completeness).
+- Smart chunk context: `tarjoman book context ./dir ch2.en.md --prev ch1.fa.md --tail 2 --json` (fetches only matched terms/characters, scene state, cascades, and recent tail).
+- Chapter check: `tarjoman book check ./dir ch1.en.md ch1.fa.md --json` (termbase, character names, dialogue register, and completeness).
 
-## 6. Verification & Workflow Commands
+## 6. Verification, MCP & Workflow Commands
 - Pre-clean PDF extracts: `tarjoman prep raw.txt -o clean.txt`
-- Subtitles (text-only timeline-safe flow): `tarjoman srt extract en.srt -o cues.txt`, `tarjoman srt merge en.srt fa_cues.txt -o fa.srt`, `tarjoman srt check fa.srt --source en.srt --json`
-- Completeness vs. source: `tarjoman verify source.md translated.md --json`
+- EPUB text-only workflow: `tarjoman epub extract book.epub -o ./epub_work` and `tarjoman epub merge book.epub ./epub_work -o book.fa.epub`
+- Subtitles (SRT & WebVTT): `tarjoman srt extract en.vtt -o cues.txt`, `tarjoman srt merge en.vtt fa_cues.txt -o fa.vtt`, `tarjoman srt check fa.srt --source en.srt --json`
+- Localization files (JSON/ARB/PO/YAML): `tarjoman i18n check en.json fa.json --json`
+- Completeness vs. source: `tarjoman verify source.md translated.md --json` (covers paragraphs, numbers, citations, URLs, code, LaTeX, placeholders, headings, tables)
+- MCP server (stdio JSON-RPC 2.0): `tarjoman mcp` (exposes `tarjoman_route_guide`, `tarjoman_lint`, `tarjoman_fix_safe`, `tarjoman_verify`, `tarjoman_book_context`, `tarjoman_srt_check`, `tarjoman_i18n_check`)
 - Safe orthography auto-fix (Arabic ی/ک, ZWNJ, tanvin, punctuation; shields code/LaTeX/URLs/placeholders):
   ```bash
   tarjoman fix <path-to-file> --in-place

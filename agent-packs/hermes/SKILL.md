@@ -138,12 +138,15 @@ Step 7: Run AuditStage, `tarjoman fix output.md --in-place`, `tarjoman verify so
 Step 8: Call selected composer (Typst/EPUB3/HTML/Bilingual) -> Produce deliverable
 ```
 
-Additional CLI utilities for preprocessing, safe auto-fixing, completeness, and subtitles:
+Additional CLI utilities for preprocessing, safe auto-fixing, completeness, EPUB, i18n, and subtitles:
+- MCP stdio server (`tarjoman mcp`): exposes `tarjoman_route_guide`, `tarjoman_lint`, `tarjoman_fix_safe`, `tarjoman_verify`, `tarjoman_book_context`, `tarjoman_srt_check`, and `tarjoman_i18n_check`.
 - PDF extract cleanup: `tarjoman prep raw.txt -o clean.txt`
 - Safe orthography auto-fixer: `tarjoman fix output.md --in-place` (supports `--dry-run`, `--json`)
 - Style & severity linting: `tarjoman lint output.md --style literary --errors-only --json`
-- Completeness verification: `tarjoman verify source.md translated.md --json`
-- Subtitle timeline-safe workflow: `tarjoman srt extract en.srt -o cues.txt`, `tarjoman srt merge en.srt fa_cues.txt -o fa.srt`, and `tarjoman srt check fa.srt --source en.srt --json`
+- Completeness verification: `tarjoman verify source.md translated.md --json` (paragraphs, numbers, citations, URLs, code, LaTeX, placeholders, headings, tables)
+- EPUB extract/merge: `tarjoman epub extract book.epub -o ./work --json` and `tarjoman epub merge book.epub ./work -o book.fa.epub --json`
+- Localization check (JSON/ARB/PO/YAML): `tarjoman i18n check en.json fa.json --json`
+- Subtitle timeline-safe workflow (SRT & WebVTT): `tarjoman srt extract en.srt -o cues.txt`, `tarjoman srt merge en.srt fa_cues.txt -o fa.srt`, and `tarjoman srt check fa.srt --source en.srt --json`
 
 ---
 
@@ -167,7 +170,8 @@ tarjoman book candidates book.en.md --project ./my-book  # suggest recurring nam
 tarjoman book manifest ./my-book            # SHA-256 chunk cache: resume, skip translated
 tarjoman book characters ./my-book --add "Harry:هری:brave:شما" --list
 tarjoman book terms ./my-book --add "wand=چوب‌دستی:literary" --search wand --cascades
-tarjoman book check ./my-book ch1.en.md ch1.fa.md       # terms, characters, register & fidelity
+tarjoman book context ./my-book ch2.en.md --prev ch1.fa.md --tail 2 --json  # chunk-relevant context
+tarjoman book check ./my-book ch1.en.md ch1.fa.md --json  # terms, characters, register & fidelity
 ```
 
 - **Manifest** (`tarjoman.memory.BookManifestManager`): SHA-256 chunk/chapter caching; `pending_chunks()` tells the agent what still needs translation.

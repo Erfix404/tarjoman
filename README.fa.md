@@ -102,22 +102,44 @@ tarjoman lint chapter1.fa.md --errors-only --json    # فقط خطاهای قط�
 tarjoman lint post.md --only ai-tell --only calque
 ```
 
-### زیرنویس
+### زیرنویس (SRT و WebVTT)
 
 ```bash
+tarjoman srt extract film.en.vtt -o film.cues.txt
+tarjoman srt merge film.en.vtt film.fa.cues.txt -o film.fa.vtt
 tarjoman srt check film.fa.srt --source film.en.srt --json   # تعداد، زمان، طول خط، سرعت خواندن
 ```
 
-### کتاب
+### فایل‌های ترجمه‌ی اپ و بازی (`i18n`)
+
+```bash
+tarjoman i18n check locales/en.json locales/fa.json --max-ratio 1.8 --json
+```
+
+### کتاب و EPUB
 
 ```bash
 tarjoman book init "عنوان کتاب" -o ./my-book
 tarjoman book characters ./my-book --add "Alice:آلیس:formal:تو"
 tarjoman book terms ./my-book --add "Oh dear=وای خدا"
+tarjoman book context ./my-book ch2.en.md --prev ch1.fa.md --json   # فقط اصطلاح و شخصیت همین تکه
 tarjoman book check ./my-book ch1.en.md ch1.fa.md --json
+
+tarjoman epub extract book.epub -o ./epub_work --json
+tarjoman epub merge book.epub ./epub_work -o book.fa.epub --json
 ```
 
-راهنمای کامل: `.claude/skills/tarjoman/references/book.md`
+### اتصال مستقیم از طریق MCP (`tarjoman mcp`)
+
+```json
+{
+  "mcpServers": {
+    "tarjoman": { "command": "tarjoman", "args": ["mcp"] }
+  }
+}
+```
+
+راهنمای کامل کتاب: `.claude/skills/tarjoman/references/book.md` · یادداشت پژوهشی ارتقای کیفیت: `docs/research/translation-quality-roadmap.md`
 
 ---
 
